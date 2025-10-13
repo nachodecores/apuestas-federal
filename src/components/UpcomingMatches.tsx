@@ -411,18 +411,18 @@ export default function UpcomingMatches() {
                   <button
                     type="button"
                     onClick={() => handlePredictionChange(idx, 'home')}
-                    className={`py-2 sm:py-2.5 md:py-3 px-2 sm:px-3 rounded-md sm:rounded-lg transition-all border-2 ${
+                    className={`py-2 sm:py-2.5 md:py-3 px-2 sm:px-3 rounded-md sm:rounded-lg transition-all ${
                       bets[idx]?.prediction === 'home'
-                        ? 'border-transparent'
-                        : 'bg-[#c3b2c4] text-gray-700 hover:opacity-80 border-transparent'
+                        ? ''
+                        : 'bg-[#c3b2c4] text-gray-700 hover:opacity-80'
                     }`}
-                    style={bets[idx]?.prediction === 'home' ? { background: 'linear-gradient(to right, #953bff, #02efff)' } : {}}
+                    style={bets[idx]?.prediction === 'home' ? { background: 'linear-gradient(to right, rgb(2, 239, 255), rgb(0, 255, 135))' } : {}}
                   >
                     <div className={`font-semibold text-xs sm:text-sm ${
-                      bets[idx]?.prediction === 'home' ? 'text-white' : ''
+                      bets[idx]?.prediction === 'home' ? 'text-[#37003c]' : ''
                     }`}>Local</div>
                     <div className={`text-[0.625rem] sm:text-xs mt-0.5 sm:mt-1 ${
-                      bets[idx]?.prediction === 'home' ? 'text-white' : 'text-gray-800'
+                      bets[idx]?.prediction === 'home' ? 'text-[#37003c]' : 'text-gray-800'
                     }`}>
                       {match.odds.home.toFixed(2)}x
                     </div>
@@ -432,18 +432,18 @@ export default function UpcomingMatches() {
                   <button
                     type="button"
                     onClick={() => handlePredictionChange(idx, 'draw')}
-                    className={`py-2 sm:py-2.5 md:py-3 px-2 sm:px-3 rounded-md sm:rounded-lg transition-all border-2 ${
+                    className={`py-2 sm:py-2.5 md:py-3 px-2 sm:px-3 rounded-md sm:rounded-lg transition-all ${
                       bets[idx]?.prediction === 'draw'
-                        ? 'border-transparent'
-                        : 'bg-[#c3b2c4] text-gray-700 hover:opacity-80 border-transparent'
+                        ? ''
+                        : 'bg-[#c3b2c4] text-gray-700 hover:opacity-80'
                     }`}
-                    style={bets[idx]?.prediction === 'draw' ? { background: 'linear-gradient(to right, #953bff, #02efff)' } : {}}
+                    style={bets[idx]?.prediction === 'draw' ? { background: 'linear-gradient(to right, rgb(2, 239, 255), rgb(0, 255, 135))' } : {}}
                   >
                     <div className={`font-semibold text-xs sm:text-sm ${
-                      bets[idx]?.prediction === 'draw' ? 'text-white' : ''
+                      bets[idx]?.prediction === 'draw' ? 'text-[#37003c]' : ''
                     }`}>Empate</div>
                     <div className={`text-[0.625rem] sm:text-xs mt-0.5 sm:mt-1 ${
-                      bets[idx]?.prediction === 'draw' ? 'text-white' : 'text-gray-800'
+                      bets[idx]?.prediction === 'draw' ? 'text-[#37003c]' : 'text-gray-800'
                     }`}>
                       {match.odds.draw.toFixed(2)}x
                     </div>
@@ -453,18 +453,18 @@ export default function UpcomingMatches() {
                   <button
                     type="button"
                     onClick={() => handlePredictionChange(idx, 'away')}
-                    className={`py-2 sm:py-2.5 md:py-3 px-2 sm:px-3 rounded-md sm:rounded-lg transition-all border-2 ${
+                    className={`py-2 sm:py-2.5 md:py-3 px-2 sm:px-3 rounded-md sm:rounded-lg transition-all ${
                       bets[idx]?.prediction === 'away'
-                        ? 'border-transparent'
-                        : 'bg-[#c3b2c4] text-gray-700 hover:opacity-80 border-transparent'
+                        ? ''
+                        : 'bg-[#c3b2c4] text-gray-700 hover:opacity-80'
                     }`}
-                    style={bets[idx]?.prediction === 'away' ? { background: 'linear-gradient(to right, #953bff, #02efff)' } : {}}
+                    style={bets[idx]?.prediction === 'away' ? { background: 'linear-gradient(to right, rgb(2, 239, 255), rgb(0, 255, 135))' } : {}}
                   >
                     <div className={`font-semibold text-xs sm:text-sm ${
-                      bets[idx]?.prediction === 'away' ? 'text-white' : ''
+                      bets[idx]?.prediction === 'away' ? 'text-[#37003c]' : ''
                     }`}>Visitante</div>
                     <div className={`text-[0.625rem] sm:text-xs mt-0.5 sm:mt-1 ${
-                      bets[idx]?.prediction === 'away' ? 'text-white' : 'text-gray-800'
+                      bets[idx]?.prediction === 'away' ? 'text-[#37003c]' : 'text-gray-800'
                     }`}>
                       {match.odds.away.toFixed(2)}x
                     </div>
