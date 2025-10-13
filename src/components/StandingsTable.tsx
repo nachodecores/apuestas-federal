@@ -22,12 +22,22 @@ interface Standing {
   total: number; // Puntos totales en la tabla H2H
 }
 
+interface ApiMatch {
+  event: number;
+  league_entry_1: number;
+  league_entry_2: number;
+  league_entry_1_points: number;
+  league_entry_2_points: number;
+  finished: boolean;
+}
+
 interface DraftLeagueData {
   league: {
     name: string;
   };
   league_entries: LeagueEntry[];
   standings: Standing[];
+  matches: ApiMatch[];
 }
 
 // Tipo para mostrar en la tabla (datos ya procesados)
@@ -38,6 +48,25 @@ interface PlayerDisplay {
   points: number;
   record: string; // ej: "6-1-0" (ganados-empatados-perdidos)
   balance: number;
+  recentForm: ('win' | 'draw' | 'loss')[]; // Últimos 5 resultados
+}
+
+// Función para calcular racha de los últimos N partidos
+function getRecentForm(league_entry_id: number, allMatches: ApiMatch[], count: number = 5): ('win' | 'draw' | 'loss')[] {
+  const teamMatches = allMatches
+    .filter(m => m.finished && (m.league_entry_1 === league_entry_id || m.league_entry_2 === league_entry_id))
+    .sort((a, b) => b.event - a.event) // Más recientes primero
+    .slice(0, count);
+  
+  return teamMatches.map(match => {
+    const isTeam1 = match.league_entry_1 === league_entry_id;
+    const teamPoints = isTeam1 ? match.league_entry_1_points : match.league_entry_2_points;
+    const oppPoints = isTeam1 ? match.league_entry_2_points : match.league_entry_1_points;
+    
+    if (teamPoints > oppPoints) return 'win';
+    if (teamPoints === oppPoints) return 'draw';
+    return 'loss';
+  });
 }
 
 export default function StandingsTable() {
@@ -71,13 +100,17 @@ export default function StandingsTable() {
             (e) => e.id === standing.league_entry
           );
           
+          // Calculamos la racha de los últimos 5 partidos
+          const recentForm = getRecentForm(standing.league_entry, data.matches, 5);
+          
           return {
             position: standing.rank,
             name: entry ? `${entry.player_first_name} ${entry.player_last_name}` : 'Desconocido',
             teamName: entry?.entry_name || 'Sin nombre',
             points: standing.points_for,
             record: `${standing.matches_won}-${standing.matches_drawn}-${standing.matches_lost}`,
-            balance: 10000 // Por ahora mock, después lo calcularemos según apuestas
+            balance: 10000, // Por ahora mock, después lo calcularemos según apuestas
+            recentForm
           };
         });
         
@@ -99,9 +132,9 @@ export default function StandingsTable() {
   // Mientras está cargando, mostramos un spinner
   if (loading) {
     return (
-      <section className="py-20">
+      <section className="py-20 bg-[#ebe5eb]">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <div className="text-white text-xl">Cargando tabla de posiciones...</div>
+          <div className="text-[#37003c] text-xl">Cargando tabla de posiciones...</div>
         </div>
       </section>
     );
@@ -110,7 +143,7 @@ export default function StandingsTable() {
   // Si hay error, lo mostramos
   if (error) {
     return (
-      <section className="py-20">
+      <section className="py-20 bg-[#ebe5eb]">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <div className="text-red-500 text-xl">Error: {error}</div>
         </div>
@@ -120,38 +153,38 @@ export default function StandingsTable() {
   
   // Renderizamos la tabla con los datos reales
   return (
-    <section className="py-20">
+    <section className="py-20 bg-[#ebe5eb]">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center mb-8">
-          <h3 className="text-3xl sm:text-4xl font-black text-white">
+          <h3 className="text-3xl sm:text-4xl font-black text-[#37003c]">
             Tabla de Posiciones
           </h3>
-          <span className="text-sm text-gray-500 uppercase tracking-wider">
-            Gameweek {gameweek}
-          </span>
         </div>
 
-        <div className="rounded-2xl overflow-hidden border border-white/10 bg-white/5 backdrop-blur-sm">
+        <div className="rounded-2xl overflow-hidden border border-gray-200 bg-white shadow-lg">
           <div className="overflow-x-auto">
             <table className="w-full">
               <thead>
-                <tr className="border-b border-white/10 text-left">
-                  <th className="px-6 py-4 text-xs font-semibold text-gray-400 uppercase tracking-wider">
+                <tr className="border-b border-gray-200 text-left bg-gray-50">
+                  <th className="px-6 py-4 text-xs font-semibold text-gray-600 uppercase tracking-wider">
                     Pos
                   </th>
-                  <th className="px-6 py-4 text-xs font-semibold text-gray-400 uppercase tracking-wider">
-                    Manager
+                  <th className="px-6 py-4 text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                    CCP
                   </th>
-                  <th className="px-6 py-4 text-xs font-semibold text-gray-400 uppercase tracking-wider">
-                    Equipo
+                  <th className="px-6 py-4 text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                    Cuadro
                   </th>
-                  <th className="px-6 py-4 text-xs font-semibold text-gray-400 uppercase tracking-wider text-right">
+                  <th className="px-6 py-4 text-xs font-semibold text-gray-600 uppercase tracking-wider text-right">
                     Récord
                   </th>
-                  <th className="px-6 py-4 text-xs font-semibold text-gray-400 uppercase tracking-wider text-right">
+                  <th className="px-6 py-4 text-xs font-semibold text-gray-600 uppercase tracking-wider text-center">
+                    Últimos 5
+                  </th>
+                  <th className="px-6 py-4 text-xs font-semibold text-gray-600 uppercase tracking-wider text-right">
                     Puntos
                   </th>
-                  <th className="px-6 py-4 text-xs font-semibold text-gray-400 uppercase tracking-wider text-right">
+                  <th className="px-6 py-4 text-xs font-semibold text-gray-600 uppercase tracking-wider text-right">
                     Balance
                   </th>
                 </tr>
@@ -160,7 +193,7 @@ export default function StandingsTable() {
                 {players.map((player, idx) => (
                   <tr
                     key={player.position}
-                    className="border-b border-white/5 hover:bg-white/5 transition-colors"
+                    className="border-b border-gray-100 hover:bg-gray-50 transition-colors"
                   >
                     <td className="px-6 py-4">
                       <div className={`w-8 h-8 rounded-lg flex items-center justify-center font-bold text-sm ${
@@ -173,16 +206,31 @@ export default function StandingsTable() {
                       </div>
                     </td>
                     <td className="px-6 py-4">
-                      <span className="text-white font-semibold">{player.name}</span>
+                      <span className="text-gray-900 font-semibold">{player.name}</span>
                     </td>
                     <td className="px-6 py-4">
-                      <span className="text-gray-400 text-sm">{player.teamName}</span>
+                      <span className="text-gray-600 text-sm">{player.teamName}</span>
                     </td>
                     <td className="px-6 py-4 text-right">
-                      <span className="text-gray-300 font-mono text-sm">{player.record}</span>
+                      <span className="text-gray-700 font-mono text-sm">{player.record}</span>
+                    </td>
+                    <td className="px-6 py-4">
+                      <div className="flex gap-1 justify-center">
+                        {[...player.recentForm].reverse().map((result, formIdx) => (
+                          <div
+                            key={formIdx}
+                            className={`w-6 h-6 rounded-full ${
+                              result === 'win' ? 'bg-green-500' :
+                              result === 'draw' ? 'bg-gray-400' :
+                              'bg-red-500'
+                            }`}
+                            title={result === 'win' ? 'Victoria' : result === 'draw' ? 'Empate' : 'Derrota'}
+                          />
+                        ))}
+                      </div>
                     </td>
                     <td className="px-6 py-4 text-right">
-                      <span className="text-[#00ff87] font-bold">{player.points}</span>
+                      <span className="text-[#37003c] font-bold">{player.points}</span>
                     </td>
                     <td className="px-6 py-4 text-right">
                       <span className={`font-bold ${

@@ -250,7 +250,7 @@ export default function ClaimPage() {
               <button
                 type="submit"
                 disabled={claiming}
-                className="w-full py-4 rounded-xl gradient-fpl text-white font-bold hover:opacity-90 transition-opacity disabled:opacity-50"
+                className="w-full py-4 rounded-xl gradient-fpl font-bold hover:opacity-90 transition-opacity disabled:opacity-50"
               >
                 {claiming ? "Reclamando cuenta..." : "Reclamar mi cuenta"}
               </button>

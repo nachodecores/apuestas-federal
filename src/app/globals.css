@@ -18,18 +18,23 @@
   --color-fpl-magenta: var(--fpl-magenta);
   --color-fpl-cyan: var(--fpl-cyan);
   --color-fpl-pink: var(--fpl-pink);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --font-sans: var(--font-poppins);
+  --font-mono: var(--font-inter);
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: var(--font-geist-sans), system-ui, -apple-system, sans-serif;
+  font-family: var(--font-poppins), system-ui, -apple-system, sans-serif;
 }
 
 /* Gradient utilities */
 .gradient-fpl {
+  background: linear-gradient(to right, rgb(0, 255, 135), rgb(2, 239, 255));
+  color: #37003c;
+}
+
+.gradient-fpl-purple {
   background: linear-gradient(135deg, var(--fpl-purple) 0%, var(--fpl-magenta) 100%);
 }
 

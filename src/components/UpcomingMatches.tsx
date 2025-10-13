@@ -1,7 +1,9 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Image from "next/image";
 import { createClient } from "@/lib/supabase/client";
+import { calculateOdds } from "@/lib/odds-calculator";
 
 // Tipos de datos que vienen de la API
 interface LeagueEntry {
@@ -21,9 +23,20 @@ interface ApiMatch {
   started: boolean;
 }
 
+interface Standing {
+  league_entry: number;
+  rank: number;
+  points_for: number;
+  matches_won: number;
+  matches_drawn: number;
+  matches_lost: number;
+  total: number;
+}
+
 interface DraftLeagueData {
   league_entries: LeagueEntry[];
   matches: ApiMatch[];
+  standings: Standing[];
 }
 
 // Tipo para mostrar en las cards
@@ -33,8 +46,15 @@ interface MatchDisplay {
   team2Name: string;
   team1Manager: string;
   team2Manager: string;
+  team1Logo: string | null;
+  team2Logo: string | null;
   league_entry_1: number;
   league_entry_2: number;
+  odds: {
+    home: number;
+    draw: number;
+    away: number;
+  };
 }
 
 // Tipo para la apuesta de cada partido
@@ -48,6 +68,8 @@ export default function UpcomingMatches() {
   
   // Estados de datos
   const [matches, setMatches] = useState<MatchDisplay[]>([]);
+  const [standings, setStandings] = useState<Standing[]>([]);
+  const [allMatches, setAllMatches] = useState<ApiMatch[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [nextGameweek, setNextGameweek] = useState<number>(8);
@@ -81,6 +103,30 @@ export default function UpcomingMatches() {
     }
     
     getUser();
+    
+    // Escuchar cambios de autenticación en TIEMPO REAL
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange(async (_event, session) => {
+      setUser(session?.user ?? null);
+      
+      if (session?.user) {
+        // Actualizar balance cuando el usuario se loguea
+        const { data: profile } = await supabase
+          .from('profiles')
+          .select('balance')
+          .eq('id', session.user.id)
+          .single();
+        
+        if (profile) {
+          setUserBalance(profile.balance);
+        }
+      } else {
+        setUserBalance(0);
+      }
+    });
+    
+    return () => subscription.unsubscribe();
   }, [supabase]);
 
   // useEffect 2: Obtener partidos de la API
@@ -96,7 +142,20 @@ export default function UpcomingMatches() {
         
         const data: DraftLeagueData = await response.json();
         
-        // 2. Encontramos el próximo gameweek (el primero que no haya terminado)
+        // Guardar standings y matches para calcular odds
+        setStandings(data.standings);
+        setAllMatches(data.matches);
+        
+        // 2. Obtener logos de los equipos desde Supabase
+        const { data: profiles } = await supabase
+          .from('profiles')
+          .select('league_entry_id, team_logo');
+        
+        const teamLogos = new Map(
+          profiles?.map(p => [p.league_entry_id, p.team_logo]) || []
+        );
+        
+        // 3. Encontramos el próximo gameweek (el primero que no haya terminado)
         const upcomingMatches = data.matches.filter(match => !match.finished);
         
         if (upcomingMatches.length === 0) {
@@ -110,11 +169,19 @@ export default function UpcomingMatches() {
         // 3. Filtramos solo los partidos de ese gameweek
         const nextGWMatches = upcomingMatches.filter(match => match.event === nextGW);
         
-        // 4. Mapeamos los IDs de equipos a nombres
+        // 4. Mapeamos los IDs de equipos a nombres Y calculamos odds
         const processedMatches: MatchDisplay[] = nextGWMatches.map(match => {
           // Buscamos los equipos por su league_entry ID
           const team1 = data.league_entries.find(e => e.id === match.league_entry_1);
           const team2 = data.league_entries.find(e => e.id === match.league_entry_2);
+          
+          // Calcular odds dinámicos para este partido
+          const odds = calculateOdds(
+            match.league_entry_1,
+            match.league_entry_2,
+            data.standings,
+            data.matches
+          );
           
           return {
             gameweek: match.event,
@@ -122,8 +189,11 @@ export default function UpcomingMatches() {
             team2Name: team2?.entry_name || 'Equipo 2',
             team1Manager: team1 ? `${team1.player_first_name} ${team1.player_last_name}` : 'Manager 1',
             team2Manager: team2 ? `${team2.player_first_name} ${team2.player_last_name}` : 'Manager 2',
+            team1Logo: teamLogos.get(match.league_entry_1) || null,
+            team2Logo: teamLogos.get(match.league_entry_2) || null,
             league_entry_1: match.league_entry_1,
-            league_entry_2: match.league_entry_2
+            league_entry_2: match.league_entry_2,
+            odds
           };
         });
         
@@ -166,44 +236,86 @@ export default function UpcomingMatches() {
     }));
   }
 
-  // Función para crear la apuesta
-  async function handlePlaceBet(matchIndex: number, match: MatchDisplay) {
-    const bet = bets[matchIndex];
+  // Calcular balance disponible (descontando lo ya apostado)
+  function getAvailableBalance() {
+    const totalBet = Object.values(bets)
+      .filter(b => b?.amount)
+      .reduce((sum, b) => sum + parseFloat(b.amount || '0'), 0);
     
+    return userBalance - totalBet;
+  }
+
+  // Función para confirmar TODAS las apuestas del gameweek
+  async function handleConfirmAllBets() {
     // Validaciones
     if (!user) {
       alert('Necesitás iniciar sesión para apostar');
       return;
     }
     
-    if (!bet?.prediction) {
-      alert('Seleccioná un resultado (Local, Empate o Visitante)');
+    // Filtrar solo las apuestas que tienen predicción y monto
+    const validBets = matches
+      .map((match, idx) => ({ match, bet: bets[idx], index: idx }))
+      .filter(({ bet }) => bet?.prediction && bet.amount && parseFloat(bet.amount) > 0);
+    
+    if (validBets.length === 0) {
+      alert('No hay apuestas para confirmar. Seleccioná al menos un resultado y monto.');
       return;
     }
     
-    if (!bet.amount || parseFloat(bet.amount) <= 0) {
-      alert('Ingresá un monto válido para apostar');
+    // Calcular total a apostar
+    const totalAmount = validBets.reduce((sum, { bet }) => sum + parseFloat(bet.amount), 0);
+    
+    if (totalAmount > userBalance) {
+      alert(`No tenés suficiente saldo. Total: $${totalAmount}, Disponible: $${userBalance}`);
       return;
     }
     
-    const amount = parseFloat(bet.amount);
-    
-    if (amount > userBalance) {
-      alert(`No tenés suficiente saldo. Tu balance es $${userBalance}`);
-      return;
-    }
-    
-    // TODO: Aquí vamos a crear la apuesta en la base de datos
-    console.log('Apuesta:', {
-      user_id: user.id,
-      gameweek: match.gameweek,
-      match_league_entry_1: match.league_entry_1,
-      match_league_entry_2: match.league_entry_2,
-      prediction: bet.prediction,
-      amount
+    // Preparar datos para enviar al backend
+    const betsData = validBets.map(({ match, bet }) => {
+      const betAmount = parseFloat(bet.amount);
+      const selectedOdd = match.odds[bet.prediction!];
+      
+      return {
+        gameweek: match.gameweek,
+        match_league_entry_1: match.league_entry_1,
+        match_league_entry_2: match.league_entry_2,
+        prediction: bet.prediction!,
+        amount: betAmount,
+        odds: selectedOdd,
+        potential_win: betAmount * selectedOdd
+      };
     });
     
-    alert(`¡Apuesta creada! $${amount} a ${bet.prediction === 'home' ? match.team1Manager : bet.prediction === 'away' ? match.team2Manager : 'Empate'}`);
+    try {
+      // Llamar al endpoint para crear las apuestas
+      const response = await fetch('/api/bets/create', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ bets: betsData }),
+      });
+      
+      const result = await response.json();
+      
+      if (!response.ok) {
+        throw new Error(result.error || 'Error al crear apuestas');
+      }
+      
+      // Éxito! Actualizar el balance local
+      setUserBalance(result.new_balance);
+      
+      // Mostrar mensaje de éxito
+      alert(`🎉 ¡${result.bets_created} apuesta(s) confirmadas!\n\nTotal apostado: $${totalAmount.toFixed(2)}\nNuevo balance: $${result.new_balance.toFixed(2)}`);
+      
+      // Limpiar el formulario
+      setBets({});
+      
+    } catch (error: any) {
+      alert(`Error: ${error.message}`);
+      console.error('Error al confirmar apuestas:', error);
+    }
   }
 
   // Estado de carga
@@ -229,7 +341,7 @@ export default function UpcomingMatches() {
   }
 
   return (
-    <section className="py-20 bg-gradient-to-b from-transparent to-[#37003c]/10">
+    <section className="py-20 bg-[#37003c]">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <h3 className="text-3xl sm:text-4xl font-black text-white mb-12">
           Próximos Partidos - GW{nextGameweek}
@@ -241,74 +353,111 @@ export default function UpcomingMatches() {
               key={idx}
               className="p-6 rounded-2xl bg-white/5 border border-white/10 hover:border-[#ff2882]/50 transition-all hover:scale-105"
             >
-              <div className="text-xs text-[#ff2882] font-semibold uppercase tracking-wider mb-4">
-                Gameweek {match.gameweek}
-              </div>
+            
               
               {/* Equipos */}
               <div className="flex items-center justify-between mb-6">
                 <div className="text-center flex-1">
-                  <div className="w-14 h-14 rounded-full bg-gradient-to-br from-[#ff2882] to-[#37003c] mx-auto mb-2 flex items-center justify-center text-white font-bold text-xs">
-                    {match.team1Manager.split(' ').map(n => n[0]).join('')}
-                  </div>
-                  <div className="text-white font-semibold text-sm mb-1">{match.team1Manager}</div>
-                  <div className="text-gray-500 text-xs">{match.team1Name}</div>
+                  {/* Avatar - Escudo o iniciales del equipo */}
+                  {match.team1Logo ? (
+                    <div className="w-14 h-14 rounded-full mx-auto mb-2 overflow-hidden bg-white border-2 border-white/20">
+                      <Image
+                        src={`/assets/${match.team1Logo}`}
+                        alt={match.team1Name}
+                        width={56}
+                        height={56}
+                        className="object-cover w-full h-full"
+                      />
+                    </div>
+                  ) : (
+                    <div className="w-14 h-14 rounded-full bg-gradient-to-br from-[#ff2882] to-[#37003c] mx-auto mb-2 flex items-center justify-center text-white font-bold text-xs">
+                      {match.team1Name.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase()}
+                    </div>
+                  )}
+                  <div className="text-white font-semibold text-sm mb-1">{match.team1Name}</div>
+                  <div className="text-gray-500 text-xs">{match.team1Manager}</div>
                 </div>
                 
                 <div className="text-gray-600 font-black text-xl px-4">VS</div>
                 
                 <div className="text-center flex-1">
-                  <div className="w-14 h-14 rounded-full bg-gradient-to-br from-[#37003c] to-[#00ff87] mx-auto mb-2 flex items-center justify-center text-white font-bold text-xs">
-                    {match.team2Manager.split(' ').map(n => n[0]).join('')}
-                  </div>
-                  <div className="text-white font-semibold text-sm mb-1">{match.team2Manager}</div>
-                  <div className="text-gray-500 text-xs">{match.team2Name}</div>
+                  {/* Avatar - Escudo o iniciales del equipo */}
+                  {match.team2Logo ? (
+                    <div className="w-14 h-14 rounded-full mx-auto mb-2 overflow-hidden bg-white border-2 border-white/20">
+                      <Image
+                        src={`/assets/${match.team2Logo}`}
+                        alt={match.team2Name}
+                        width={56}
+                        height={56}
+                        className="object-cover w-full h-full"
+                      />
+                    </div>
+                  ) : (
+                    <div className="w-14 h-14 rounded-full bg-gradient-to-br from-[#37003c] to-[#00ff87] mx-auto mb-2 flex items-center justify-center text-white font-bold text-xs">
+                      {match.team2Name.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase()}
+                    </div>
+                  )}
+                  <div className="text-white font-semibold text-sm mb-1">{match.team2Name}</div>
+                  <div className="text-gray-500 text-xs">{match.team2Manager}</div>
                 </div>
               </div>
 
               {/* Radio buttons para predicción */}
               <div className="mb-4">
-                <label className="block text-xs text-gray-400 uppercase tracking-wider mb-2">
-                  ¿Quién gana?
-                </label>
+          
                 <div className="grid grid-cols-3 gap-2">
                   {/* Local */}
                   <button
                     type="button"
                     onClick={() => handlePredictionChange(idx, 'home')}
-                    className={`py-2 px-3 rounded-lg text-sm font-semibold transition-all ${
+                    className={`py-3 px-3 rounded-lg transition-all ${
                       bets[idx]?.prediction === 'home'
-                        ? 'bg-[#ff2882] text-white'
-                        : 'bg-white/5 text-gray-400 hover:bg-white/10'
+                        ? 'bg-[#ff2882] text-white border-2 border-[#ff2882]'
+                        : 'bg-white/5 text-gray-400 hover:bg-white/10 border-2 border-transparent'
                     }`}
                   >
-                    Local
+                    <div className="font-semibold text-sm">Local</div>
+                    <div className={`text-xs mt-1 ${
+                      bets[idx]?.prediction === 'home' ? 'text-white' : 'text-[#00ff87]'
+                    }`}>
+                      {match.odds.home.toFixed(2)}x
+                    </div>
                   </button>
                   
                   {/* Empate */}
                   <button
                     type="button"
                     onClick={() => handlePredictionChange(idx, 'draw')}
-                    className={`py-2 px-3 rounded-lg text-sm font-semibold transition-all ${
+                    className={`py-3 px-3 rounded-lg transition-all ${
                       bets[idx]?.prediction === 'draw'
-                        ? 'bg-[#00ff87] text-black'
-                        : 'bg-white/5 text-gray-400 hover:bg-white/10'
+                        ? 'bg-[#00ff87] text-black border-2 border-[#00ff87]'
+                        : 'bg-white/5 text-gray-400 hover:bg-white/10 border-2 border-transparent'
                     }`}
                   >
-                    Empate
+                    <div className="font-semibold text-sm">Empate</div>
+                    <div className={`text-xs mt-1 ${
+                      bets[idx]?.prediction === 'draw' ? 'text-black' : 'text-[#00ff87]'
+                    }`}>
+                      {match.odds.draw.toFixed(2)}x
+                    </div>
                   </button>
                   
                   {/* Visitante */}
                   <button
                     type="button"
                     onClick={() => handlePredictionChange(idx, 'away')}
-                    className={`py-2 px-3 rounded-lg text-sm font-semibold transition-all ${
+                    className={`py-3 px-3 rounded-lg transition-all ${
                       bets[idx]?.prediction === 'away'
-                        ? 'bg-[#37003c] text-white'
-                        : 'bg-white/5 text-gray-400 hover:bg-white/10'
+                        ? 'bg-[#37003c] text-white border-2 border-[#37003c]'
+                        : 'bg-white/5 text-gray-400 hover:bg-white/10 border-2 border-transparent'
                     }`}
                   >
-                    Visitante
+                    <div className="font-semibold text-sm">Visitante</div>
+                    <div className={`text-xs mt-1 ${
+                      bets[idx]?.prediction === 'away' ? 'text-white' : 'text-[#00ff87]'
+                    }`}>
+                      {match.odds.away.toFixed(2)}x
+                    </div>
                   </button>
                 </div>
               </div>
@@ -317,7 +466,13 @@ export default function UpcomingMatches() {
               <div className="mb-4">
                 <label className="block text-xs text-gray-400 uppercase tracking-wider mb-2">
                   Monto a apostar
-                  {user && <span className="text-[#00ff87] ml-2">(Disponible: ${userBalance})</span>}
+                  {user && (
+                    <span className={`ml-2 font-bold ${
+                      getAvailableBalance() < 0 ? 'text-red-500' : 'text-[#00ff87]'
+                    }`}>
+                      (Disponible: ${getAvailableBalance().toFixed(2)})
+                    </span>
+                  )}
                 </label>
                 <div className="relative">
                   <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 font-bold">$</span>
@@ -329,19 +484,56 @@ export default function UpcomingMatches() {
                     className="w-full pl-8 pr-4 py-2 rounded-lg bg-white/5 border border-white/10 text-white placeholder-gray-500 focus:outline-none focus:border-[#ff2882] transition-colors"
                   />
                 </div>
+                
+                {/* Mostrar ganancia potencial */}
+                {bets[idx]?.prediction && bets[idx]?.amount && parseFloat(bets[idx].amount) > 0 && (
+                  <div className="mt-2 text-xs text-gray-400">
+                    Ganancia potencial: 
+                    <span className="text-[#00ff87] font-bold ml-1">
+                      ${(parseFloat(bets[idx].amount) * match.odds[bets[idx].prediction!]).toFixed(2)}
+                    </span>
+                  </div>
+                )}
               </div>
 
-              {/* Botón para confirmar apuesta */}
-              <button 
-                onClick={() => handlePlaceBet(idx, match)}
-                disabled={!user || !bets[idx]?.prediction || !bets[idx]?.amount}
-                className="w-full py-3 rounded-xl bg-[#ff2882] text-white font-bold hover:bg-[#ff2882]/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                {!user ? 'Ingresá para apostar' : 'Confirmar apuesta'}
-              </button>
             </div>
           ))}
         </div>
+
+        {/* Botón para confirmar TODAS las apuestas */}
+        {user && (
+          <div className="mt-12 max-w-2xl mx-auto">
+            <div className="bg-white/5 border border-white/10 rounded-2xl p-6">
+              <div className="flex items-center justify-between mb-4">
+                <div>
+                  <h4 className="text-lg font-bold text-white mb-1">
+                    Resumen de apuestas
+                  </h4>
+                  <p className="text-sm text-gray-400">
+                    {Object.values(bets).filter(b => b?.prediction && b?.amount).length} apuesta(s) seleccionada(s)
+                  </p>
+                </div>
+                <div className="text-right">
+                  <div className="text-sm text-gray-400">Total a apostar</div>
+                  <div className="text-2xl font-black text-[#ff2882]">
+                    ${Object.values(bets)
+                      .filter(b => b?.amount)
+                      .reduce((sum, b) => sum + parseFloat(b.amount || '0'), 0)
+                      .toFixed(2)}
+                  </div>
+                </div>
+              </div>
+              
+              <button
+                onClick={handleConfirmAllBets}
+                disabled={Object.values(bets).filter(b => b?.prediction && b?.amount).length === 0}
+                className="w-full py-4 rounded-xl gradient-fpl font-bold text-lg hover:opacity-90 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed shadow-xl shadow-[#00ff87]/20"
+              >
+                Confirmar Apuestas
+              </button>
+            </div>
+          </div>
+        )}
       </div>
     </section>
   );

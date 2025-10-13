@@ -196,7 +196,7 @@ export default function LoginPage() {
                 <button
                   type="submit"
                   disabled={loggingIn}
-                  className="w-full py-3 rounded-xl gradient-fpl text-white font-bold hover:opacity-90 transition-opacity disabled:opacity-50"
+                  className="w-full py-3 rounded-xl gradient-fpl font-bold hover:opacity-90 transition-opacity disabled:opacity-50"
                 >
                   {loggingIn ? "Iniciando sesión..." : "Iniciar sesión"}
                 </button>
