@@ -489,18 +489,20 @@ export default function UpcomingMatches() {
 
               {/* Input de monto */}
               <div className="mb-3 sm:mb-4">
-                <label className="block text-[0.625rem] sm:text-xs text-gray-700 uppercase tracking-wider mb-1.5 sm:mb-2">
-                  Monto a apostar
-                </label>
-                <div className="relative">
-                  <span className="absolute left-3 sm:left-4 top-1/2 -translate-y-1/2 text-gray-600 font-bold text-sm sm:text-base">$</span>
-                  <input
-                    type="text"
-                    value={bets[idx]?.amount || ''}
-                    onChange={(e) => handleAmountChange(idx, e.target.value)}
-                    placeholder="0"
-                    className="w-full pl-7 sm:pl-8 pr-3 sm:pr-4 py-1.5 sm:py-2 rounded-md sm:rounded-lg bg-white border border-gray-200 text-gray-900 placeholder-gray-400 focus:outline-none focus:border-[#ff2882] transition-colors text-sm sm:text-base"
-                  />
+                <div className="flex items-center gap-2 sm:gap-3">
+                  <label className="text-[0.625rem] sm:text-xs text-gray-700 uppercase tracking-wider whitespace-nowrap">
+                    Monto
+                  </label>
+                  <div className="relative flex-1">
+                    <span className="absolute left-3 sm:left-4 top-1/2 -translate-y-1/2 text-gray-600 font-bold text-sm sm:text-base">$</span>
+                    <input
+                      type="text"
+                      value={bets[idx]?.amount || ''}
+                      onChange={(e) => handleAmountChange(idx, e.target.value)}
+                      placeholder="0"
+                      className="w-full pl-7 sm:pl-8 pr-3 sm:pr-4 py-1.5 sm:py-2 rounded-md sm:rounded-lg bg-white border border-gray-200 text-gray-900 placeholder-gray-400 focus:outline-none focus:border-[#ff2882] transition-colors text-sm sm:text-base"
+                    />
+                  </div>
                 </div>
                 
                 {/* Mostrar ganancia potencial */}
