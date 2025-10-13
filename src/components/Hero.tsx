@@ -60,12 +60,12 @@ export default function Hero() {
   }, [supabase]);
 
   return (
-    <section className="relative overflow-hidden bg-[#ebe5eb]">
+    <section className="relative overflow-hidden w-full" style={{ backgroundColor: 'rgb(55, 0, 60)' }}>
       
       <div className="relative max-w-7xl mx-auto px-3 sm:px-4 md:px-6 lg:px-8 py-8 sm:py-10 md:py-12 lg:py-16">
         <div className="text-center">
           {/* Gameweek Actual - Título */}
-          <h2 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-black text-[#37003c] mb-6 sm:mb-8">
+          <h2 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-black text-white mb-6 sm:mb-8">
             {loading ? (
               <span className="animate-pulse">Gameweek ...</span>
             ) : (
@@ -76,31 +76,31 @@ export default function Hero() {
           {/* Stats */}
           <div className="grid grid-cols-3 gap-3 sm:gap-6 md:gap-8 max-w-3xl mx-auto">
             {/* Apuestas Activas */}
-            <div className="bg-white/50 rounded-lg sm:rounded-xl md:rounded-2xl p-3 sm:p-4 md:p-6 border border-gray-200">
+            <div className="bg-white/10 rounded-lg sm:rounded-xl md:rounded-2xl p-3 sm:p-4 md:p-6 border border-white/20">
               <div className="text-2xl sm:text-3xl md:text-4xl font-black text-[#ff2882] mb-1 sm:mb-2">
                 {loading ? '...' : activeBets}
               </div>
-              <div className="text-[0.625rem] sm:text-xs md:text-sm text-gray-600 uppercase tracking-wider">
+              <div className="text-[0.625rem] sm:text-xs md:text-sm text-gray-300 uppercase tracking-wider">
                 Apuestas Activas
               </div>
             </div>
 
             {/* Monto Apostado GW */}
-            <div className="bg-white/50 rounded-lg sm:rounded-xl md:rounded-2xl p-3 sm:p-4 md:p-6 border border-gray-200">
+            <div className="bg-white/10 rounded-lg sm:rounded-xl md:rounded-2xl p-3 sm:p-4 md:p-6 border border-white/20">
               <div className="text-2xl sm:text-3xl md:text-4xl font-black text-[#00ff87] mb-1 sm:mb-2">
                 {loading ? '...' : `$${gwAmount.toLocaleString()}`}
               </div>
-              <div className="text-[0.625rem] sm:text-xs md:text-sm text-gray-600 uppercase tracking-wider">
+              <div className="text-[0.625rem] sm:text-xs md:text-sm text-gray-300 uppercase tracking-wider">
                 Apostado GW
               </div>
             </div>
 
             {/* Pozo Total */}
-            <div className="bg-white/50 rounded-lg sm:rounded-xl md:rounded-2xl p-3 sm:p-4 md:p-6 border border-gray-200">
-              <div className="text-2xl sm:text-3xl md:text-4xl font-black text-[#37003c] mb-1 sm:mb-2">
+            <div className="bg-white/10 rounded-lg sm:rounded-xl md:rounded-2xl p-3 sm:p-4 md:p-6 border border-white/20">
+              <div className="text-2xl sm:text-3xl md:text-4xl font-black text-white mb-1 sm:mb-2">
                 {loading ? '...' : `$${totalPool.toLocaleString()}`}
               </div>
-              <div className="text-[0.625rem] sm:text-xs md:text-sm text-gray-600 uppercase tracking-wider">
+              <div className="text-[0.625rem] sm:text-xs md:text-sm text-gray-300 uppercase tracking-wider">
                 Pozo Total
               </div>
             </div>
