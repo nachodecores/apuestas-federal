@@ -466,13 +466,6 @@ export default function UpcomingMatches() {
               <div className="mb-4">
                 <label className="block text-xs text-gray-400 uppercase tracking-wider mb-2">
                   Monto a apostar
-                  {user && (
-                    <span className={`ml-2 font-bold ${
-                      getAvailableBalance() < 0 ? 'text-red-500' : 'text-[#00ff87]'
-                    }`}>
-                      (Disponible: ${getAvailableBalance().toFixed(2)})
-                    </span>
-                  )}
                 </label>
                 <div className="relative">
                   <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 font-bold">$</span>

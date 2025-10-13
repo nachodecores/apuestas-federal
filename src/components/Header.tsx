@@ -22,6 +22,7 @@ export default function Header() {
   const [userName, setUserName] = useState<string>('');
   const [userTeamName, setUserTeamName] = useState<string>('');
   const [userTeamLogo, setUserTeamLogo] = useState<string | null>(null);
+  const [userBalance, setUserBalance] = useState<number>(0);
   const [isAdmin, setIsAdmin] = useState<boolean>(false);
   const [participants, setParticipants] = useState<Participant[]>([]);
   const [loading, setLoading] = useState(true);
@@ -37,16 +38,17 @@ export default function Header() {
       setUser(user);
       
       if (user) {
-        // Obtener datos completos del perfil
+        // Obtener datos completos del perfil (incluyendo balance)
         const { data: profile } = await supabase
           .from('profiles')
-          .select('display_name, league_entry_id, team_logo')
+          .select('display_name, league_entry_id, team_logo, balance')
           .eq('id', user.id)
           .single();
         
         if (profile) {
           setUserName(profile.display_name);
           setUserTeamLogo(profile.team_logo);
+          setUserBalance(profile.balance || 0);
           
           // Verificar si es admin (Ignacio de Cores)
           setIsAdmin(profile.display_name === 'Ignacio de Cores');
@@ -63,6 +65,7 @@ export default function Header() {
         setUserName('');
         setUserTeamName('');
         setUserTeamLogo(null);
+        setUserBalance(0);
         setIsAdmin(false);
       }
       
@@ -118,10 +121,22 @@ export default function Header() {
     // Escuchar cambios de autenticación
     const {
       data: { subscription },
-    } = supabase.auth.onAuthStateChange((_event, session) => {
+    } = supabase.auth.onAuthStateChange(async (_event, session) => {
       setUser(session?.user ?? null);
       if (!session?.user) {
         setUserName('');
+        setUserBalance(0);
+      } else {
+        // Actualizar balance cuando el usuario se loguea o cambia sesión
+        const { data: profile } = await supabase
+          .from('profiles')
+          .select('balance')
+          .eq('id', session.user.id)
+          .single();
+        
+        if (profile) {
+          setUserBalance(profile.balance || 0);
+        }
       }
     });
 
@@ -213,33 +228,44 @@ export default function Header() {
           ) : user ? (
             // Usuario logueado - mostrar opciones
             <div className="flex items-center gap-2 sm:gap-3">
-              {/* Avatar + Nombre (solo en home) */}
+              {/* Avatar + Nombre + Balance (solo en home) */}
               {isHome && (
-                <Link
-                  href="/dashboard"
-                  className="px-2 py-1.5 sm:px-3 sm:py-2 rounded-md text-xs sm:text-sm font-semibold hover:opacity-90 transition-opacity flex items-center gap-1.5"
-                  style={{ 
-                    backgroundColor: 'rgba(255, 255, 255, 0.75)', 
-                    color: 'rgb(55, 0, 60)' 
-                  }}
-                >
-                  {userTeamLogo ? (
-                    <div className="w-6 h-6 sm:w-7 sm:h-7 rounded-full overflow-hidden bg-white border border-white/20 flex-shrink-0">
-                      <Image
-                        src={`/assets/${userTeamLogo}`}
-                        alt={userTeamName}
-                        width={32}
-                        height={32}
-                        className="object-cover w-full h-full"
-                      />
-                    </div>
-                  ) : (
-                    <div className="w-6 h-6 sm:w-7 sm:h-7 rounded-full bg-gradient-to-br from-[#ff2882] to-[#37003c] flex items-center justify-center text-white font-bold text-[0.625rem] sm:text-xs flex-shrink-0">
-                      {userTeamName.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase()}
-                    </div>
-                  )}
-                  <span className="hidden sm:inline">{userName || 'Dashboard'}</span>
-                </Link>
+                <div className="flex items-center gap-2 sm:gap-3">
+                  {/* Balance disponible */}
+                  <div className="hidden md:flex flex-col items-end">
+                    <span className="text-[0.625rem] text-white/70 uppercase tracking-wider">Disponible</span>
+                    <span className="text-sm sm:text-base font-bold text-[#00ff87]">
+                      ${userBalance.toFixed(2)}
+                    </span>
+                  </div>
+                  
+                  {/* Link al dashboard con avatar */}
+                  <Link
+                    href="/dashboard"
+                    className="px-2 py-1.5 sm:px-3 sm:py-2 rounded-md text-xs sm:text-sm font-semibold hover:opacity-90 transition-opacity flex items-center gap-1.5"
+                    style={{ 
+                      backgroundColor: 'rgba(255, 255, 255, 0.75)', 
+                      color: 'rgb(55, 0, 60)' 
+                    }}
+                  >
+                    {userTeamLogo ? (
+                      <div className="w-6 h-6 sm:w-7 sm:h-7 rounded-full overflow-hidden bg-white border border-white/20 flex-shrink-0">
+                        <Image
+                          src={`/assets/${userTeamLogo}`}
+                          alt={userTeamName}
+                          width={32}
+                          height={32}
+                          className="object-cover w-full h-full"
+                        />
+                      </div>
+                    ) : (
+                      <div className="w-6 h-6 sm:w-7 sm:h-7 rounded-full bg-gradient-to-br from-[#ff2882] to-[#37003c] flex items-center justify-center text-white font-bold text-[0.625rem] sm:text-xs flex-shrink-0">
+                        {userTeamName.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase()}
+                      </div>
+                    )}
+                    <span className="hidden sm:inline">{userName || 'Dashboard'}</span>
+                  </Link>
+                </div>
               )}
 
               {/* Botón Dashboard (en admin) */}
