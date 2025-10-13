@@ -209,16 +209,21 @@ export default function UpcomingMatches() {
     fetchMatches();
   }, []);
 
-  // Función para actualizar la predicción de un partido
+  // Función para actualizar la predicción de un partido (toggle: clicar de nuevo des-selecciona)
   function handlePredictionChange(matchIndex: number, prediction: 'home' | 'draw' | 'away') {
-    setBets(prev => ({
-      ...prev,
-      [matchIndex]: {
-        ...prev[matchIndex],
-        prediction,
-        amount: prev[matchIndex]?.amount || ''
-      }
-    }));
+    setBets(prev => {
+      // Si ya estaba seleccionada esta predicción, la des-seleccionamos
+      const currentPrediction = prev[matchIndex]?.prediction;
+      
+      return {
+        ...prev,
+        [matchIndex]: {
+          ...prev[matchIndex],
+          prediction: currentPrediction === prediction ? null : prediction,
+          amount: prev[matchIndex]?.amount || ''
+        }
+      };
+    });
   }
 
   // Función para actualizar el monto de la apuesta

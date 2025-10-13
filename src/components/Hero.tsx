@@ -82,35 +82,59 @@ export default function Hero() {
         {/* Contenido con stats */}
         <div className="px-3 sm:px-4 md:px-6 lg:px-8 py-8 sm:py-10 md:py-12 lg:py-16">
           <div className="text-center">
-            {/* Stats */}
-            <div className="grid grid-cols-3 gap-3 sm:gap-6 md:gap-8 max-w-3xl mx-auto">
+          {/* Stats */}
+          <div className="grid grid-cols-3 gap-3 sm:gap-6 md:gap-8 max-w-3xl mx-auto">
             {/* Apuestas Activas */}
-            <div className="bg-white/10 rounded-lg sm:rounded-xl md:rounded-2xl p-3 sm:p-4 md:p-6 border border-white/20">
-              <div className="text-2xl sm:text-3xl md:text-4xl font-black text-[#ff2882] mb-1 sm:mb-2">
-                {loading ? '...' : activeBets}
+            <div className="text-center">
+              <div className="text-[0.625rem] sm:text-xs md:text-sm text-gray-300 tracking-wider mb-2 sm:mb-3">
+                n° apuestas
               </div>
-              <div className="text-[0.625rem] sm:text-xs md:text-sm text-gray-300 uppercase tracking-wider">
-                Apuestas Activas
+              <div 
+                className="text-2xl sm:text-3xl md:text-4xl font-black mb-0"
+                style={{ 
+                  background: 'linear-gradient(to right, rgb(0, 255, 135), rgb(2, 239, 255))',
+                  WebkitBackgroundClip: 'text',
+                  WebkitTextFillColor: 'transparent',
+                  backgroundClip: 'text'
+                }}
+              >
+                {loading ? '...' : activeBets}
               </div>
             </div>
 
             {/* Monto Apostado GW */}
-            <div className="bg-white/10 rounded-lg sm:rounded-xl md:rounded-2xl p-3 sm:p-4 md:p-6 border border-white/20">
-              <div className="text-2xl sm:text-3xl md:text-4xl font-black text-[#00ff87] mb-1 sm:mb-2">
-                {loading ? '...' : `$${gwAmount.toLocaleString()}`}
+            <div className="text-center">
+              <div className="text-[0.625rem] sm:text-xs md:text-sm text-gray-300 tracking-wider mb-2 sm:mb-3">
+                Total apostado
               </div>
-              <div className="text-[0.625rem] sm:text-xs md:text-sm text-gray-300 uppercase tracking-wider">
-                Apostado GW
+              <div 
+                className="text-2xl sm:text-3xl md:text-4xl font-black mb-0"
+                style={{ 
+                  background: 'linear-gradient(to right, rgb(0, 255, 135), rgb(2, 239, 255))',
+                  WebkitBackgroundClip: 'text',
+                  WebkitTextFillColor: 'transparent',
+                  backgroundClip: 'text'
+                }}
+              >
+                {loading ? '...' : `$${gwAmount.toLocaleString()}`}
               </div>
             </div>
 
             {/* Pozo Total */}
-            <div className="bg-white/10 rounded-lg sm:rounded-xl md:rounded-2xl p-3 sm:p-4 md:p-6 border border-white/20">
-              <div className="text-2xl sm:text-3xl md:text-4xl font-black text-white mb-1 sm:mb-2">
-                {loading ? '...' : `$${totalPool.toLocaleString()}`}
+            <div className="text-center">
+              <div className="text-[0.625rem] sm:text-xs md:text-sm text-gray-300 tracking-wider mb-2 sm:mb-3">
+                Pozo
               </div>
-              <div className="text-[0.625rem] sm:text-xs md:text-sm text-gray-300 uppercase tracking-wider">
-                Pozo Total
+              <div 
+                className="text-2xl sm:text-3xl md:text-4xl font-black mb-0"
+                style={{ 
+                  background: 'linear-gradient(to right, rgb(0, 255, 135), rgb(2, 239, 255))',
+                  WebkitBackgroundClip: 'text',
+                  WebkitTextFillColor: 'transparent',
+                  backgroundClip: 'text'
+                }}
+              >
+                {loading ? '...' : `$${totalPool.toLocaleString()}`}
               </div>
             </div>
             </div>
