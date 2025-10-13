@@ -364,7 +364,7 @@ export default function UpcomingMatches() {
           {matches.map((match, idx) => (
             <div
               key={idx}
-              className="p-4 sm:p-5 md:p-6 rounded-xl sm:rounded-2xl border border-white/10 hover:border-[#ff2882]/50 transition-all hover:scale-105"
+              className="p-4 sm:p-5 md:p-6 rounded-xl sm:rounded-2xl border border-white/10"
               style={{ backgroundColor: 'rgba(237, 237, 237, 0.85)' }}
             >
             
