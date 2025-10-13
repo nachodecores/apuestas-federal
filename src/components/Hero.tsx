@@ -60,25 +60,24 @@ export default function Hero() {
   }, [supabase]);
 
   return (
-    <section className="relative overflow-hidden w-full" style={{ backgroundColor: 'rgb(55, 0, 60)' }}>
+    <section className="relative overflow-hidden w-full px-3 sm:px-4 md:px-6 lg:px-8 pt-6 sm:pt-8 md:pt-10 lg:pt-12">
       
-      <div className="relative flex justify-center">
-        {/* Gameweek Actual - Título con gradiente en la parte superior */}
-        <div 
-          className="w-[80%] px-4 sm:px-6 md:px-8 py-2 sm:py-3 md:py-4 rounded-b-xl sm:rounded-b-2xl md:rounded-b-3xl text-center"
-          style={{ background: 'linear-gradient(to right, rgb(0, 255, 135), rgb(2, 239, 255))' }}
-        >
-          <h2 className="text-base sm:text-lg md:text-xl lg:text-2xl font-normal mb-0" style={{ color: '#37003c' }}>
-            {loading ? (
-              <span className="animate-pulse">Gameweek ...</span>
-            ) : (
-              `Gameweek ${currentGameweek}`
-            )}
-          </h2>
+      <div className="relative max-w-7xl mx-auto rounded-xl sm:rounded-2xl overflow-hidden" style={{ backgroundColor: 'rgb(55, 0, 60)' }}>
+        <div className="relative flex justify-center">
+          {/* Gameweek Actual - Título con gradiente en la parte superior */}
+          <div 
+            className="w-[80%] px-4 sm:px-6 md:px-8 py-2 sm:py-3 md:py-4 rounded-b-xl sm:rounded-b-2xl md:rounded-b-3xl text-center"
+            style={{ background: 'linear-gradient(to right, rgb(0, 255, 135), rgb(2, 239, 255))' }}
+          >
+            <h2 className="text-base sm:text-lg md:text-xl lg:text-2xl font-normal mb-0" style={{ color: '#37003c' }}>
+              {loading ? (
+                <span className="animate-pulse">Gameweek ...</span>
+              ) : (
+                `Gameweek ${currentGameweek}`
+              )}
+            </h2>
+          </div>
         </div>
-      </div>
-      
-      <div className="relative max-w-7xl mx-auto">
 
         {/* Contenido con stats */}
         <div className="px-3 sm:px-4 md:px-6 lg:px-8 py-8 sm:py-10 md:py-12 lg:py-16">
