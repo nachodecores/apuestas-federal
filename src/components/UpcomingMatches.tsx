@@ -414,13 +414,18 @@ export default function UpcomingMatches() {
                     className={`py-2 sm:py-2.5 md:py-3 px-2 sm:px-3 rounded-md sm:rounded-lg transition-all ${
                       bets[idx]?.prediction === 'home'
                         ? ''
-                        : 'bg-[#c3b2c4] text-gray-700 hover:opacity-80'
+                        : 'hover:opacity-80'
                     }`}
-                    style={bets[idx]?.prediction === 'home' ? { background: 'linear-gradient(to right, rgb(2, 239, 255), rgb(0, 255, 135))' } : {}}
+                    style={bets[idx]?.prediction === 'home' 
+                      ? { background: 'linear-gradient(to right, rgb(2, 239, 255), rgb(0, 255, 135))' }
+                      : { backgroundColor: '#c3b2c4' }
+                    }
                   >
                     <div className={`font-semibold text-xs sm:text-sm ${
-                      bets[idx]?.prediction === 'home' ? 'text-[#37003c]' : ''
-                    }`}>Local</div>
+                      bets[idx]?.prediction === 'home' ? 'text-[#37003c]' : 'text-gray-700'
+                    }`}>
+                      Local
+                    </div>
                     <div className={`text-[0.625rem] sm:text-xs mt-0.5 sm:mt-1 ${
                       bets[idx]?.prediction === 'home' ? 'text-[#37003c]' : 'text-gray-800'
                     }`}>
@@ -435,13 +440,18 @@ export default function UpcomingMatches() {
                     className={`py-2 sm:py-2.5 md:py-3 px-2 sm:px-3 rounded-md sm:rounded-lg transition-all ${
                       bets[idx]?.prediction === 'draw'
                         ? ''
-                        : 'bg-[#c3b2c4] text-gray-700 hover:opacity-80'
+                        : 'hover:opacity-80'
                     }`}
-                    style={bets[idx]?.prediction === 'draw' ? { background: 'linear-gradient(to right, rgb(2, 239, 255), rgb(0, 255, 135))' } : {}}
+                    style={bets[idx]?.prediction === 'draw' 
+                      ? { background: 'linear-gradient(to right, rgb(2, 239, 255), rgb(0, 255, 135))' }
+                      : { backgroundColor: '#c3b2c4' }
+                    }
                   >
                     <div className={`font-semibold text-xs sm:text-sm ${
-                      bets[idx]?.prediction === 'draw' ? 'text-[#37003c]' : ''
-                    }`}>Empate</div>
+                      bets[idx]?.prediction === 'draw' ? 'text-[#37003c]' : 'text-gray-700'
+                    }`}>
+                      Empate
+                    </div>
                     <div className={`text-[0.625rem] sm:text-xs mt-0.5 sm:mt-1 ${
                       bets[idx]?.prediction === 'draw' ? 'text-[#37003c]' : 'text-gray-800'
                     }`}>
@@ -456,13 +466,18 @@ export default function UpcomingMatches() {
                     className={`py-2 sm:py-2.5 md:py-3 px-2 sm:px-3 rounded-md sm:rounded-lg transition-all ${
                       bets[idx]?.prediction === 'away'
                         ? ''
-                        : 'bg-[#c3b2c4] text-gray-700 hover:opacity-80'
+                        : 'hover:opacity-80'
                     }`}
-                    style={bets[idx]?.prediction === 'away' ? { background: 'linear-gradient(to right, rgb(2, 239, 255), rgb(0, 255, 135))' } : {}}
+                    style={bets[idx]?.prediction === 'away' 
+                      ? { background: 'linear-gradient(to right, rgb(2, 239, 255), rgb(0, 255, 135))' }
+                      : { backgroundColor: '#c3b2c4' }
+                    }
                   >
                     <div className={`font-semibold text-xs sm:text-sm ${
-                      bets[idx]?.prediction === 'away' ? 'text-[#37003c]' : ''
-                    }`}>Visitante</div>
+                      bets[idx]?.prediction === 'away' ? 'text-[#37003c]' : 'text-gray-700'
+                    }`}>
+                      Visitante
+                    </div>
                     <div className={`text-[0.625rem] sm:text-xs mt-0.5 sm:mt-1 ${
                       bets[idx]?.prediction === 'away' ? 'text-[#37003c]' : 'text-gray-800'
                     }`}>
