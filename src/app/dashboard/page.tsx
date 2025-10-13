@@ -2,6 +2,7 @@ import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
+import Header from "@/components/Header";
 
 interface Bet {
   id: string;
@@ -72,44 +73,7 @@ export default async function DashboardPage() {
 
   return (
     <div className="min-h-screen bg-[#0a0a0a]">
-      {/* Header */}
-      <header className="border-b border-white/10 bg-black/50 sticky top-0 z-50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex justify-between items-center">
-          <Link 
-            href="/"
-            className="flex items-center gap-3 hover:opacity-80 transition-opacity"
-          >
-            <Image 
-              src="/assets/logopremierclaro.svg"
-              alt="Premier League"
-              width={40}
-              height={50}
-              className="h-10 w-auto"
-            />
-            <h1 className="text-2xl text-white">
-              <span className="font-black">Bet</span>
-              <span className="font-normal"> Federal</span>
-            </h1>
-          </Link>
-          
-          <div className="flex gap-3">
-            <Link
-              href="/admin"
-              className="px-4 py-2 rounded-xl bg-[#ff2882]/10 border border-[#ff2882]/50 text-[#ff2882] hover:bg-[#ff2882]/20 transition-colors font-semibold"
-            >
-              Admin
-            </Link>
-            <form action="/auth/signout" method="post">
-              <button 
-                type="submit"
-                className="px-4 py-2 rounded-xl bg-white/5 border border-white/10 text-white hover:bg-white/10 transition-colors"
-              >
-                Cerrar sesión
-              </button>
-            </form>
-          </div>
-        </div>
-      </header>
+      <Header />
 
       {/* Contenido */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">

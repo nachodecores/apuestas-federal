@@ -4,7 +4,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { useEffect, useState, useRef } from "react";
 import { createClient } from "@/lib/supabase/client";
-import { useRouter } from "next/navigation";
+import { useRouter, usePathname } from "next/navigation";
 import type { User } from "@supabase/supabase-js";
 
 // Tipo para participantes con sus datos
@@ -17,6 +17,7 @@ interface Participant {
 
 export default function Header() {
   const router = useRouter();
+  const pathname = usePathname();
   const [user, setUser] = useState<User | null>(null);
   const [userName, setUserName] = useState<string>('');
   const [userTeamName, setUserTeamName] = useState<string>('');
@@ -161,11 +162,27 @@ export default function Header() {
     }
   }
 
+  // Logout handler
+  async function handleLogout() {
+    await supabase.auth.signOut();
+    router.push('/');
+  }
+
+  // Determinar el estilo según la página
+  const isHome = pathname === '/';
+  const isAdmin = pathname?.startsWith('/admin');
+  const isDashboard = pathname?.startsWith('/dashboard');
+  
+  const headerBg = isHome 
+    ? 'linear-gradient(to right, #953bff, #02efff)' 
+    : 'rgba(0, 0, 0, 0.5)';
+
   return (
-    <nav className="border-b border-white/10 sticky top-0 z-50" style={{ background: 'linear-gradient(to right, #953bff, #02efff)' }}>
+    <nav className="border-b border-white/10 sticky top-0 z-50 backdrop-blur-sm" style={{ background: headerBg }}>
       <div className="max-w-7xl mx-auto px-3 sm:px-4 md:px-6 lg:px-8">
         <div className="flex justify-between items-center h-14 sm:h-16 md:h-20">
-          <Link href="/" className="flex items-center gap-2 sm:gap-3">
+          {/* Logo y título */}
+          <Link href="/" className="flex items-center gap-2 sm:gap-3 hover:opacity-80 transition-opacity">
             <Image 
               src="/assets/logopremierclaro.svg"
               alt="Premier League"
@@ -173,42 +190,81 @@ export default function Header() {
               height={50}
               className="h-7 sm:h-9 md:h-10 w-auto"
             />
-            <h1 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl text-[#ebe5eb]">
+            <h1 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl text-white">
               <span className="font-black">Bet</span>
               <span className="font-normal"> Federal</span>
+              {isAdmin && <span className="ml-2 text-xs sm:text-sm text-[#ff2882]">Admin</span>}
             </h1>
           </Link>
 
+          {/* Botones de navegación */}
           {loading ? (
             <div className="w-20 h-8 sm:w-24 sm:h-10 bg-white/5 rounded-full animate-pulse"></div>
           ) : user ? (
-            <Link
-              href="/dashboard"
-              className="px-3 py-1.5 sm:px-4 sm:py-2 rounded-md text-sm sm:text-base font-semibold hover:opacity-90 transition-opacity flex items-center gap-1.5 sm:gap-2"
-              style={{ 
-                backgroundColor: 'rgba(255, 255, 255, 0.75)', 
-                color: 'rgb(55, 0, 60)' 
-              }}
-            >
-              {/* Avatar - Escudo o iniciales del equipo */}
-              {userTeamLogo ? (
-                <div className="w-6 h-6 sm:w-7 sm:h-7 md:w-8 md:h-8 rounded-full overflow-hidden bg-white border border-white/20 flex-shrink-0">
-                  <Image
-                    src={`/assets/${userTeamLogo}`}
-                    alt={userTeamName}
-                    width={32}
-                    height={32}
-                    className="object-cover w-full h-full"
-                  />
-                </div>
-              ) : (
-                <div className="w-6 h-6 sm:w-7 sm:h-7 md:w-8 md:h-8 rounded-full bg-gradient-to-br from-[#ff2882] to-[#37003c] flex items-center justify-center text-white font-bold text-[0.625rem] sm:text-xs flex-shrink-0">
-                  {userTeamName.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase()}
-                </div>
+            // Usuario logueado - mostrar opciones
+            <div className="flex items-center gap-2 sm:gap-3">
+              {/* Avatar + Nombre (solo en home) */}
+              {isHome && (
+                <Link
+                  href="/dashboard"
+                  className="px-2 py-1.5 sm:px-3 sm:py-2 rounded-md text-xs sm:text-sm font-semibold hover:opacity-90 transition-opacity flex items-center gap-1.5"
+                  style={{ 
+                    backgroundColor: 'rgba(255, 255, 255, 0.75)', 
+                    color: 'rgb(55, 0, 60)' 
+                  }}
+                >
+                  {userTeamLogo ? (
+                    <div className="w-6 h-6 sm:w-7 sm:h-7 rounded-full overflow-hidden bg-white border border-white/20 flex-shrink-0">
+                      <Image
+                        src={`/assets/${userTeamLogo}`}
+                        alt={userTeamName}
+                        width={32}
+                        height={32}
+                        className="object-cover w-full h-full"
+                      />
+                    </div>
+                  ) : (
+                    <div className="w-6 h-6 sm:w-7 sm:h-7 rounded-full bg-gradient-to-br from-[#ff2882] to-[#37003c] flex items-center justify-center text-white font-bold text-[0.625rem] sm:text-xs flex-shrink-0">
+                      {userTeamName.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase()}
+                    </div>
+                  )}
+                  <span className="hidden sm:inline">{userName || 'Dashboard'}</span>
+                </Link>
               )}
-              <span className="hidden sm:inline">{userName || 'Dashboard'}</span>
-            </Link>
+
+              {/* Botón Dashboard (en admin) */}
+              {isAdmin && (
+                <Link
+                  href="/dashboard"
+                  className="px-3 py-1.5 sm:px-4 sm:py-2 rounded-md sm:rounded-xl bg-white/5 border border-white/10 text-white hover:bg-white/10 transition-colors text-xs sm:text-sm font-semibold"
+                >
+                  Dashboard
+                </Link>
+              )}
+
+              {/* Botón Admin (en dashboard) */}
+              {isDashboard && (
+                <Link
+                  href="/admin"
+                  className="px-3 py-1.5 sm:px-4 sm:py-2 rounded-md sm:rounded-xl bg-[#ff2882]/10 border border-[#ff2882]/50 text-[#ff2882] hover:bg-[#ff2882]/20 transition-colors text-xs sm:text-sm font-semibold"
+                >
+                  Admin
+                </Link>
+              )}
+
+              {/* Botón Cerrar sesión (en dashboard y admin) */}
+              {(isDashboard || isAdmin) && (
+                <button
+                  onClick={handleLogout}
+                  className="px-3 py-1.5 sm:px-4 sm:py-2 rounded-md sm:rounded-xl bg-white/5 border border-white/10 text-white hover:bg-white/10 transition-colors text-xs sm:text-sm font-semibold"
+                >
+                  <span className="hidden sm:inline">Cerrar sesión</span>
+                  <span className="sm:hidden">Salir</span>
+                </button>
+              )}
+            </div>
           ) : (
+            // Usuario NO logueado - mostrar dropdown
             <div className="relative" ref={dropdownRef}>
               <button
                 onClick={() => setShowDropdown(!showDropdown)}
