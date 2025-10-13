@@ -131,10 +131,11 @@ export async function POST(request: Request) {
       bets_created: createdBets.length
     });
 
-  } catch (error: any) {
+  } catch (error) {
     console.error('Error general:', error);
+    const errorMessage = error instanceof Error ? error.message : 'Error al procesar apuestas';
     return NextResponse.json(
-      { error: error.message || 'Error al procesar apuestas' },
+      { error: errorMessage },
       { status: 500 }
     );
   }

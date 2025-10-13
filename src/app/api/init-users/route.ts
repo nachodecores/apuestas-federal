@@ -74,8 +74,9 @@ export async function GET() {
       results,
       message: '✅ Usuarios creados! Ya podés usar "¿Quién sos?" para login'
     });
-  } catch (error: any) {
-    return NextResponse.json({ success: false, error: error.message }, { status: 500 });
+  } catch (error) {
+    const errorMessage = error instanceof Error ? error.message : 'Error desconocido';
+    return NextResponse.json({ success: false, error: errorMessage }, { status: 500 });
   }
 }
 

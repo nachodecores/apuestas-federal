@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { createClient } from "@/lib/supabase/client";
+import { User } from "@supabase/supabase-js";
 import Link from "next/link";
 import Header from "@/components/Header";
 
@@ -17,7 +18,7 @@ interface ResolveResult {
 
 export default function AdminPage() {
   const supabase = createClient();
-  const [user, setUser] = useState<any>(null);
+  const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
   const [gameweekToResolve, setGameweekToResolve] = useState<number>(8);
   const [resolving, setResolving] = useState(false);
@@ -31,7 +32,8 @@ export default function AdminPage() {
     }
     
     getUser();
-  }, [supabase]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   async function handleResolve() {
     if (!gameweekToResolve || gameweekToResolve < 1 || gameweekToResolve > 38) {
@@ -64,7 +66,8 @@ export default function AdminPage() {
       }
 
       setResult(data);
-    } catch (error: any) {
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Error desconocido';
       setResult({
         success: false,
         gameweek: gameweekToResolve,
@@ -72,7 +75,7 @@ export default function AdminPage() {
         won: 0,
         lost: 0,
         users_updated: 0,
-        error: error.message,
+        error: errorMessage,
       });
     } finally {
       setResolving(false);

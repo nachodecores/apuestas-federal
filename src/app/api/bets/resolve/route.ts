@@ -15,19 +15,6 @@ interface Match {
   started: boolean;
 }
 
-interface Bet {
-  id: string;
-  user_id: string;
-  gameweek: number;
-  match_league_entry_1: number;
-  match_league_entry_2: number;
-  prediction: 'home' | 'draw' | 'away';
-  amount: number;
-  odds: number;
-  potential_win: number;
-  status: 'pending' | 'won' | 'lost';
-}
-
 export async function POST(request: Request) {
   try {
     const supabase = await createClient();
@@ -196,9 +183,10 @@ export async function POST(request: Request) {
       users_updated: usersToUpdate.size
     });
 
-  } catch (error: any) {
+  } catch (error) {
     console.error('Error en API route /api/bets/resolve:', error);
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    const errorMessage = error instanceof Error ? error.message : 'Error desconocido';
+    return NextResponse.json({ error: errorMessage }, { status: 500 });
   }
 }
 
