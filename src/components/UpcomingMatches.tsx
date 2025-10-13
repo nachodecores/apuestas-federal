@@ -321,9 +321,9 @@ export default function UpcomingMatches() {
   // Estado de carga
   if (loading) {
     return (
-      <section className="py-20 bg-gradient-to-b from-transparent to-[#37003c]/10">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <div className="text-white text-xl">Cargando próximos partidos...</div>
+      <section className="py-8 sm:py-12 md:py-16 lg:py-20 bg-[#37003c]">
+        <div className="max-w-7xl mx-auto px-3 sm:px-4 md:px-6 lg:px-8 text-center">
+          <div className="text-white text-base sm:text-lg md:text-xl">Cargando próximos partidos...</div>
         </div>
       </section>
     );
@@ -332,92 +332,92 @@ export default function UpcomingMatches() {
   // Estado de error
   if (error) {
     return (
-      <section className="py-20 bg-gradient-to-b from-transparent to-[#37003c]/10">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <div className="text-red-500 text-xl">Error: {error}</div>
+      <section className="py-8 sm:py-12 md:py-16 lg:py-20 bg-[#37003c]">
+        <div className="max-w-7xl mx-auto px-3 sm:px-4 md:px-6 lg:px-8 text-center">
+          <div className="text-red-500 text-base sm:text-lg md:text-xl">Error: {error}</div>
         </div>
       </section>
     );
   }
 
   return (
-    <section className="py-20 bg-[#37003c]">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <h3 className="text-3xl sm:text-4xl font-black text-white mb-12">
+    <section className="py-8 sm:py-12 md:py-16 lg:py-20 bg-[#37003c]">
+      <div className="max-w-7xl mx-auto px-3 sm:px-4 md:px-6 lg:px-8">
+        <h3 className="text-2xl sm:text-3xl md:text-4xl font-black text-white mb-6 sm:mb-8 md:mb-12">
           Próximos Partidos - GW{nextGameweek}
         </h3>
 
-        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5 md:gap-6">
           {matches.map((match, idx) => (
             <div
               key={idx}
-              className="p-6 rounded-2xl bg-white/5 border border-white/10 hover:border-[#ff2882]/50 transition-all hover:scale-105"
+              className="p-4 sm:p-5 md:p-6 rounded-xl sm:rounded-2xl bg-white/5 border border-white/10 hover:border-[#ff2882]/50 transition-all hover:scale-105"
             >
             
               
               {/* Equipos */}
-              <div className="flex items-center justify-between mb-6">
+              <div className="flex items-center justify-between mb-4 sm:mb-5 md:mb-6">
                 <div className="text-center flex-1">
                   {/* Avatar - Escudo o iniciales del equipo */}
                   {match.team1Logo ? (
-                    <div className="w-14 h-14 rounded-full mx-auto mb-2 overflow-hidden bg-white border-2 border-white/20">
+                    <div className="w-12 h-12 sm:w-14 sm:h-14 md:w-16 md:h-16 rounded-full mx-auto mb-1.5 sm:mb-2 overflow-hidden bg-white border border-white/20 sm:border-2">
                       <Image
                         src={`/assets/${match.team1Logo}`}
                         alt={match.team1Name}
-                        width={56}
-                        height={56}
+                        width={64}
+                        height={64}
                         className="object-cover w-full h-full"
                       />
                     </div>
                   ) : (
-                    <div className="w-14 h-14 rounded-full bg-gradient-to-br from-[#ff2882] to-[#37003c] mx-auto mb-2 flex items-center justify-center text-white font-bold text-xs">
+                    <div className="w-12 h-12 sm:w-14 sm:h-14 md:w-16 md:h-16 rounded-full bg-gradient-to-br from-[#ff2882] to-[#37003c] mx-auto mb-1.5 sm:mb-2 flex items-center justify-center text-white font-bold text-[0.625rem] sm:text-xs">
                       {match.team1Name.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase()}
                     </div>
                   )}
-                  <div className="text-white font-semibold text-sm mb-1">{match.team1Name}</div>
-                  <div className="text-gray-500 text-xs">{match.team1Manager}</div>
+                  <div className="text-white font-semibold text-xs sm:text-sm mb-0.5 sm:mb-1 truncate px-1">{match.team1Name}</div>
+                  <div className="text-gray-500 text-[0.625rem] sm:text-xs truncate px-1">{match.team1Manager}</div>
                 </div>
                 
-                <div className="text-gray-600 font-black text-xl px-4">VS</div>
+                <div className="text-gray-600 font-black text-base sm:text-lg md:text-xl px-2 sm:px-3 md:px-4">VS</div>
                 
                 <div className="text-center flex-1">
                   {/* Avatar - Escudo o iniciales del equipo */}
                   {match.team2Logo ? (
-                    <div className="w-14 h-14 rounded-full mx-auto mb-2 overflow-hidden bg-white border-2 border-white/20">
+                    <div className="w-12 h-12 sm:w-14 sm:h-14 md:w-16 md:h-16 rounded-full mx-auto mb-1.5 sm:mb-2 overflow-hidden bg-white border border-white/20 sm:border-2">
                       <Image
                         src={`/assets/${match.team2Logo}`}
                         alt={match.team2Name}
-                        width={56}
-                        height={56}
+                        width={64}
+                        height={64}
                         className="object-cover w-full h-full"
                       />
                     </div>
                   ) : (
-                    <div className="w-14 h-14 rounded-full bg-gradient-to-br from-[#37003c] to-[#00ff87] mx-auto mb-2 flex items-center justify-center text-white font-bold text-xs">
+                    <div className="w-12 h-12 sm:w-14 sm:h-14 md:w-16 md:h-16 rounded-full bg-gradient-to-br from-[#37003c] to-[#00ff87] mx-auto mb-1.5 sm:mb-2 flex items-center justify-center text-white font-bold text-[0.625rem] sm:text-xs">
                       {match.team2Name.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase()}
                     </div>
                   )}
-                  <div className="text-white font-semibold text-sm mb-1">{match.team2Name}</div>
-                  <div className="text-gray-500 text-xs">{match.team2Manager}</div>
+                  <div className="text-white font-semibold text-xs sm:text-sm mb-0.5 sm:mb-1 truncate px-1">{match.team2Name}</div>
+                  <div className="text-gray-500 text-[0.625rem] sm:text-xs truncate px-1">{match.team2Manager}</div>
                 </div>
               </div>
 
               {/* Radio buttons para predicción */}
-              <div className="mb-4">
+              <div className="mb-3 sm:mb-4">
           
-                <div className="grid grid-cols-3 gap-2">
+                <div className="grid grid-cols-3 gap-1.5 sm:gap-2">
                   {/* Local */}
                   <button
                     type="button"
                     onClick={() => handlePredictionChange(idx, 'home')}
-                    className={`py-3 px-3 rounded-lg transition-all ${
+                    className={`py-2 sm:py-2.5 md:py-3 px-2 sm:px-3 rounded-md sm:rounded-lg transition-all ${
                       bets[idx]?.prediction === 'home'
                         ? 'bg-[#ff2882] text-white border-2 border-[#ff2882]'
                         : 'bg-white/5 text-gray-400 hover:bg-white/10 border-2 border-transparent'
                     }`}
                   >
-                    <div className="font-semibold text-sm">Local</div>
-                    <div className={`text-xs mt-1 ${
+                    <div className="font-semibold text-xs sm:text-sm">Local</div>
+                    <div className={`text-[0.625rem] sm:text-xs mt-0.5 sm:mt-1 ${
                       bets[idx]?.prediction === 'home' ? 'text-white' : 'text-[#00ff87]'
                     }`}>
                       {match.odds.home.toFixed(2)}x
@@ -428,14 +428,14 @@ export default function UpcomingMatches() {
                   <button
                     type="button"
                     onClick={() => handlePredictionChange(idx, 'draw')}
-                    className={`py-3 px-3 rounded-lg transition-all ${
+                    className={`py-2 sm:py-2.5 md:py-3 px-2 sm:px-3 rounded-md sm:rounded-lg transition-all ${
                       bets[idx]?.prediction === 'draw'
                         ? 'bg-[#00ff87] text-black border-2 border-[#00ff87]'
                         : 'bg-white/5 text-gray-400 hover:bg-white/10 border-2 border-transparent'
                     }`}
                   >
-                    <div className="font-semibold text-sm">Empate</div>
-                    <div className={`text-xs mt-1 ${
+                    <div className="font-semibold text-xs sm:text-sm">Empate</div>
+                    <div className={`text-[0.625rem] sm:text-xs mt-0.5 sm:mt-1 ${
                       bets[idx]?.prediction === 'draw' ? 'text-black' : 'text-[#00ff87]'
                     }`}>
                       {match.odds.draw.toFixed(2)}x
@@ -446,14 +446,14 @@ export default function UpcomingMatches() {
                   <button
                     type="button"
                     onClick={() => handlePredictionChange(idx, 'away')}
-                    className={`py-3 px-3 rounded-lg transition-all ${
+                    className={`py-2 sm:py-2.5 md:py-3 px-2 sm:px-3 rounded-md sm:rounded-lg transition-all ${
                       bets[idx]?.prediction === 'away'
                         ? 'bg-[#37003c] text-white border-2 border-[#37003c]'
                         : 'bg-white/5 text-gray-400 hover:bg-white/10 border-2 border-transparent'
                     }`}
                   >
-                    <div className="font-semibold text-sm">Visitante</div>
-                    <div className={`text-xs mt-1 ${
+                    <div className="font-semibold text-xs sm:text-sm">Visitante</div>
+                    <div className={`text-[0.625rem] sm:text-xs mt-0.5 sm:mt-1 ${
                       bets[idx]?.prediction === 'away' ? 'text-white' : 'text-[#00ff87]'
                     }`}>
                       {match.odds.away.toFixed(2)}x
@@ -463,24 +463,24 @@ export default function UpcomingMatches() {
               </div>
 
               {/* Input de monto */}
-              <div className="mb-4">
-                <label className="block text-xs text-gray-400 uppercase tracking-wider mb-2">
+              <div className="mb-3 sm:mb-4">
+                <label className="block text-[0.625rem] sm:text-xs text-gray-400 uppercase tracking-wider mb-1.5 sm:mb-2">
                   Monto a apostar
                 </label>
                 <div className="relative">
-                  <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 font-bold">$</span>
+                  <span className="absolute left-3 sm:left-4 top-1/2 -translate-y-1/2 text-gray-400 font-bold text-sm sm:text-base">$</span>
                   <input
                     type="text"
                     value={bets[idx]?.amount || ''}
                     onChange={(e) => handleAmountChange(idx, e.target.value)}
                     placeholder="0"
-                    className="w-full pl-8 pr-4 py-2 rounded-lg bg-white/5 border border-white/10 text-white placeholder-gray-500 focus:outline-none focus:border-[#ff2882] transition-colors"
+                    className="w-full pl-7 sm:pl-8 pr-3 sm:pr-4 py-1.5 sm:py-2 rounded-md sm:rounded-lg bg-white/5 border border-white/10 text-white placeholder-gray-500 focus:outline-none focus:border-[#ff2882] transition-colors text-sm sm:text-base"
                   />
                 </div>
                 
                 {/* Mostrar ganancia potencial */}
                 {bets[idx]?.prediction && bets[idx]?.amount && parseFloat(bets[idx].amount) > 0 && (
-                  <div className="mt-2 text-xs text-gray-400">
+                  <div className="mt-1.5 sm:mt-2 text-[0.625rem] sm:text-xs text-gray-400">
                     Ganancia potencial: 
                     <span className="text-[#00ff87] font-bold ml-1">
                       ${(parseFloat(bets[idx].amount) * match.odds[bets[idx].prediction!]).toFixed(2)}
@@ -495,20 +495,20 @@ export default function UpcomingMatches() {
 
         {/* Botón para confirmar TODAS las apuestas */}
         {user && (
-          <div className="mt-12 max-w-2xl mx-auto">
-            <div className="bg-white/5 border border-white/10 rounded-2xl p-6">
-              <div className="flex items-center justify-between mb-4">
+          <div className="mt-6 sm:mt-8 md:mt-12 max-w-2xl mx-auto">
+            <div className="bg-white/5 border border-white/10 rounded-xl sm:rounded-2xl p-4 sm:p-5 md:p-6">
+              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-4 sm:mb-5 gap-3 sm:gap-0">
                 <div>
-                  <h4 className="text-lg font-bold text-white mb-1">
+                  <h4 className="text-base sm:text-lg font-bold text-white mb-1">
                     Resumen de apuestas
                   </h4>
-                  <p className="text-sm text-gray-400">
+                  <p className="text-xs sm:text-sm text-gray-400">
                     {Object.values(bets).filter(b => b?.prediction && b?.amount).length} apuesta(s) seleccionada(s)
                   </p>
                 </div>
-                <div className="text-right">
-                  <div className="text-sm text-gray-400">Total a apostar</div>
-                  <div className="text-2xl font-black text-[#ff2882]">
+                <div className="text-left sm:text-right">
+                  <div className="text-xs sm:text-sm text-gray-400">Total a apostar</div>
+                  <div className="text-xl sm:text-2xl font-black text-[#ff2882]">
                     ${Object.values(bets)
                       .filter(b => b?.amount)
                       .reduce((sum, b) => sum + parseFloat(b.amount || '0'), 0)
@@ -520,7 +520,7 @@ export default function UpcomingMatches() {
               <button
                 onClick={handleConfirmAllBets}
                 disabled={Object.values(bets).filter(b => b?.prediction && b?.amount).length === 0}
-                className="w-full py-4 rounded-xl gradient-fpl font-bold text-lg hover:opacity-90 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed shadow-xl shadow-[#00ff87]/20"
+                className="w-full py-3 sm:py-4 rounded-lg sm:rounded-xl gradient-fpl font-bold text-base sm:text-lg hover:opacity-90 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed shadow-xl shadow-[#00ff87]/20"
               >
                 Confirmar Apuestas
               </button>

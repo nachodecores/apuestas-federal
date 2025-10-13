@@ -213,7 +213,7 @@ export default function Header() {
             {isHome ? (
               <h1 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl text-white">
                 <span className="font-black">Bet</span>
-                <span className="font-normal"> Federal</span>
+                <span className="font-normal">Federal</span>
               </h1>
             ) : (
               <h1 className="text-base sm:text-lg md:text-xl lg:text-2xl text-white font-semibold uppercase tracking-wide">
