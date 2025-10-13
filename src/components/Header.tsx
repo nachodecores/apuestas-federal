@@ -351,7 +351,11 @@ export default function Header() {
                 <div 
                   className="absolute right-0 mt-2 w-[calc(100vw-2rem)] sm:w-72 md:w-80 max-w-sm bg-white border border-gray-200 rounded-xl shadow-2xl overflow-hidden z-[9999]"
                   style={{ display: 'block' }}
-                  ref={(el) => el && console.log('Dropdown rendered:', el)}
+                  ref={(el) => {
+                    if (el) {
+                      console.log('Dropdown rendered:', el);
+                    }
+                  }}
                 >
                   
                   <div className="max-h-[70vh] sm:max-h-96 overflow-y-auto">
