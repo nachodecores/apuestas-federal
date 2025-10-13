@@ -18,7 +18,7 @@ export default function RegisterPage() {
 
   // Lista de emails permitidos (los 10 de la liga)
   // TODO: Esto idealmente vendría de la base de datos o variables de entorno
-  const allowedEmails = [
+  const allowedEmails: string[] = [
     // Por ahora dejamos esto vacío para permitir cualquier email
     // Más adelante configuramos la lista real
   ];
