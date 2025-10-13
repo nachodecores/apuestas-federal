@@ -62,24 +62,26 @@ export default function Hero() {
   return (
     <section className="relative overflow-hidden w-full" style={{ backgroundColor: 'rgb(55, 0, 60)' }}>
       
-      <div className="relative w-full px-3 sm:px-4 md:px-6 lg:px-8 pt-8 sm:pt-10 md:pt-12 lg:pt-16 pb-8 sm:pb-10 md:pb-12 lg:pb-16 rounded-b-xl sm:rounded-b-2xl md:rounded-b-3xl">
-        <div className="text-center">
-          {/* Gameweek Actual - Título */}
-          <div 
-            className="inline-block px-6 sm:px-8 md:px-12 py-3 sm:py-4 md:py-5 rounded-xl sm:rounded-2xl md:rounded-3xl mb-6 sm:mb-8"
-            style={{ background: 'linear-gradient(to right, rgb(0, 255, 135), rgb(2, 239, 255))' }}
-          >
-            <h2 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-black mb-0" style={{ color: '#37003c' }}>
-              {loading ? (
-                <span className="animate-pulse">Gameweek ...</span>
-              ) : (
-                `Gameweek ${currentGameweek}`
-              )}
-            </h2>
-          </div>
+      <div className="relative max-w-7xl mx-auto rounded-xl sm:rounded-2xl md:rounded-3xl overflow-hidden">
+        {/* Gameweek Actual - Título con gradiente en la parte superior */}
+        <div 
+          className="w-full px-6 sm:px-8 md:px-12 py-3 sm:py-4 md:py-5 rounded-b-xl sm:rounded-b-2xl md:rounded-b-3xl text-center"
+          style={{ background: 'linear-gradient(to right, rgb(0, 255, 135), rgb(2, 239, 255))' }}
+        >
+          <h2 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-black mb-0" style={{ color: '#37003c' }}>
+            {loading ? (
+              <span className="animate-pulse">Gameweek ...</span>
+            ) : (
+              `Gameweek ${currentGameweek}`
+            )}
+          </h2>
+        </div>
 
-          {/* Stats */}
-          <div className="grid grid-cols-3 gap-3 sm:gap-6 md:gap-8 max-w-3xl mx-auto">
+        {/* Contenido con stats */}
+        <div className="px-3 sm:px-4 md:px-6 lg:px-8 py-8 sm:py-10 md:py-12 lg:py-16">
+          <div className="text-center">
+            {/* Stats */}
+            <div className="grid grid-cols-3 gap-3 sm:gap-6 md:gap-8 max-w-3xl mx-auto">
             {/* Apuestas Activas */}
             <div className="bg-white/10 rounded-lg sm:rounded-xl md:rounded-2xl p-3 sm:p-4 md:p-6 border border-white/20">
               <div className="text-2xl sm:text-3xl md:text-4xl font-black text-[#ff2882] mb-1 sm:mb-2">
@@ -108,6 +110,7 @@ export default function Hero() {
               <div className="text-[0.625rem] sm:text-xs md:text-sm text-gray-300 uppercase tracking-wider">
                 Pozo Total
               </div>
+            </div>
             </div>
           </div>
         </div>
