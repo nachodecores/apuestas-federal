@@ -211,9 +211,9 @@ export default function Header() {
               className="h-7 sm:h-9 md:h-10 w-auto"
             />
             {isHome ? (
-              <h1 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl text-white">
+              <h1 className="text-lg sm:text-xl md:text-2xl lg:text-3xl text-white">
                 <span className="font-black">Bet</span>
-                <span className="font-normal">Federal</span>
+                <span className="font-normal"> Federal</span>
               </h1>
             ) : (
               <h1 className="text-base sm:text-lg md:text-xl lg:text-2xl text-white font-semibold uppercase tracking-wide">
@@ -248,6 +248,13 @@ export default function Header() {
                       color: 'rgb(55, 0, 60)' 
                     }}
                   >
+                    {/* Texto a la izquierda, alineado a la derecha */}
+                    <div className="flex flex-col text-right">
+                      <span className="font-semibold text-[0.625rem] sm:text-xs leading-tight">{userName}</span>
+                      <span className="text-[0.625rem] sm:text-xs text-gray-600 leading-tight font-light">{userTeamName || 'Dashboard'}</span>
+                    </div>
+                    
+                    {/* Avatar a la derecha */}
                     {userTeamLogo ? (
                       <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-full overflow-hidden bg-white border border-white/20 flex-shrink-0">
                         <Image
@@ -263,10 +270,6 @@ export default function Header() {
                         {userTeamName.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase()}
                       </div>
                     )}
-                    <div className="hidden sm:flex sm:flex-col">
-                      <span className="font-semibold text-xs sm:text-sm leading-tight">{userTeamName || 'Dashboard'}</span>
-                      <span className="text-[0.625rem] sm:text-xs text-gray-600 leading-tight">{userName}</span>
-                    </div>
                   </Link>
                 </div>
               )}
