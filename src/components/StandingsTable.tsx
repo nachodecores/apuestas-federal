@@ -169,8 +169,8 @@ export default function StandingsTable() {
             <table className="w-full">
               <thead>
                 <tr className="border-b border-gray-200 text-left bg-gray-50">
-                  <th className="px-2 py-2 sm:px-3 sm:py-3 md:px-4 md:py-3 lg:px-6 lg:py-4 text-[0.625rem] sm:text-xs font-light text-gray-600 uppercase tracking-wider">
-                    Pos
+                  <th className="px-2 py-2 sm:px-3 sm:py-3 md:px-4 md:py-3 lg:px-6 lg:py-4">
+                    {/* Columna vacía para posición sin header */}
                   </th>
                   <th className="px-2 py-2 sm:px-3 sm:py-3 md:px-4 md:py-3 lg:px-6 lg:py-4 text-[0.625rem] sm:text-xs font-light text-gray-600 uppercase tracking-wider">
                     Jugador
@@ -185,10 +185,10 @@ export default function StandingsTable() {
                     Racha
                   </th>
                   <th className="px-2 py-2 sm:px-3 sm:py-3 md:px-4 md:py-3 lg:px-6 lg:py-4 text-[0.625rem] sm:text-xs font-light text-gray-600 uppercase tracking-wider text-right">
-                    Pts FPL
+                    +
                   </th>
-                  <th className="hidden sm:table-cell px-3 py-3 md:px-4 md:py-3 lg:px-6 lg:py-4 text-[0.625rem] sm:text-xs font-light text-gray-600 uppercase tracking-wider text-right">
-                    Pts H2H
+                  <th className="px-2 py-2 sm:px-3 sm:py-3 md:px-4 md:py-3 lg:px-6 lg:py-4 text-[0.625rem] sm:text-xs font-light text-gray-600 uppercase tracking-wider text-right">
+                    Pts
                   </th>
                 </tr>
               </thead>
@@ -245,14 +245,14 @@ export default function StandingsTable() {
                       </div>
                     </td>
                     
-                    {/* Puntos FPL */}
+                    {/* Puntos FPL (+) - VISIBLE en mobile */}
                     <td className="px-2 py-2 sm:px-3 sm:py-3 md:px-4 md:py-3 lg:px-6 lg:py-4 text-right">
-                      <span className="text-[#37003c] font-light text-sm sm:text-base">{player.fplPoints}</span>
+                      <span className="text-[#37003c] font-light text-xs sm:text-sm md:text-base">{player.fplPoints}</span>
                     </td>
                     
-                    {/* Puntos H2H - oculto en mobile */}
-                    <td className="hidden sm:table-cell px-3 py-3 md:px-4 md:py-3 lg:px-6 lg:py-4 text-right">
-                      <span className="text-gray-700 font-light text-sm sm:text-base">{player.h2hPoints}</span>
+                    {/* Puntos H2H (Pts) - VISIBLE en mobile */}
+                    <td className="px-2 py-2 sm:px-3 sm:py-3 md:px-4 md:py-3 lg:px-6 lg:py-4 text-right">
+                      <span className="text-gray-700 font-light text-xs sm:text-sm md:text-base">{player.h2hPoints}</span>
                     </td>
                   </tr>
                 ))}
