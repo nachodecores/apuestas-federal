@@ -242,14 +242,14 @@ export default function Header() {
                   {/* Link al dashboard con avatar */}
                   <Link
                     href="/dashboard"
-                    className="px-2 py-1.5 sm:px-3 sm:py-2 rounded-md text-xs sm:text-sm font-semibold hover:opacity-90 transition-opacity flex items-center gap-1.5"
+                    className="px-2 py-1.5 sm:px-3 sm:py-2 rounded-md hover:opacity-90 transition-opacity flex items-center gap-1.5 sm:gap-2"
                     style={{ 
                       backgroundColor: 'rgba(255, 255, 255, 0.75)', 
                       color: 'rgb(55, 0, 60)' 
                     }}
                   >
                     {userTeamLogo ? (
-                      <div className="w-6 h-6 sm:w-7 sm:h-7 rounded-full overflow-hidden bg-white border border-white/20 flex-shrink-0">
+                      <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-full overflow-hidden bg-white border border-white/20 flex-shrink-0">
                         <Image
                           src={`/assets/${userTeamLogo}`}
                           alt={userTeamName}
@@ -259,11 +259,14 @@ export default function Header() {
                         />
                       </div>
                     ) : (
-                      <div className="w-6 h-6 sm:w-7 sm:h-7 rounded-full bg-gradient-to-br from-[#ff2882] to-[#37003c] flex items-center justify-center text-white font-bold text-[0.625rem] sm:text-xs flex-shrink-0">
+                      <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-gradient-to-br from-[#ff2882] to-[#37003c] flex items-center justify-center text-white font-bold text-[0.625rem] sm:text-xs flex-shrink-0">
                         {userTeamName.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase()}
                       </div>
                     )}
-                    <span className="hidden sm:inline">{userName || 'Dashboard'}</span>
+                    <div className="hidden sm:flex sm:flex-col">
+                      <span className="font-semibold text-xs sm:text-sm leading-tight">{userTeamName || 'Dashboard'}</span>
+                      <span className="text-[0.625rem] sm:text-xs text-gray-600 leading-tight">{userName}</span>
+                    </div>
                   </Link>
                 </div>
               )}
