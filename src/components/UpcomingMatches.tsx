@@ -226,19 +226,38 @@ export default function UpcomingMatches() {
     });
   }
 
-  // Función para actualizar el monto de la apuesta
-  function handleAmountChange(matchIndex: number, amount: string) {
-    // Solo permitir números y punto decimal
-    if (amount && !/^\d*\.?\d*$/.test(amount)) return;
-    
-    setBets(prev => ({
-      ...prev,
-      [matchIndex]: {
-        ...prev[matchIndex],
-        prediction: prev[matchIndex]?.prediction || null,
-        amount
-      }
-    }));
+  // Función para incrementar el monto ($10)
+  function handleIncrementAmount(matchIndex: number) {
+    setBets(prev => {
+      const currentAmount = parseFloat(prev[matchIndex]?.amount || '0');
+      const newAmount = currentAmount + 10;
+      
+      return {
+        ...prev,
+        [matchIndex]: {
+          ...prev[matchIndex],
+          prediction: prev[matchIndex]?.prediction || null,
+          amount: newAmount.toString()
+        }
+      };
+    });
+  }
+
+  // Función para decrementar el monto ($10)
+  function handleDecrementAmount(matchIndex: number) {
+    setBets(prev => {
+      const currentAmount = parseFloat(prev[matchIndex]?.amount || '0');
+      const newAmount = Math.max(0, currentAmount - 10); // No permitir negativos
+      
+      return {
+        ...prev,
+        [matchIndex]: {
+          ...prev[matchIndex],
+          prediction: prev[matchIndex]?.prediction || null,
+          amount: newAmount > 0 ? newAmount.toString() : ''
+        }
+      };
+    });
   }
 
   // Calcular balance disponible (descontando lo ya apostado)
@@ -500,27 +519,38 @@ export default function UpcomingMatches() {
                 </div>
               </div>
 
-              {/* Input de monto */}
+              {/* Input de monto con botones + y - */}
               <div className="mb-3 sm:mb-4">
-                <div className="flex items-center gap-2 sm:gap-3">
-                  <label className="text-[0.625rem] sm:text-xs text-gray-700 uppercase tracking-wider whitespace-nowrap">
-                    Monto
-                  </label>
-                  <div className="relative flex-1">
-                    <span className="absolute left-3 sm:left-4 top-1/2 -translate-y-1/2 text-gray-600 font-bold text-sm sm:text-base">$</span>
-                    <input
-                      type="text"
-                      value={bets[idx]?.amount || ''}
-                      onChange={(e) => handleAmountChange(idx, e.target.value)}
-                      placeholder="0"
-                      className="w-full pl-7 sm:pl-8 pr-3 sm:pr-4 py-1.5 sm:py-2 rounded-md sm:rounded-lg bg-white border border-gray-200 text-gray-900 placeholder-gray-400 focus:outline-none focus:border-[#ff2882] transition-colors text-sm sm:text-base"
-                    />
+                <div className="flex items-center gap-2">
+                  {/* Botón - */}
+                  <button
+                    type="button"
+                    onClick={() => handleDecrementAmount(idx)}
+                    className="w-8 h-8 sm:w-9 sm:h-9 md:w-10 md:h-10 rounded-md sm:rounded-lg bg-white border border-gray-200 text-gray-700 font-bold text-lg hover:bg-gray-50 transition-colors flex items-center justify-center flex-shrink-0"
+                  >
+                    −
+                  </button>
+                  
+                  {/* Contador central */}
+                  <div className="flex-1 text-center py-1.5 sm:py-2 rounded-md sm:rounded-lg bg-white border border-gray-200">
+                    <div className="text-sm sm:text-base md:text-lg font-bold text-gray-900">
+                      ${parseFloat(bets[idx]?.amount || '0').toFixed(0)}
+                    </div>
                   </div>
+                  
+                  {/* Botón + */}
+                  <button
+                    type="button"
+                    onClick={() => handleIncrementAmount(idx)}
+                    className="w-8 h-8 sm:w-9 sm:h-9 md:w-10 md:h-10 rounded-md sm:rounded-lg bg-white border border-gray-200 text-gray-700 font-bold text-lg hover:bg-gray-50 transition-colors flex items-center justify-center flex-shrink-0"
+                  >
+                    +
+                  </button>
                 </div>
                 
                 {/* Mostrar ganancia potencial */}
                 {bets[idx]?.prediction && bets[idx]?.amount && parseFloat(bets[idx].amount) > 0 && (
-                  <div className="mt-1.5 sm:mt-2 text-[0.625rem] sm:text-xs text-gray-600">
+                  <div className="mt-1.5 sm:mt-2 text-[0.625rem] sm:text-xs text-gray-600 text-center">
                     Ganancia potencial: 
                     <span className="text-[#00a85a] font-bold ml-1">
                       ${(parseFloat(bets[idx].amount) * match.odds[bets[idx].prediction!]).toFixed(2)}
