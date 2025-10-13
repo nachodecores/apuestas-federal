@@ -35,15 +35,17 @@ export default function ClaimPage() {
 
         if (error) throw error;
         setProfiles(data || []);
-      } catch (error: any) {
-        setError(error.message);
+      } catch (error) {
+        const errorMessage = error instanceof Error ? error.message : 'Error al cargar perfiles';
+        setError(errorMessage);
       } finally {
         setLoading(false);
       }
     }
 
     loadProfiles();
-  }, [supabase]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   // Reclamar cuenta
   async function handleClaim(e: React.FormEvent) {
@@ -107,8 +109,9 @@ export default function ClaimPage() {
       router.push("/dashboard");
       router.refresh();
       
-    } catch (error: any) {
-      setError(error.message || "Error al reclamar la cuenta");
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : "Error al reclamar la cuenta";
+      setError(errorMessage);
     } finally {
       setClaiming(false);
     }

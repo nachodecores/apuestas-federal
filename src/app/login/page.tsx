@@ -37,15 +37,17 @@ export default function LoginPage() {
 
         if (error) throw error;
         setProfiles(data || []);
-      } catch (error: any) {
-        setError(error.message);
+      } catch (error) {
+        const errorMessage = error instanceof Error ? error.message : 'Error al cargar perfiles';
+        setError(errorMessage);
       } finally {
         setLoading(false);
       }
     }
 
     loadProfiles();
-  }, [supabase]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   // Función para login
   async function handleLogin(e: React.FormEvent) {
@@ -67,7 +69,7 @@ export default function LoginPage() {
       // Si el login es exitoso, redirigir al dashboard
       router.push("/dashboard");
       router.refresh();
-    } catch (error: any) {
+    } catch {
       setError("Contraseña incorrecta");
     } finally {
       setLoggingIn(false);

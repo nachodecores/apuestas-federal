@@ -4,19 +4,6 @@ import Link from "next/link";
 import Image from "next/image";
 import Header from "@/components/Header";
 
-interface Bet {
-  id: string;
-  gameweek: number;
-  match_league_entry_1: number;
-  match_league_entry_2: number;
-  prediction: 'home' | 'draw' | 'away';
-  amount: number;
-  odds: number;
-  potential_win: number;
-  status: 'pending' | 'won' | 'lost';
-  created_at: string;
-}
-
 export default async function DashboardPage() {
   const supabase = await createClient();
 
@@ -264,8 +251,6 @@ export default async function DashboardPage() {
                       .slice(0, 10)
                       .map((bet) => {
                         const isWon = bet.status === 'won';
-                        const team1 = teamMap.get(bet.match_league_entry_1);
-                        const team2 = teamMap.get(bet.match_league_entry_2);
                         
                         return (
                           <tr key={bet.id} className="hover:bg-white/5 transition-colors">
