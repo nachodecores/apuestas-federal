@@ -178,8 +178,8 @@ export default function StandingsTable() {
                   <th className="hidden lg:table-cell px-6 py-4 text-xs font-semibold text-gray-600 uppercase tracking-wider text-right">
                     Récord
                   </th>
-                  <th className="hidden sm:table-cell px-3 py-3 md:px-4 md:py-3 lg:px-6 lg:py-4 text-xs font-semibold text-gray-600 uppercase tracking-wider text-center">
-                    Últimos 5
+                  <th className="px-2 py-2 sm:px-3 sm:py-3 md:px-4 md:py-3 lg:px-6 lg:py-4 text-[0.625rem] sm:text-xs font-semibold text-gray-600 uppercase tracking-wider text-center">
+                    Racha
                   </th>
                   <th className="px-2 py-2 sm:px-3 sm:py-3 md:px-4 md:py-3 lg:px-6 lg:py-4 text-[0.625rem] sm:text-xs font-semibold text-gray-600 uppercase tracking-wider text-right">
                     Pts
@@ -197,12 +197,7 @@ export default function StandingsTable() {
                   >
                     {/* Posición */}
                     <td className="px-2 py-2 sm:px-3 sm:py-3 md:px-4 md:py-3 lg:px-6 lg:py-4">
-                      <div className={`w-6 h-6 sm:w-7 sm:h-7 md:w-8 md:h-8 rounded-md sm:rounded-lg flex items-center justify-center font-bold text-xs sm:text-sm ${
-                        idx === 0 ? 'bg-[#00ff87] text-black' : 
-                        idx === 1 ? 'bg-[#ff2882] text-white' :
-                        idx === 2 ? 'bg-[#37003c] text-white' :
-                        'bg-gray-200 text-gray-700'
-                      }`}>
+                      <div className="w-6 h-6 sm:w-7 sm:h-7 md:w-8 md:h-8 rounded-md sm:rounded-lg flex items-center justify-center font-bold text-xs sm:text-sm bg-gray-200 text-gray-700">
                         {player.position}
                       </div>
                     </td>
@@ -230,13 +225,13 @@ export default function StandingsTable() {
                       <span className="text-gray-700 font-mono text-sm">{player.record}</span>
                     </td>
                     
-                    {/* Últimos 5 - oculto en mobile */}
-                    <td className="hidden sm:table-cell px-3 py-3 md:px-4 md:py-3 lg:px-6 lg:py-4">
+                    {/* Racha (Últimos 5) - VISIBLE en mobile */}
+                    <td className="px-2 py-2 sm:px-3 sm:py-3 md:px-4 md:py-3 lg:px-6 lg:py-4">
                       <div className="flex gap-0.5 sm:gap-1 justify-center">
                         {[...player.recentForm].reverse().map((result, formIdx) => (
                           <div
                             key={formIdx}
-                            className={`w-4 h-4 sm:w-5 sm:h-5 md:w-6 md:h-6 rounded-full ${
+                            className={`w-3 h-3 sm:w-4 sm:h-4 md:w-5 md:h-5 lg:w-6 lg:h-6 rounded-full ${
                               result === 'win' ? 'bg-green-500' :
                               result === 'draw' ? 'bg-gray-400' :
                               'bg-red-500'
