@@ -4,6 +4,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { useEffect, useState, useRef } from "react";
 import { createClient } from "@/lib/supabase/client";
+import { createClient as createSupabaseClient } from '@supabase/supabase-js';
 import { useRouter, usePathname } from "next/navigation";
 import type { User } from "@supabase/supabase-js";
 
@@ -30,6 +31,12 @@ export default function Header() {
   const [loggingIn, setLoggingIn] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
   const supabase = createClient();
+  
+  // Cliente público para consultas sin autenticación
+  const supabasePublic = createSupabaseClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+  );
 
   useEffect(() => {
     // Obtener usuario actual, nombre y participantes
@@ -71,7 +78,7 @@ export default function Header() {
       
       // Obtener todos los participantes con sus logos y nombres de equipo
       try {
-        const { data: allProfiles } = await supabase
+        const { data: allProfiles } = await supabasePublic
           .from('profiles')
           .select('display_name, league_entry_id, team_logo, fpl_entry_id')
           .order('display_name');
