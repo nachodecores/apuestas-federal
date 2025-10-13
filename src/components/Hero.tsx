@@ -62,7 +62,16 @@ export default function Hero() {
   return (
     <section className="relative overflow-hidden w-full bg-[#ebe5eb] py-8 sm:py-12 md:py-16 lg:py-20">
       
-      <div className="relative w-full overflow-hidden" style={{ backgroundColor: 'rgb(55, 0, 60)' }}>
+      <div 
+        className="relative w-full overflow-hidden" 
+        style={{ 
+          backgroundColor: 'rgb(55, 0, 60)',
+          backgroundImage: 'url(/assets/pattern-1.png)',
+          backgroundPosition: 'left center',
+          backgroundRepeat: 'no-repeat',
+          backgroundSize: 'auto 100%'
+        }}
+      >
         <div className="relative flex justify-center">
           {/* Gameweek Actual - Título con gradiente en la parte superior */}
           <div 
