@@ -126,6 +126,7 @@ export default function UpcomingMatches() {
     });
     
     return () => subscription.unsubscribe();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // useEffect 2: Obtener partidos de la API
@@ -202,6 +203,7 @@ export default function UpcomingMatches() {
     }
     
     fetchMatches();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // Función para actualizar la predicción de un partido (toggle: clicar de nuevo des-selecciona)

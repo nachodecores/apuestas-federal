@@ -35,7 +35,7 @@ export default function RegisterPage() {
       }
 
       // Registrar usuario en Supabase
-      const { data, error } = await supabase.auth.signUp({
+      const { error } = await supabase.auth.signUp({
         email,
         password,
         options: {
@@ -50,8 +50,9 @@ export default function RegisterPage() {
       // Si el registro es exitoso
       alert("¡Registro exitoso! Revisá tu email para confirmar tu cuenta.");
       router.push("/login");
-    } catch (error: any) {
-      setError(error.message || "Error al registrarse");
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : "Error al registrarse";
+      setError(errorMessage);
     } finally {
       setLoading(false);
     }
@@ -71,8 +72,9 @@ export default function RegisterPage() {
       });
 
       if (error) throw error;
-    } catch (error: any) {
-      setError(error.message || "Error al registrarse con Google");
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : "Error al registrarse con Google";
+      setError(errorMessage);
       setLoading(false);
     }
   }

@@ -57,7 +57,7 @@ export default function Header() {
           const leagueResponse = await fetch('/api/league');
           const leagueData = await leagueResponse.json();
           const entry = leagueData.league_entries?.find(
-            (e: any) => e.id === profile.league_entry_id
+            (e: { id: number; entry_name: string }) => e.id === profile.league_entry_id
           );
           setUserTeamName(entry?.entry_name || '');
         }
@@ -83,7 +83,7 @@ export default function Header() {
           
           const participantsData: Participant[] = allProfiles.map(profile => {
             const entry = leagueData.league_entries?.find(
-              (e: any) => e.id === profile.league_entry_id
+              (e: { id: number; entry_name: string }) => e.id === profile.league_entry_id
             );
             
             return {
@@ -147,7 +147,7 @@ export default function Header() {
           const leagueResponse = await fetch('/api/league');
           const leagueData = await leagueResponse.json();
           const entry = leagueData.league_entries?.find(
-            (e: any) => e.id === profile.league_entry_id
+            (e: { id: number; entry_name: string }) => e.id === profile.league_entry_id
           );
           setUserTeamName(entry?.entry_name || '');
         }
@@ -155,7 +155,8 @@ export default function Header() {
     });
 
     return () => subscription.unsubscribe();
-  }, [supabase]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   // Cerrar dropdown al hacer click afuera
   useEffect(() => {
@@ -189,8 +190,9 @@ export default function Header() {
       setShowDropdown(false);
       // NO redirigimos al dashboard, el usuario se queda en la página actual
       // El Header se actualiza automáticamente mostrando el botón "Dashboard"
-    } catch (error: any) {
-      alert(`Error: ${error.message}\n\nEste usuario aún no está creado en el sistema.`);
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Error desconocido';
+      alert(`Error: ${errorMessage}\n\nEste usuario aún no está creado en el sistema.`);
     } finally {
       setLoggingIn(false);
     }
