@@ -214,9 +214,9 @@ export default function Header() {
     : 'rgba(0, 0, 0, 0.5)';
 
   return (
-    <nav className="border-b border-white/10 sticky top-0 z-50 backdrop-blur-sm" style={{ background: headerBg }}>
+    <nav className="border-b border-white/10 sticky top-0 z-50 backdrop-blur-sm overflow-visible" style={{ background: headerBg }}>
       <div className="max-w-7xl mx-auto px-3 sm:px-4 md:px-6 lg:px-8">
-        <div className="flex justify-between items-center h-14 sm:h-16 md:h-20">
+        <div className="flex justify-between items-center h-14 sm:h-16 md:h-20 relative">
           {/* Logo y título */}
           <Link href="/" className="flex items-center gap-2 sm:gap-3 hover:opacity-80 transition-opacity">
             <Image 
@@ -323,9 +323,12 @@ export default function Header() {
             </div>
           ) : (
             // Usuario NO logueado - mostrar dropdown
-            <div className="relative" ref={dropdownRef}>
+            <div className="relative z-[100]" ref={dropdownRef}>
               <button
-                onClick={() => setShowDropdown(!showDropdown)}
+                onClick={() => {
+                  console.log('Dropdown clicked, current state:', showDropdown);
+                  setShowDropdown(!showDropdown);
+                }}
                 disabled={loggingIn}
                 className="px-3 py-1.5 sm:px-5 sm:py-2 md:px-6 text-sm sm:text-base rounded-md font-semibold hover:opacity-90 transition-opacity disabled:opacity-50"
                 style={{ 
@@ -338,7 +341,11 @@ export default function Header() {
 
               {/* Dropdown */}
               {showDropdown && (
-                <div className="absolute right-0 mt-2 w-[calc(100vw-2rem)] sm:w-72 md:w-80 max-w-sm bg-white border border-gray-200 rounded-xl shadow-2xl overflow-hidden z-50">
+                <div 
+                  className="absolute right-0 mt-2 w-[calc(100vw-2rem)] sm:w-72 md:w-80 max-w-sm bg-white border border-gray-200 rounded-xl shadow-2xl overflow-hidden z-[9999]"
+                  style={{ display: 'block' }}
+                  ref={(el) => el && console.log('Dropdown rendered:', el)}
+                >
                   
                   <div className="max-h-[70vh] sm:max-h-96 overflow-y-auto">
                     {participants.map((participant) => (
