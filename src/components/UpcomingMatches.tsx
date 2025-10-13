@@ -351,7 +351,8 @@ export default function UpcomingMatches() {
           {matches.map((match, idx) => (
             <div
               key={idx}
-              className="p-4 sm:p-5 md:p-6 rounded-xl sm:rounded-2xl bg-white/5 border border-white/10 hover:border-[#ff2882]/50 transition-all hover:scale-105"
+              className="p-4 sm:p-5 md:p-6 rounded-xl sm:rounded-2xl border border-white/10 hover:border-[#ff2882]/50 transition-all hover:scale-105"
+              style={{ backgroundColor: '#ededed' }}
             >
             
               
@@ -374,11 +375,11 @@ export default function UpcomingMatches() {
                       {match.team1Name.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase()}
                     </div>
                   )}
-                  <div className="text-white font-semibold text-xs sm:text-sm mb-0.5 sm:mb-1 truncate px-1">{match.team1Name}</div>
-                  <div className="text-gray-500 text-[0.625rem] sm:text-xs truncate px-1">{match.team1Manager}</div>
+                  <div className="text-gray-900 font-semibold text-xs sm:text-sm mb-0.5 sm:mb-1 truncate px-1">{match.team1Name}</div>
+                  <div className="text-gray-600 text-[0.625rem] sm:text-xs truncate px-1">{match.team1Manager}</div>
                 </div>
                 
-                <div className="text-gray-600 font-black text-base sm:text-lg md:text-xl px-2 sm:px-3 md:px-4">VS</div>
+                <div className="text-gray-800 font-black text-base sm:text-lg md:text-xl px-2 sm:px-3 md:px-4">VS</div>
                 
                 <div className="text-center flex-1">
                   {/* Avatar - Escudo o iniciales del equipo */}
@@ -397,8 +398,8 @@ export default function UpcomingMatches() {
                       {match.team2Name.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase()}
                     </div>
                   )}
-                  <div className="text-white font-semibold text-xs sm:text-sm mb-0.5 sm:mb-1 truncate px-1">{match.team2Name}</div>
-                  <div className="text-gray-500 text-[0.625rem] sm:text-xs truncate px-1">{match.team2Manager}</div>
+                  <div className="text-gray-900 font-semibold text-xs sm:text-sm mb-0.5 sm:mb-1 truncate px-1">{match.team2Name}</div>
+                  <div className="text-gray-600 text-[0.625rem] sm:text-xs truncate px-1">{match.team2Manager}</div>
                 </div>
               </div>
 
@@ -413,7 +414,7 @@ export default function UpcomingMatches() {
                     className={`py-2 sm:py-2.5 md:py-3 px-2 sm:px-3 rounded-md sm:rounded-lg transition-all ${
                       bets[idx]?.prediction === 'home'
                         ? 'bg-[#ff2882] text-white border-2 border-[#ff2882]'
-                        : 'bg-white/5 text-gray-400 hover:bg-white/10 border-2 border-transparent'
+                        : 'bg-white text-gray-600 hover:bg-gray-50 border-2 border-gray-200'
                     }`}
                   >
                     <div className="font-semibold text-xs sm:text-sm">Local</div>
@@ -431,7 +432,7 @@ export default function UpcomingMatches() {
                     className={`py-2 sm:py-2.5 md:py-3 px-2 sm:px-3 rounded-md sm:rounded-lg transition-all ${
                       bets[idx]?.prediction === 'draw'
                         ? 'bg-[#00ff87] text-black border-2 border-[#00ff87]'
-                        : 'bg-white/5 text-gray-400 hover:bg-white/10 border-2 border-transparent'
+                        : 'bg-white text-gray-600 hover:bg-gray-50 border-2 border-gray-200'
                     }`}
                   >
                     <div className="font-semibold text-xs sm:text-sm">Empate</div>
@@ -449,7 +450,7 @@ export default function UpcomingMatches() {
                     className={`py-2 sm:py-2.5 md:py-3 px-2 sm:px-3 rounded-md sm:rounded-lg transition-all ${
                       bets[idx]?.prediction === 'away'
                         ? 'bg-[#37003c] text-white border-2 border-[#37003c]'
-                        : 'bg-white/5 text-gray-400 hover:bg-white/10 border-2 border-transparent'
+                        : 'bg-white text-gray-600 hover:bg-gray-50 border-2 border-gray-200'
                     }`}
                   >
                     <div className="font-semibold text-xs sm:text-sm">Visitante</div>
@@ -464,25 +465,25 @@ export default function UpcomingMatches() {
 
               {/* Input de monto */}
               <div className="mb-3 sm:mb-4">
-                <label className="block text-[0.625rem] sm:text-xs text-gray-400 uppercase tracking-wider mb-1.5 sm:mb-2">
+                <label className="block text-[0.625rem] sm:text-xs text-gray-700 uppercase tracking-wider mb-1.5 sm:mb-2">
                   Monto a apostar
                 </label>
                 <div className="relative">
-                  <span className="absolute left-3 sm:left-4 top-1/2 -translate-y-1/2 text-gray-400 font-bold text-sm sm:text-base">$</span>
+                  <span className="absolute left-3 sm:left-4 top-1/2 -translate-y-1/2 text-gray-600 font-bold text-sm sm:text-base">$</span>
                   <input
                     type="text"
                     value={bets[idx]?.amount || ''}
                     onChange={(e) => handleAmountChange(idx, e.target.value)}
                     placeholder="0"
-                    className="w-full pl-7 sm:pl-8 pr-3 sm:pr-4 py-1.5 sm:py-2 rounded-md sm:rounded-lg bg-white/5 border border-white/10 text-white placeholder-gray-500 focus:outline-none focus:border-[#ff2882] transition-colors text-sm sm:text-base"
+                    className="w-full pl-7 sm:pl-8 pr-3 sm:pr-4 py-1.5 sm:py-2 rounded-md sm:rounded-lg bg-white border border-gray-200 text-gray-900 placeholder-gray-400 focus:outline-none focus:border-[#ff2882] transition-colors text-sm sm:text-base"
                   />
                 </div>
                 
                 {/* Mostrar ganancia potencial */}
                 {bets[idx]?.prediction && bets[idx]?.amount && parseFloat(bets[idx].amount) > 0 && (
-                  <div className="mt-1.5 sm:mt-2 text-[0.625rem] sm:text-xs text-gray-400">
+                  <div className="mt-1.5 sm:mt-2 text-[0.625rem] sm:text-xs text-gray-600">
                     Ganancia potencial: 
-                    <span className="text-[#00ff87] font-bold ml-1">
+                    <span className="text-[#00a85a] font-bold ml-1">
                       ${(parseFloat(bets[idx].amount) * match.odds[bets[idx].prediction!]).toFixed(2)}
                     </span>
                   </div>
