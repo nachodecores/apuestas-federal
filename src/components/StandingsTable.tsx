@@ -173,10 +173,10 @@ export default function StandingsTable() {
                     {/* Columna vacía para posición sin header */}
                   </th>
                   <th className="px-2 py-2 sm:px-3 sm:py-3 md:px-4 md:py-3 lg:px-6 lg:py-4 text-[0.625rem] sm:text-xs font-light text-gray-600 uppercase tracking-wider">
-                    Jugador
+                    Equipo
                   </th>
                   <th className="hidden md:table-cell px-4 py-3 lg:px-6 lg:py-4 text-xs font-light text-gray-600 uppercase tracking-wider">
-                    Cuadro
+                    Manager
                   </th>
                   <th className="hidden lg:table-cell px-6 py-4 text-xs font-light text-gray-600 uppercase tracking-wider text-right">
                     Récord
@@ -205,22 +205,22 @@ export default function StandingsTable() {
                       </span>
                     </td>
                     
-                    {/* Nombre del jugador */}
+                    {/* Equipo y jugador */}
                     <td className="px-2 py-2 sm:px-3 sm:py-3 md:px-4 md:py-3 lg:px-6 lg:py-4">
                       <div className="flex flex-col">
-                        <span className="text-gray-900 font-normal text-xs sm:text-sm md:text-base truncate max-w-[8rem] sm:max-w-none">
-                          {player.name}
-                        </span>
-                        {/* Mostrar team name en mobile (bajo el nombre) */}
-                        <span className="md:hidden text-gray-500 font-light text-[0.625rem] sm:text-xs truncate max-w-[8rem]">
+                        <span className="text-gray-900 font-semibold text-xs sm:text-sm md:text-base truncate max-w-[8rem] sm:max-w-none">
                           {player.teamName}
+                        </span>
+                        {/* Mostrar manager name (bajo el equipo) */}
+                        <span className="text-gray-500 font-light text-[0.625rem] sm:text-xs truncate max-w-[8rem]">
+                          {player.name}
                         </span>
                       </div>
                     </td>
                     
-                    {/* Cuadro - oculto en mobile */}
+                    {/* Manager - oculto en mobile */}
                     <td className="hidden md:table-cell px-4 py-3 lg:px-6 lg:py-4">
-                      <span className="text-gray-600 font-light text-sm">{player.teamName}</span>
+                      <span className="text-gray-600 font-light text-sm">{player.name}</span>
                     </td>
                     
                     {/* Récord - oculto en mobile y tablet */}
