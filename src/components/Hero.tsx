@@ -1,10 +1,8 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { createClient } from "@/lib/supabase/client";
 
 export default function Hero() {
-  const supabase = createClient();
   const [currentGameweek, setCurrentGameweek] = useState<number>(8);
   const [activeBets, setActiveBets] = useState<number>(0);
   const [gwAmount, setGwAmount] = useState<number>(0);
@@ -14,41 +12,17 @@ export default function Hero() {
   useEffect(() => {
     async function fetchStats() {
       try {
-        // 1. Obtener gameweek actual de la API de FPL
-        const apiResponse = await fetch('/api/league');
-        const fplData = await apiResponse.json();
+        const response = await fetch('/api/stats');
+        const data = await response.json();
         
-        // Encontrar el próximo gameweek (primer partido no terminado)
-        const upcomingMatches = fplData.matches.filter((m: { finished: boolean }) => !m.finished);
-        const nextGW = upcomingMatches.length > 0 ? upcomingMatches[0].event : 8;
-        setCurrentGameweek(nextGW);
-
-        // 2. Contar apuestas activas (status='pending')
-        const { count: activeBetsCount } = await supabase
-          .from('bets')
-          .select('*', { count: 'exact', head: true })
-          .eq('status', 'pending');
+        if (data.error) {
+          throw new Error(data.error);
+        }
         
-        setActiveBets(activeBetsCount || 0);
-
-        // 3. Sumar montos apostados en el gameweek actual
-        const { data: gwBets } = await supabase
-          .from('bets')
-          .select('amount')
-          .eq('gameweek', nextGW)
-          .eq('status', 'pending');
-        
-        const gwTotal = gwBets?.reduce((sum, bet) => sum + bet.amount, 0) || 0;
-        setGwAmount(gwTotal);
-
-        // 4. Sumar todos los balances (pozo total)
-        const { data: profiles } = await supabase
-          .from('profiles')
-          .select('balance');
-        
-        const poolTotal = profiles?.reduce((sum, profile) => sum + profile.balance, 0) || 0;
-        setTotalPool(poolTotal);
-
+        setCurrentGameweek(data.currentGameweek);
+        setActiveBets(data.activeBets);
+        setGwAmount(data.gwAmount);
+        setTotalPool(data.totalPool);
         setLoading(false);
       } catch (error) {
         console.error('Error fetching stats:', error);
@@ -57,7 +31,7 @@ export default function Hero() {
     }
 
     fetchStats();
-  }, [supabase]);
+  }, []);
 
   return (
     <section className="relative overflow-hidden w-full bg-[#ebe5eb] py-8 sm:py-12 md:py-16 lg:py-20">
