@@ -125,17 +125,31 @@ export default function Header() {
       setUser(session?.user ?? null);
       if (!session?.user) {
         setUserName('');
+        setUserTeamName('');
+        setUserTeamLogo(null);
         setUserBalance(0);
+        setIsAdmin(false);
       } else {
-        // Actualizar balance cuando el usuario se loguea o cambia sesión
+        // Actualizar todos los datos del usuario cuando se loguea o cambia sesión
         const { data: profile } = await supabase
           .from('profiles')
-          .select('balance')
+          .select('balance, display_name, league_entry_id, team_logo')
           .eq('id', session.user.id)
           .single();
         
         if (profile) {
           setUserBalance(profile.balance || 0);
+          setUserName(profile.display_name);
+          setUserTeamLogo(profile.team_logo);
+          setIsAdmin(profile.display_name === 'Ignacio de Cores');
+          
+          // Obtener nombre del equipo de la API
+          const leagueResponse = await fetch('/api/league');
+          const leagueData = await leagueResponse.json();
+          const entry = leagueData.league_entries?.find(
+            (e: any) => e.id === profile.league_entry_id
+          );
+          setUserTeamName(entry?.entry_name || '');
         }
       }
     });
@@ -249,9 +263,9 @@ export default function Header() {
                     }}
                   >
                     {/* Texto a la izquierda, alineado a la derecha */}
-                    <div className="flex flex-col text-right">
+                    <div className="flex flex-col items-end text-right">
                       <span className="font-semibold text-[0.625rem] sm:text-xs leading-tight">{userName}</span>
-                      <span className="text-[0.625rem] sm:text-xs text-gray-600 leading-tight font-light">{userTeamName || 'Dashboard'}</span>
+                      <span className="text-[0.625rem] sm:text-xs text-gray-600 leading-tight font-light">{userTeamName}</span>
                     </div>
                     
                     {/* Avatar a la derecha */}
