@@ -62,13 +62,13 @@ export default function Hero() {
   return (
     <section className="relative overflow-hidden w-full" style={{ backgroundColor: 'rgb(55, 0, 60)' }}>
       
-      <div className="relative max-w-7xl mx-auto">
+      <div className="relative flex justify-center">
         {/* Gameweek Actual - Título con gradiente en la parte superior */}
         <div 
-          className="w-full px-6 sm:px-8 md:px-12 py-3 sm:py-4 md:py-5 rounded-b-xl sm:rounded-b-2xl md:rounded-b-3xl text-center"
+          className="w-[80%] px-4 sm:px-6 md:px-8 py-2 sm:py-3 md:py-4 rounded-b-xl sm:rounded-b-2xl md:rounded-b-3xl text-center"
           style={{ background: 'linear-gradient(to right, rgb(0, 255, 135), rgb(2, 239, 255))' }}
         >
-          <h2 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-black mb-0" style={{ color: '#37003c' }}>
+          <h2 className="text-base sm:text-lg md:text-xl lg:text-2xl font-normal mb-0" style={{ color: '#37003c' }}>
             {loading ? (
               <span className="animate-pulse">Gameweek ...</span>
             ) : (
@@ -76,6 +76,9 @@ export default function Hero() {
             )}
           </h2>
         </div>
+      </div>
+      
+      <div className="relative max-w-7xl mx-auto">
 
         {/* Contenido con stats */}
         <div className="px-3 sm:px-4 md:px-6 lg:px-8 py-8 sm:py-10 md:py-12 lg:py-16">
