@@ -62,7 +62,7 @@ export default function Hero() {
   return (
     <section className="relative overflow-hidden w-full" style={{ backgroundColor: 'rgb(55, 0, 60)' }}>
       
-      <div className="relative max-w-7xl mx-auto rounded-xl sm:rounded-2xl md:rounded-3xl overflow-hidden">
+      <div className="relative max-w-7xl mx-auto">
         {/* Gameweek Actual - Título con gradiente en la parte superior */}
         <div 
           className="w-full px-6 sm:px-8 md:px-12 py-3 sm:py-4 md:py-5 rounded-b-xl sm:rounded-b-2xl md:rounded-b-3xl text-center"
