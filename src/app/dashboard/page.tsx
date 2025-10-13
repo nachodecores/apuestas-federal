@@ -92,14 +92,22 @@ export default async function DashboardPage() {
             </h1>
           </Link>
           
-          <form action="/auth/signout" method="post">
-            <button 
-              type="submit"
-              className="px-4 py-2 rounded-xl bg-white/5 border border-white/10 text-white hover:bg-white/10 transition-colors"
+          <div className="flex gap-3">
+            <Link
+              href="/admin"
+              className="px-4 py-2 rounded-xl bg-[#ff2882]/10 border border-[#ff2882]/50 text-[#ff2882] hover:bg-[#ff2882]/20 transition-colors font-semibold"
             >
-              Cerrar sesión
-            </button>
-          </form>
+              Admin
+            </Link>
+            <form action="/auth/signout" method="post">
+              <button 
+                type="submit"
+                className="px-4 py-2 rounded-xl bg-white/5 border border-white/10 text-white hover:bg-white/10 transition-colors"
+              >
+                Cerrar sesión
+              </button>
+            </form>
+          </div>
         </div>
       </header>
 
