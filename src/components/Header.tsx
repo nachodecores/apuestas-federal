@@ -203,7 +203,6 @@ export default function Header() {
             ) : (
               <h1 className="text-base sm:text-lg md:text-xl lg:text-2xl text-white font-semibold uppercase tracking-wide">
                 Volver
-                {isAdminPage && <span className="ml-2 text-xs sm:text-sm text-[#ff2882] normal-case">Admin</span>}
               </h1>
             )}
           </Link>

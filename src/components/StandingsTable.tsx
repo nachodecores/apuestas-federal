@@ -132,9 +132,9 @@ export default function StandingsTable() {
   // Mientras está cargando, mostramos un spinner
   if (loading) {
     return (
-      <section className="py-20 bg-[#ebe5eb]">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <div className="text-[#37003c] text-xl">Cargando tabla de posiciones...</div>
+      <section className="py-8 sm:py-12 md:py-16 lg:py-20 bg-[#ebe5eb]">
+        <div className="max-w-7xl mx-auto px-3 sm:px-4 md:px-6 lg:px-8 text-center">
+          <div className="text-[#37003c] text-base sm:text-lg md:text-xl">Cargando tabla de posiciones...</div>
         </div>
       </section>
     );
@@ -143,9 +143,9 @@ export default function StandingsTable() {
   // Si hay error, lo mostramos
   if (error) {
     return (
-      <section className="py-20 bg-[#ebe5eb]">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <div className="text-red-500 text-xl">Error: {error}</div>
+      <section className="py-8 sm:py-12 md:py-16 lg:py-20 bg-[#ebe5eb]">
+        <div className="max-w-7xl mx-auto px-3 sm:px-4 md:px-6 lg:px-8 text-center">
+          <div className="text-red-500 text-base sm:text-lg md:text-xl">Error: {error}</div>
         </div>
       </section>
     );
@@ -153,38 +153,38 @@ export default function StandingsTable() {
   
   // Renderizamos la tabla con los datos reales
   return (
-    <section className="py-20 bg-[#ebe5eb]">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-between items-center mb-8">
-          <h3 className="text-3xl sm:text-4xl font-black text-[#37003c]">
+    <section className="py-8 sm:py-12 md:py-16 lg:py-20 bg-[#ebe5eb]">
+      <div className="max-w-7xl mx-auto px-3 sm:px-4 md:px-6 lg:px-8">
+        <div className="flex justify-between items-center mb-4 sm:mb-6 md:mb-8">
+          <h3 className="text-2xl sm:text-3xl md:text-4xl font-black text-[#37003c]">
             Tabla de Posiciones
           </h3>
         </div>
 
-        <div className="rounded-2xl overflow-hidden border border-gray-200 bg-white shadow-lg">
+        <div className="rounded-lg sm:rounded-xl md:rounded-2xl overflow-hidden border border-gray-200 bg-white shadow-lg">
           <div className="overflow-x-auto">
             <table className="w-full">
               <thead>
                 <tr className="border-b border-gray-200 text-left bg-gray-50">
-                  <th className="px-6 py-4 text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                  <th className="px-2 py-2 sm:px-3 sm:py-3 md:px-4 md:py-3 lg:px-6 lg:py-4 text-[0.625rem] sm:text-xs font-semibold text-gray-600 uppercase tracking-wider">
                     Pos
                   </th>
-                  <th className="px-6 py-4 text-xs font-semibold text-gray-600 uppercase tracking-wider">
-                    CCP
+                  <th className="px-2 py-2 sm:px-3 sm:py-3 md:px-4 md:py-3 lg:px-6 lg:py-4 text-[0.625rem] sm:text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                    Jugador
                   </th>
-                  <th className="px-6 py-4 text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                  <th className="hidden md:table-cell px-4 py-3 lg:px-6 lg:py-4 text-xs font-semibold text-gray-600 uppercase tracking-wider">
                     Cuadro
                   </th>
-                  <th className="px-6 py-4 text-xs font-semibold text-gray-600 uppercase tracking-wider text-right">
+                  <th className="hidden lg:table-cell px-6 py-4 text-xs font-semibold text-gray-600 uppercase tracking-wider text-right">
                     Récord
                   </th>
-                  <th className="px-6 py-4 text-xs font-semibold text-gray-600 uppercase tracking-wider text-center">
+                  <th className="hidden sm:table-cell px-3 py-3 md:px-4 md:py-3 lg:px-6 lg:py-4 text-xs font-semibold text-gray-600 uppercase tracking-wider text-center">
                     Últimos 5
                   </th>
-                  <th className="px-6 py-4 text-xs font-semibold text-gray-600 uppercase tracking-wider text-right">
-                    Puntos
+                  <th className="px-2 py-2 sm:px-3 sm:py-3 md:px-4 md:py-3 lg:px-6 lg:py-4 text-[0.625rem] sm:text-xs font-semibold text-gray-600 uppercase tracking-wider text-right">
+                    Pts
                   </th>
-                  <th className="px-6 py-4 text-xs font-semibold text-gray-600 uppercase tracking-wider text-right">
+                  <th className="hidden sm:table-cell px-3 py-3 md:px-4 md:py-3 lg:px-6 lg:py-4 text-[0.625rem] sm:text-xs font-semibold text-gray-600 uppercase tracking-wider text-right">
                     Balance
                   </th>
                 </tr>
@@ -195,31 +195,48 @@ export default function StandingsTable() {
                     key={player.position}
                     className="border-b border-gray-100 hover:bg-gray-50 transition-colors"
                   >
-                    <td className="px-6 py-4">
-                      <div className={`w-8 h-8 rounded-lg flex items-center justify-center font-bold text-sm ${
+                    {/* Posición */}
+                    <td className="px-2 py-2 sm:px-3 sm:py-3 md:px-4 md:py-3 lg:px-6 lg:py-4">
+                      <div className={`w-6 h-6 sm:w-7 sm:h-7 md:w-8 md:h-8 rounded-md sm:rounded-lg flex items-center justify-center font-bold text-xs sm:text-sm ${
                         idx === 0 ? 'bg-[#00ff87] text-black' : 
                         idx === 1 ? 'bg-[#ff2882] text-white' :
                         idx === 2 ? 'bg-[#37003c] text-white' :
-                        'bg-white/10 text-white'
+                        'bg-gray-200 text-gray-700'
                       }`}>
                         {player.position}
                       </div>
                     </td>
-                    <td className="px-6 py-4">
-                      <span className="text-gray-900 font-semibold">{player.name}</span>
+                    
+                    {/* Nombre del jugador */}
+                    <td className="px-2 py-2 sm:px-3 sm:py-3 md:px-4 md:py-3 lg:px-6 lg:py-4">
+                      <div className="flex flex-col">
+                        <span className="text-gray-900 font-semibold text-xs sm:text-sm md:text-base truncate max-w-[8rem] sm:max-w-none">
+                          {player.name}
+                        </span>
+                        {/* Mostrar team name en mobile (bajo el nombre) */}
+                        <span className="md:hidden text-gray-500 text-[0.625rem] sm:text-xs truncate max-w-[8rem]">
+                          {player.teamName}
+                        </span>
+                      </div>
                     </td>
-                    <td className="px-6 py-4">
+                    
+                    {/* Cuadro - oculto en mobile */}
+                    <td className="hidden md:table-cell px-4 py-3 lg:px-6 lg:py-4">
                       <span className="text-gray-600 text-sm">{player.teamName}</span>
                     </td>
-                    <td className="px-6 py-4 text-right">
+                    
+                    {/* Récord - oculto en mobile y tablet */}
+                    <td className="hidden lg:table-cell px-6 py-4 text-right">
                       <span className="text-gray-700 font-mono text-sm">{player.record}</span>
                     </td>
-                    <td className="px-6 py-4">
-                      <div className="flex gap-1 justify-center">
+                    
+                    {/* Últimos 5 - oculto en mobile */}
+                    <td className="hidden sm:table-cell px-3 py-3 md:px-4 md:py-3 lg:px-6 lg:py-4">
+                      <div className="flex gap-0.5 sm:gap-1 justify-center">
                         {[...player.recentForm].reverse().map((result, formIdx) => (
                           <div
                             key={formIdx}
-                            className={`w-6 h-6 rounded-full ${
+                            className={`w-4 h-4 sm:w-5 sm:h-5 md:w-6 md:h-6 rounded-full ${
                               result === 'win' ? 'bg-green-500' :
                               result === 'draw' ? 'bg-gray-400' :
                               'bg-red-500'
@@ -229,11 +246,15 @@ export default function StandingsTable() {
                         ))}
                       </div>
                     </td>
-                    <td className="px-6 py-4 text-right">
-                      <span className="text-[#37003c] font-bold">{player.points}</span>
+                    
+                    {/* Puntos */}
+                    <td className="px-2 py-2 sm:px-3 sm:py-3 md:px-4 md:py-3 lg:px-6 lg:py-4 text-right">
+                      <span className="text-[#37003c] font-bold text-sm sm:text-base">{player.points}</span>
                     </td>
-                    <td className="px-6 py-4 text-right">
-                      <span className={`font-bold ${
+                    
+                    {/* Balance - oculto en mobile */}
+                    <td className="hidden sm:table-cell px-3 py-3 md:px-4 md:py-3 lg:px-6 lg:py-4 text-right">
+                      <span className={`font-bold text-xs sm:text-sm md:text-base ${
                         player.balance > 1000 ? 'text-[#00ff87]' : 'text-[#ff2882]'
                       }`}>
                         ${player.balance.toLocaleString()}
