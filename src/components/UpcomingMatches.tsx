@@ -418,7 +418,7 @@ export default function UpcomingMatches() {
                     }`}
                     style={bets[idx]?.prediction === 'home' 
                       ? { background: 'linear-gradient(to right, rgb(2, 239, 255), rgb(0, 255, 135))' }
-                      : { backgroundColor: '#c3b2c4' }
+                      : { backgroundColor: 'rgb(239, 239, 239)' }
                     }
                   >
                     <div className={`font-semibold text-xs sm:text-sm ${
@@ -444,7 +444,7 @@ export default function UpcomingMatches() {
                     }`}
                     style={bets[idx]?.prediction === 'draw' 
                       ? { background: 'linear-gradient(to right, rgb(2, 239, 255), rgb(0, 255, 135))' }
-                      : { backgroundColor: '#c3b2c4' }
+                      : { backgroundColor: 'rgb(239, 239, 239)' }
                     }
                   >
                     <div className={`font-semibold text-xs sm:text-sm ${
@@ -470,7 +470,7 @@ export default function UpcomingMatches() {
                     }`}
                     style={bets[idx]?.prediction === 'away' 
                       ? { background: 'linear-gradient(to right, rgb(2, 239, 255), rgb(0, 255, 135))' }
-                      : { backgroundColor: '#c3b2c4' }
+                      : { backgroundColor: 'rgb(239, 239, 239)' }
                     }
                   >
                     <div className={`font-semibold text-xs sm:text-sm ${
