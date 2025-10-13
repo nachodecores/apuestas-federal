@@ -76,7 +76,6 @@ export default function StandingsTable() {
   const [players, setPlayers] = useState<PlayerDisplay[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [gameweek, setGameweek] = useState(7); // GW actual
   
   // useEffect: se ejecuta cuando el componente se monta (aparece en pantalla)
   useEffect(() => {
@@ -193,7 +192,7 @@ export default function StandingsTable() {
                 </tr>
               </thead>
               <tbody>
-                {players.map((player, idx) => (
+                {players.map((player) => (
                   <tr
                     key={player.position}
                     className="border-b border-gray-100 hover:bg-gray-50 transition-colors"

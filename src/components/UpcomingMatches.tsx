@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import Image from "next/image";
 import { createClient } from "@/lib/supabase/client";
 import { calculateOdds } from "@/lib/odds-calculator";
+import type { User } from "@supabase/supabase-js";
 
 // Tipos de datos que vienen de la API
 interface LeagueEntry {
@@ -68,14 +69,12 @@ export default function UpcomingMatches() {
   
   // Estados de datos
   const [matches, setMatches] = useState<MatchDisplay[]>([]);
-  const [standings, setStandings] = useState<Standing[]>([]);
-  const [allMatches, setAllMatches] = useState<ApiMatch[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [nextGameweek, setNextGameweek] = useState<number>(8);
   
   // Estados de autenticación
-  const [user, setUser] = useState<any>(null);
+  const [user, setUser] = useState<User | null>(null);
   const [userBalance, setUserBalance] = useState<number>(0);
   
   // Estado para las apuestas de cada partido
@@ -127,7 +126,7 @@ export default function UpcomingMatches() {
     });
     
     return () => subscription.unsubscribe();
-  }, [supabase]);
+  }, []);
 
   // useEffect 2: Obtener partidos de la API
   useEffect(() => {
@@ -141,10 +140,6 @@ export default function UpcomingMatches() {
         }
         
         const data: DraftLeagueData = await response.json();
-        
-        // Guardar standings y matches para calcular odds
-        setStandings(data.standings);
-        setAllMatches(data.matches);
         
         // 2. Obtener logos de los equipos desde Supabase
         const { data: profiles } = await supabase
@@ -260,15 +255,6 @@ export default function UpcomingMatches() {
     });
   }
 
-  // Calcular balance disponible (descontando lo ya apostado)
-  function getAvailableBalance() {
-    const totalBet = Object.values(bets)
-      .filter(b => b?.amount)
-      .reduce((sum, b) => sum + parseFloat(b.amount || '0'), 0);
-    
-    return userBalance - totalBet;
-  }
-
   // Función para confirmar TODAS las apuestas del gameweek
   async function handleConfirmAllBets() {
     // Validaciones
@@ -336,8 +322,9 @@ export default function UpcomingMatches() {
       // Limpiar el formulario
       setBets({});
       
-    } catch (error: any) {
-      alert(`Error: ${error.message}`);
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Error desconocido';
+      alert(`Error: ${errorMessage}`);
       console.error('Error al confirmar apuestas:', error);
     }
   }
@@ -526,7 +513,13 @@ export default function UpcomingMatches() {
                   <button
                     type="button"
                     onClick={() => handleDecrementAmount(idx)}
-                    className="w-8 h-8 sm:w-9 sm:h-9 md:w-10 md:h-10 rounded-md sm:rounded-lg bg-white border border-gray-200 text-gray-700 font-bold text-lg hover:bg-gray-50 transition-colors flex items-center justify-center flex-shrink-0"
+                    className="w-12 h-8 sm:w-14 sm:h-9 md:w-16 md:h-10 rounded-md sm:rounded-lg bg-white border border-gray-200 text-gray-700 font-bold text-lg hover:bg-gray-50 active:border-0 transition-colors flex items-center justify-center flex-shrink-0"
+                    style={{}}
+                    onMouseDown={(e) => e.currentTarget.style.background = 'linear-gradient(to right, rgb(2, 239, 255), rgb(0, 255, 135))'}
+                    onMouseUp={(e) => e.currentTarget.style.background = ''}
+                    onMouseLeave={(e) => e.currentTarget.style.background = ''}
+                    onTouchStart={(e) => e.currentTarget.style.background = 'linear-gradient(to right, rgb(2, 239, 255), rgb(0, 255, 135))'}
+                    onTouchEnd={(e) => e.currentTarget.style.background = ''}
                   >
                     −
                   </button>
@@ -542,7 +535,13 @@ export default function UpcomingMatches() {
                   <button
                     type="button"
                     onClick={() => handleIncrementAmount(idx)}
-                    className="w-8 h-8 sm:w-9 sm:h-9 md:w-10 md:h-10 rounded-md sm:rounded-lg bg-white border border-gray-200 text-gray-700 font-bold text-lg hover:bg-gray-50 transition-colors flex items-center justify-center flex-shrink-0"
+                    className="w-12 h-8 sm:w-14 sm:h-9 md:w-16 md:h-10 rounded-md sm:rounded-lg bg-white border border-gray-200 text-gray-700 font-bold text-lg hover:bg-gray-50 active:border-0 transition-colors flex items-center justify-center flex-shrink-0"
+                    style={{}}
+                    onMouseDown={(e) => e.currentTarget.style.background = 'linear-gradient(to right, rgb(2, 239, 255), rgb(0, 255, 135))'}
+                    onMouseUp={(e) => e.currentTarget.style.background = ''}
+                    onMouseLeave={(e) => e.currentTarget.style.background = ''}
+                    onTouchStart={(e) => e.currentTarget.style.background = 'linear-gradient(to right, rgb(2, 239, 255), rgb(0, 255, 135))'}
+                    onTouchEnd={(e) => e.currentTarget.style.background = ''}
                   >
                     +
                   </button>

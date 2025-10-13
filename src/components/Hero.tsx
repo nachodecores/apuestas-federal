@@ -19,7 +19,7 @@ export default function Hero() {
         const fplData = await apiResponse.json();
         
         // Encontrar el próximo gameweek (primer partido no terminado)
-        const upcomingMatches = fplData.matches.filter((m: any) => !m.finished);
+        const upcomingMatches = fplData.matches.filter((m: { finished: boolean }) => !m.finished);
         const nextGW = upcomingMatches.length > 0 ? upcomingMatches[0].event : 8;
         setCurrentGameweek(nextGW);
 
