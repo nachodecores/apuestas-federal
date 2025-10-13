@@ -22,6 +22,7 @@ export default function Header() {
   const [userName, setUserName] = useState<string>('');
   const [userTeamName, setUserTeamName] = useState<string>('');
   const [userTeamLogo, setUserTeamLogo] = useState<string | null>(null);
+  const [isAdmin, setIsAdmin] = useState<boolean>(false);
   const [participants, setParticipants] = useState<Participant[]>([]);
   const [loading, setLoading] = useState(true);
   const [showDropdown, setShowDropdown] = useState(false);
@@ -47,6 +48,9 @@ export default function Header() {
           setUserName(profile.display_name);
           setUserTeamLogo(profile.team_logo);
           
+          // Verificar si es admin (Ignacio de Cores)
+          setIsAdmin(profile.display_name === 'Ignacio de Cores');
+          
           // Obtener nombre del equipo de la API
           const leagueResponse = await fetch('/api/league');
           const leagueData = await leagueResponse.json();
@@ -59,6 +63,7 @@ export default function Header() {
         setUserName('');
         setUserTeamName('');
         setUserTeamLogo(null);
+        setIsAdmin(false);
       }
       
       // Obtener todos los participantes con sus logos y nombres de equipo
@@ -170,7 +175,7 @@ export default function Header() {
 
   // Determinar el estilo según la página
   const isHome = pathname === '/';
-  const isAdmin = pathname?.startsWith('/admin');
+  const isAdminPage = pathname?.startsWith('/admin');
   const isDashboard = pathname?.startsWith('/dashboard');
   
   const headerBg = isHome 
@@ -190,11 +195,17 @@ export default function Header() {
               height={50}
               className="h-7 sm:h-9 md:h-10 w-auto"
             />
-            <h1 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl text-white">
-              <span className="font-black">Bet</span>
-              <span className="font-normal"> Federal</span>
-              {isAdmin && <span className="ml-2 text-xs sm:text-sm text-[#ff2882]">Admin</span>}
-            </h1>
+            {isHome ? (
+              <h1 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl text-white">
+                <span className="font-black">Bet</span>
+                <span className="font-normal"> Federal</span>
+              </h1>
+            ) : (
+              <h1 className="text-base sm:text-lg md:text-xl lg:text-2xl text-white font-semibold uppercase tracking-wide">
+                Volver
+                {isAdminPage && <span className="ml-2 text-xs sm:text-sm text-[#ff2882] normal-case">Admin</span>}
+              </h1>
+            )}
           </Link>
 
           {/* Botones de navegación */}
@@ -233,7 +244,7 @@ export default function Header() {
               )}
 
               {/* Botón Dashboard (en admin) */}
-              {isAdmin && (
+              {isAdminPage && (
                 <Link
                   href="/dashboard"
                   className="px-3 py-1.5 sm:px-4 sm:py-2 rounded-md sm:rounded-xl bg-white/5 border border-white/10 text-white hover:bg-white/10 transition-colors text-xs sm:text-sm font-semibold"
@@ -242,8 +253,8 @@ export default function Header() {
                 </Link>
               )}
 
-              {/* Botón Admin (en dashboard) */}
-              {isDashboard && (
+              {/* Botón Admin (en dashboard) - SOLO si es Ignacio de Cores */}
+              {isDashboard && isAdmin && (
                 <Link
                   href="/admin"
                   className="px-3 py-1.5 sm:px-4 sm:py-2 rounded-md sm:rounded-xl bg-[#ff2882]/10 border border-[#ff2882]/50 text-[#ff2882] hover:bg-[#ff2882]/20 transition-colors text-xs sm:text-sm font-semibold"
@@ -253,7 +264,7 @@ export default function Header() {
               )}
 
               {/* Botón Cerrar sesión (en dashboard y admin) */}
-              {(isDashboard || isAdmin) && (
+              {(isDashboard || isAdminPage) && (
                 <button
                   onClick={handleLogout}
                   className="px-3 py-1.5 sm:px-4 sm:py-2 rounded-md sm:rounded-xl bg-white/5 border border-white/10 text-white hover:bg-white/10 transition-colors text-xs sm:text-sm font-semibold"
