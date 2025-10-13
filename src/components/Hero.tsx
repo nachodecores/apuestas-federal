@@ -60,9 +60,9 @@ export default function Hero() {
   }, [supabase]);
 
   return (
-    <section className="relative overflow-hidden w-full px-3 sm:px-4 md:px-6 lg:px-8 pt-6 sm:pt-8 md:pt-10 lg:pt-12">
+    <section className="relative overflow-hidden w-full bg-[#ebe5eb] py-8 sm:py-12 md:py-16 lg:py-20">
       
-      <div className="relative max-w-7xl mx-auto rounded-xl sm:rounded-2xl overflow-hidden" style={{ backgroundColor: 'rgb(55, 0, 60)' }}>
+      <div className="relative w-full overflow-hidden" style={{ backgroundColor: 'rgb(55, 0, 60)' }}>
         <div className="relative flex justify-center">
           {/* Gameweek Actual - Título con gradiente en la parte superior */}
           <div 
