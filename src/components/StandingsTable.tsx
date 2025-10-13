@@ -10,6 +10,7 @@ interface LeagueEntry {
   player_first_name: string;
   player_last_name: string;
   short_name: string;
+  total?: number; // Puntos totales FPL (opcional, puede venir en el objeto)
 }
 
 interface Standing {
@@ -45,7 +46,8 @@ interface PlayerDisplay {
   position: number;
   name: string;
   teamName: string;
-  points: number;
+  h2hPoints: number; // Puntos de la tabla H2H
+  fplPoints: number; // Puntos totales FPL
   record: string; // ej: "6-1-0" (ganados-empatados-perdidos)
   balance: number;
   recentForm: ('win' | 'draw' | 'loss')[]; // Últimos 5 resultados
@@ -107,7 +109,8 @@ export default function StandingsTable() {
             position: standing.rank,
             name: entry ? `${entry.player_first_name} ${entry.player_last_name}` : 'Desconocido',
             teamName: entry?.entry_name || 'Sin nombre',
-            points: standing.points_for,
+            h2hPoints: standing.total, // Puntos de la tabla H2H
+            fplPoints: standing.points_for, // Puntos totales FPL
             record: `${standing.matches_won}-${standing.matches_drawn}-${standing.matches_lost}`,
             balance: 10000, // Por ahora mock, después lo calcularemos según apuestas
             recentForm
@@ -166,23 +169,26 @@ export default function StandingsTable() {
             <table className="w-full">
               <thead>
                 <tr className="border-b border-gray-200 text-left bg-gray-50">
-                  <th className="px-2 py-2 sm:px-3 sm:py-3 md:px-4 md:py-3 lg:px-6 lg:py-4 text-[0.625rem] sm:text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                  <th className="px-2 py-2 sm:px-3 sm:py-3 md:px-4 md:py-3 lg:px-6 lg:py-4 text-[0.625rem] sm:text-xs font-light text-gray-600 uppercase tracking-wider">
                     Pos
                   </th>
-                  <th className="px-2 py-2 sm:px-3 sm:py-3 md:px-4 md:py-3 lg:px-6 lg:py-4 text-[0.625rem] sm:text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                  <th className="px-2 py-2 sm:px-3 sm:py-3 md:px-4 md:py-3 lg:px-6 lg:py-4 text-[0.625rem] sm:text-xs font-light text-gray-600 uppercase tracking-wider">
                     Jugador
                   </th>
-                  <th className="hidden md:table-cell px-4 py-3 lg:px-6 lg:py-4 text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                  <th className="hidden md:table-cell px-4 py-3 lg:px-6 lg:py-4 text-xs font-light text-gray-600 uppercase tracking-wider">
                     Cuadro
                   </th>
-                  <th className="hidden lg:table-cell px-6 py-4 text-xs font-semibold text-gray-600 uppercase tracking-wider text-right">
+                  <th className="hidden lg:table-cell px-6 py-4 text-xs font-light text-gray-600 uppercase tracking-wider text-right">
                     Récord
                   </th>
-                  <th className="px-2 py-2 sm:px-3 sm:py-3 md:px-4 md:py-3 lg:px-6 lg:py-4 text-[0.625rem] sm:text-xs font-semibold text-gray-600 uppercase tracking-wider text-center">
+                  <th className="px-2 py-2 sm:px-3 sm:py-3 md:px-4 md:py-3 lg:px-6 lg:py-4 text-[0.625rem] sm:text-xs font-light text-gray-600 uppercase tracking-wider text-center">
                     Racha
                   </th>
-                  <th className="px-2 py-2 sm:px-3 sm:py-3 md:px-4 md:py-3 lg:px-6 lg:py-4 text-[0.625rem] sm:text-xs font-semibold text-gray-600 uppercase tracking-wider text-right">
-                    Pts
+                  <th className="px-2 py-2 sm:px-3 sm:py-3 md:px-4 md:py-3 lg:px-6 lg:py-4 text-[0.625rem] sm:text-xs font-light text-gray-600 uppercase tracking-wider text-right">
+                    Pts FPL
+                  </th>
+                  <th className="hidden sm:table-cell px-3 py-3 md:px-4 md:py-3 lg:px-6 lg:py-4 text-[0.625rem] sm:text-xs font-light text-gray-600 uppercase tracking-wider text-right">
+                    Pts H2H
                   </th>
                 </tr>
               </thead>
@@ -194,7 +200,7 @@ export default function StandingsTable() {
                   >
                     {/* Posición */}
                     <td className="px-2 py-2 sm:px-3 sm:py-3 md:px-4 md:py-3 lg:px-6 lg:py-4">
-                      <span className="font-bold text-xs sm:text-sm md:text-base text-gray-700">
+                      <span className="font-light text-xs sm:text-sm md:text-base text-gray-700">
                         {player.position}
                       </span>
                     </td>
@@ -202,11 +208,11 @@ export default function StandingsTable() {
                     {/* Nombre del jugador */}
                     <td className="px-2 py-2 sm:px-3 sm:py-3 md:px-4 md:py-3 lg:px-6 lg:py-4">
                       <div className="flex flex-col">
-                        <span className="text-gray-900 font-semibold text-xs sm:text-sm md:text-base truncate max-w-[8rem] sm:max-w-none">
+                        <span className="text-gray-900 font-normal text-xs sm:text-sm md:text-base truncate max-w-[8rem] sm:max-w-none">
                           {player.name}
                         </span>
                         {/* Mostrar team name en mobile (bajo el nombre) */}
-                        <span className="md:hidden text-gray-500 text-[0.625rem] sm:text-xs truncate max-w-[8rem]">
+                        <span className="md:hidden text-gray-500 font-light text-[0.625rem] sm:text-xs truncate max-w-[8rem]">
                           {player.teamName}
                         </span>
                       </div>
@@ -214,12 +220,12 @@ export default function StandingsTable() {
                     
                     {/* Cuadro - oculto en mobile */}
                     <td className="hidden md:table-cell px-4 py-3 lg:px-6 lg:py-4">
-                      <span className="text-gray-600 text-sm">{player.teamName}</span>
+                      <span className="text-gray-600 font-light text-sm">{player.teamName}</span>
                     </td>
                     
                     {/* Récord - oculto en mobile y tablet */}
                     <td className="hidden lg:table-cell px-6 py-4 text-right">
-                      <span className="text-gray-700 font-mono text-sm">{player.record}</span>
+                      <span className="text-gray-700 font-light font-mono text-sm">{player.record}</span>
                     </td>
                     
                     {/* Racha (Últimos 5) - VISIBLE en mobile */}
@@ -239,9 +245,14 @@ export default function StandingsTable() {
                       </div>
                     </td>
                     
-                    {/* Puntos */}
+                    {/* Puntos FPL */}
                     <td className="px-2 py-2 sm:px-3 sm:py-3 md:px-4 md:py-3 lg:px-6 lg:py-4 text-right">
-                      <span className="text-[#37003c] font-bold text-sm sm:text-base">{player.points}</span>
+                      <span className="text-[#37003c] font-light text-sm sm:text-base">{player.fplPoints}</span>
+                    </td>
+                    
+                    {/* Puntos H2H - oculto en mobile */}
+                    <td className="hidden sm:table-cell px-3 py-3 md:px-4 md:py-3 lg:px-6 lg:py-4 text-right">
+                      <span className="text-gray-700 font-light text-sm sm:text-base">{player.h2hPoints}</span>
                     </td>
                   </tr>
                 ))}
