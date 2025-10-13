@@ -362,49 +362,57 @@ export default function UpcomingMatches() {
             
               
               {/* Equipos */}
-              <div className="flex items-center justify-between mb-4 sm:mb-5 md:mb-6">
-                <div className="text-center flex-1">
-                  {/* Avatar - Escudo o iniciales del equipo */}
+              <div className="flex items-center justify-between mb-4 sm:mb-5 md:mb-6 gap-1 sm:gap-2">
+                {/* Local - Avatar izquierda, datos derecha */}
+                <div className="flex items-center gap-1.5 sm:gap-2 md:gap-3 flex-1 min-w-0">
+                  {/* Avatar */}
                   {match.team1Logo ? (
-                    <div className="w-12 h-12 sm:w-14 sm:h-14 md:w-16 md:h-16 rounded-full mx-auto mb-1.5 sm:mb-2 overflow-hidden bg-white border border-white/20 sm:border-2">
+                    <div className="w-9 h-9 sm:w-11 sm:h-11 md:w-13 md:h-13 rounded-full overflow-hidden bg-white border border-white/20 sm:border-2 flex-shrink-0">
                       <Image
                         src={`/assets/${match.team1Logo}`}
                         alt={match.team1Name}
-                        width={64}
-                        height={64}
+                        width={52}
+                        height={52}
                         className="object-cover w-full h-full"
                       />
                     </div>
                   ) : (
-                    <div className="w-12 h-12 sm:w-14 sm:h-14 md:w-16 md:h-16 rounded-full bg-gradient-to-br from-[#ff2882] to-[#37003c] mx-auto mb-1.5 sm:mb-2 flex items-center justify-center text-white font-bold text-[0.625rem] sm:text-xs">
+                    <div className="w-9 h-9 sm:w-11 sm:h-11 md:w-13 md:h-13 rounded-full bg-gradient-to-br from-[#ff2882] to-[#37003c] flex items-center justify-center text-white font-bold text-[0.625rem] sm:text-xs flex-shrink-0">
                       {match.team1Name.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase()}
                     </div>
                   )}
-                  <div className="text-gray-900 font-semibold text-xs sm:text-sm mb-0.5 sm:mb-1 truncate px-1">{match.team1Name}</div>
-                  <div className="text-gray-600 text-[0.625rem] sm:text-xs truncate px-1">{match.team1Manager}</div>
+                  {/* Datos */}
+                  <div className="flex flex-col min-w-0 overflow-hidden">
+                    <div className="text-gray-900 font-semibold text-[0.625rem] sm:text-xs md:text-sm truncate">{match.team1Name}</div>
+                    <div className="text-gray-600 text-[0.5rem] sm:text-[0.625rem] md:text-xs truncate">{match.team1Manager}</div>
+                  </div>
                 </div>
                 
-                <div className="text-gray-800 font-black text-base sm:text-lg md:text-xl px-2 sm:px-3 md:px-4">VS</div>
+                <div className="text-gray-800 font-black text-xs sm:text-sm md:text-base px-0.5 sm:px-1 md:px-2 flex-shrink-0">VS</div>
                 
-                <div className="text-center flex-1">
-                  {/* Avatar - Escudo o iniciales del equipo */}
+                {/* Visitante - Avatar derecha, datos izquierda */}
+                <div className="flex items-center gap-1.5 sm:gap-2 md:gap-3 flex-1 flex-row-reverse min-w-0">
+                  {/* Avatar */}
                   {match.team2Logo ? (
-                    <div className="w-12 h-12 sm:w-14 sm:h-14 md:w-16 md:h-16 rounded-full mx-auto mb-1.5 sm:mb-2 overflow-hidden bg-white border border-white/20 sm:border-2">
+                    <div className="w-9 h-9 sm:w-11 sm:h-11 md:w-13 md:h-13 rounded-full overflow-hidden bg-white border border-white/20 sm:border-2 flex-shrink-0">
                       <Image
                         src={`/assets/${match.team2Logo}`}
                         alt={match.team2Name}
-                        width={64}
-                        height={64}
+                        width={52}
+                        height={52}
                         className="object-cover w-full h-full"
                       />
                     </div>
                   ) : (
-                    <div className="w-12 h-12 sm:w-14 sm:h-14 md:w-16 md:h-16 rounded-full bg-gradient-to-br from-[#37003c] to-[#00ff87] mx-auto mb-1.5 sm:mb-2 flex items-center justify-center text-white font-bold text-[0.625rem] sm:text-xs">
+                    <div className="w-9 h-9 sm:w-11 sm:h-11 md:w-13 md:h-13 rounded-full bg-gradient-to-br from-[#37003c] to-[#00ff87] flex items-center justify-center text-white font-bold text-[0.625rem] sm:text-xs flex-shrink-0">
                       {match.team2Name.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase()}
                     </div>
                   )}
-                  <div className="text-gray-900 font-semibold text-xs sm:text-sm mb-0.5 sm:mb-1 truncate px-1">{match.team2Name}</div>
-                  <div className="text-gray-600 text-[0.625rem] sm:text-xs truncate px-1">{match.team2Manager}</div>
+                  {/* Datos alineados a la derecha */}
+                  <div className="flex flex-col text-right min-w-0 overflow-hidden">
+                    <div className="text-gray-900 font-semibold text-[0.625rem] sm:text-xs md:text-sm truncate">{match.team2Name}</div>
+                    <div className="text-gray-600 text-[0.5rem] sm:text-[0.625rem] md:text-xs truncate">{match.team2Manager}</div>
+                  </div>
                 </div>
               </div>
 

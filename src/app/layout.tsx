@@ -16,7 +16,7 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  title: "El Boliche Federal - Apuestas FPL",
+  title: "Bet Federal",
   description: "Sistema de apuestas para tu liga privada de Draft Fantasy Premier League",
 };
 
