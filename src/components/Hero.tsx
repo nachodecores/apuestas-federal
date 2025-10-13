@@ -62,16 +62,21 @@ export default function Hero() {
   return (
     <section className="relative overflow-hidden w-full" style={{ backgroundColor: 'rgb(55, 0, 60)' }}>
       
-      <div className="relative max-w-7xl mx-auto px-3 sm:px-4 md:px-6 lg:px-8 py-8 sm:py-10 md:py-12 lg:py-16">
+      <div className="relative max-w-7xl mx-auto px-3 sm:px-4 md:px-6 lg:px-8 py-8 sm:py-10 md:py-12 lg:py-16 rounded-xl sm:rounded-2xl md:rounded-3xl">
         <div className="text-center">
           {/* Gameweek Actual - Título */}
-          <h2 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-black text-white mb-6 sm:mb-8">
-            {loading ? (
-              <span className="animate-pulse">Gameweek ...</span>
-            ) : (
-              `Gameweek ${currentGameweek}`
-            )}
-          </h2>
+          <div 
+            className="inline-block px-6 sm:px-8 md:px-12 py-3 sm:py-4 md:py-5 rounded-xl sm:rounded-2xl md:rounded-3xl mb-6 sm:mb-8"
+            style={{ background: 'linear-gradient(to right, rgb(0, 255, 135), rgb(2, 239, 255))' }}
+          >
+            <h2 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-black mb-0" style={{ color: '#37003c' }}>
+              {loading ? (
+                <span className="animate-pulse">Gameweek ...</span>
+              ) : (
+                `Gameweek ${currentGameweek}`
+              )}
+            </h2>
+          </div>
 
           {/* Stats */}
           <div className="grid grid-cols-3 gap-3 sm:gap-6 md:gap-8 max-w-3xl mx-auto">
