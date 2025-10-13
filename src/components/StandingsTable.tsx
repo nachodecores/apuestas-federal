@@ -184,9 +184,6 @@ export default function StandingsTable() {
                   <th className="px-2 py-2 sm:px-3 sm:py-3 md:px-4 md:py-3 lg:px-6 lg:py-4 text-[0.625rem] sm:text-xs font-semibold text-gray-600 uppercase tracking-wider text-right">
                     Pts
                   </th>
-                  <th className="hidden sm:table-cell px-3 py-3 md:px-4 md:py-3 lg:px-6 lg:py-4 text-[0.625rem] sm:text-xs font-semibold text-gray-600 uppercase tracking-wider text-right">
-                    Balance
-                  </th>
                 </tr>
               </thead>
               <tbody>
@@ -197,9 +194,9 @@ export default function StandingsTable() {
                   >
                     {/* Posición */}
                     <td className="px-2 py-2 sm:px-3 sm:py-3 md:px-4 md:py-3 lg:px-6 lg:py-4">
-                      <div className="w-6 h-6 sm:w-7 sm:h-7 md:w-8 md:h-8 rounded-md sm:rounded-lg flex items-center justify-center font-bold text-xs sm:text-sm bg-gray-200 text-gray-700">
+                      <span className="font-bold text-xs sm:text-sm md:text-base text-gray-700">
                         {player.position}
-                      </div>
+                      </span>
                     </td>
                     
                     {/* Nombre del jugador */}
@@ -245,15 +242,6 @@ export default function StandingsTable() {
                     {/* Puntos */}
                     <td className="px-2 py-2 sm:px-3 sm:py-3 md:px-4 md:py-3 lg:px-6 lg:py-4 text-right">
                       <span className="text-[#37003c] font-bold text-sm sm:text-base">{player.points}</span>
-                    </td>
-                    
-                    {/* Balance - oculto en mobile */}
-                    <td className="hidden sm:table-cell px-3 py-3 md:px-4 md:py-3 lg:px-6 lg:py-4 text-right">
-                      <span className={`font-bold text-xs sm:text-sm md:text-base ${
-                        player.balance > 1000 ? 'text-[#00ff87]' : 'text-[#ff2882]'
-                      }`}>
-                        ${player.balance.toLocaleString()}
-                      </span>
                     </td>
                   </tr>
                 ))}
