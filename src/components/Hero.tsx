@@ -90,7 +90,7 @@ export default function Hero() {
                 n° apuestas
               </div>
               <div 
-                className="text-2xl sm:text-3xl md:text-4xl font-normal mb-0"
+                className="text-2xl sm:text-3xl md:text-4xl font-bold mb-0"
                 style={{ 
                   background: 'linear-gradient(to right, rgb(0, 255, 135), rgb(2, 239, 255))',
                   WebkitBackgroundClip: 'text',
@@ -108,7 +108,7 @@ export default function Hero() {
                 Total apostado
               </div>
               <div 
-                className="text-2xl sm:text-3xl md:text-4xl font-normal mb-0"
+                className="text-2xl sm:text-3xl md:text-4xl font-bold mb-0"
                 style={{ 
                   background: 'linear-gradient(to right, rgb(0, 255, 135), rgb(2, 239, 255))',
                   WebkitBackgroundClip: 'text',
@@ -126,7 +126,7 @@ export default function Hero() {
                 Pozo
               </div>
               <div 
-                className="text-2xl sm:text-3xl md:text-4xl font-normal mb-0"
+                className="text-2xl sm:text-3xl md:text-4xl font-bold mb-0"
                 style={{ 
                   background: 'linear-gradient(to right, rgb(0, 255, 135), rgb(2, 239, 255))',
                   WebkitBackgroundClip: 'text',
