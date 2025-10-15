@@ -185,8 +185,8 @@ export default function UpcomingMatches() {
             team2Name: team2?.entry_name || 'Equipo 2',
             team1Manager: team1 ? `${team1.player_first_name} ${team1.player_last_name}` : 'Manager 1',
             team2Manager: team2 ? `${team2.player_first_name} ${team2.player_last_name}` : 'Manager 2',
-            team1Logo: teamLogos.get(match.league_entry_1) || null,
-            team2Logo: teamLogos.get(match.league_entry_2) || null,
+            team1Logo: (teamLogos.get(match.league_entry_1) as string) || null,
+            team2Logo: (teamLogos.get(match.league_entry_2) as string) || null,
             league_entry_1: match.league_entry_1,
             league_entry_2: match.league_entry_2,
             odds
