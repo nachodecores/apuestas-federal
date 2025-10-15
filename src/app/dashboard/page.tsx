@@ -41,14 +41,6 @@ export default function DashboardPage() {
     getUser();
   }, [supabase, router]);
 
-  if (loading) {
-    return (
-      <div className="min-h-screen bg-[#0a0a0a] flex items-center justify-center">
-        <div className="text-white text-xl">Cargando...</div>
-      </div>
-    );
-  }
-
   useEffect(() => {
     async function loadDashboardData() {
       if (!user) return;
@@ -117,6 +109,14 @@ export default function DashboardPage() {
 
     loadDashboardData();
   }, [user, supabase]);
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-[#0a0a0a] flex items-center justify-center">
+        <div className="text-white text-xl">Cargando...</div>
+      </div>
+    );
+  }
 
   if (dataLoading) {
     return (
