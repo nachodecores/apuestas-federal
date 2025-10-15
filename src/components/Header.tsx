@@ -28,6 +28,9 @@ export default function Header() {
   const [loading, setLoading] = useState(true);
   const [showDropdown, setShowDropdown] = useState(false);
   const [loggingIn, setLoggingIn] = useState(false);
+  const [showPasswordModal, setShowPasswordModal] = useState(false);
+  const [selectedParticipant, setSelectedParticipant] = useState<Participant | null>(null);
+  const [password, setPassword] = useState('');
   const dropdownRef = useRef<HTMLDivElement>(null);
   const supabase = createClient();
 
@@ -174,12 +177,27 @@ export default function Header() {
     }
   }, [showDropdown]);
 
-  // Login automático al seleccionar usuario
-  async function handleSelectUser(participant: Participant) {
+  // Mostrar modal de contraseña al seleccionar usuario
+  function handleSelectUser(participant: Participant) {
+    setSelectedParticipant(participant);
+    setShowPasswordModal(true);
+    setShowDropdown(false);
+    setPassword('');
+  }
+
+  // Login con validación de contraseña
+  async function handleLoginWithPassword() {
+    if (!selectedParticipant) return;
+    
+    if (password !== '1234') {
+      alert('Contraseña incorrecta. La contraseña es: 1234');
+      return;
+    }
+    
     setLoggingIn(true);
     
     try {
-      const email = `${participant.league_entry_id}@bolichefederal.com`;
+      const email = `${selectedParticipant.league_entry_id}@bolichefederal.com`;
       
       const { error } = await supabase.auth.signInWithPassword({
         email,
@@ -188,8 +206,10 @@ export default function Header() {
 
       if (error) throw error;
 
-      // Cerrar el dropdown
-      setShowDropdown(false);
+      // Cerrar el modal
+      setShowPasswordModal(false);
+      setSelectedParticipant(null);
+      setPassword('');
       // NO redirigimos al dashboard, el usuario se queda en la página actual
       // El Header se actualiza automáticamente mostrando el botón "Dashboard"
     } catch (error) {
@@ -198,6 +218,13 @@ export default function Header() {
     } finally {
       setLoggingIn(false);
     }
+  }
+
+  // Cancelar login
+  function handleCancelLogin() {
+    setShowPasswordModal(false);
+    setSelectedParticipant(null);
+    setPassword('');
   }
 
   // Logout handler
@@ -393,6 +420,73 @@ export default function Header() {
           )}
         </div>
       </div>
+
+      {/* Modal de contraseña */}
+      {showPasswordModal && selectedParticipant && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-[9999] p-4">
+          <div className="bg-white rounded-xl sm:rounded-2xl p-6 sm:p-8 w-full max-w-md">
+            <div className="flex items-center gap-3 mb-4">
+              {/* Avatar del participante */}
+              {selectedParticipant.team_logo ? (
+                <div className="w-12 h-12 rounded-full overflow-hidden bg-white border border-gray-200 flex-shrink-0">
+                  <Image
+                    src={`/assets/${selectedParticipant.team_logo}`}
+                    alt={selectedParticipant.teamName}
+                    width={48}
+                    height={48}
+                    className="object-cover w-full h-full"
+                  />
+                </div>
+              ) : (
+                <div className="w-12 h-12 rounded-full bg-gradient-to-br from-[#ff2882] to-[#37003c] flex items-center justify-center text-white font-bold text-sm flex-shrink-0">
+                  {selectedParticipant.teamName.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase()}
+                </div>
+              )}
+              <div>
+                <h3 className="text-lg font-bold text-gray-900">{selectedParticipant.teamName}</h3>
+                <p className="text-sm text-gray-600">{selectedParticipant.name}</p>
+              </div>
+            </div>
+
+            <div className="mb-6">
+              <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-2">
+                Contraseña
+              </label>
+              <input
+                type="password"
+                id="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') {
+                    handleLoginWithPassword();
+                  }
+                }}
+                placeholder="Ingresá la contraseña"
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#953bff] focus:border-transparent"
+                autoFocus
+              />
+              <p className="text-xs text-gray-500 mt-1">Contraseña por defecto: 1234</p>
+            </div>
+
+            <div className="flex gap-3">
+              <button
+                onClick={handleCancelLogin}
+                className="flex-1 px-4 py-2 text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors font-medium"
+              >
+                Cancelar
+              </button>
+              <button
+                onClick={handleLoginWithPassword}
+                disabled={loggingIn || !password.trim()}
+                className="flex-1 px-4 py-2 bg-gradient-to-r from-[#953bff] to-[#02efff] text-white rounded-lg hover:opacity-90 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed font-medium"
+              >
+                {loggingIn ? 'Ingresando...' : 'Ingresar'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </nav>
   );
 }
