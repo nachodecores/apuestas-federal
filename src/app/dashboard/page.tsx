@@ -70,8 +70,8 @@ export default function DashboardPage() {
         const wonBets = betsData?.filter((bet) => bet.status === "won") || [];
         const lostBets = betsData?.filter((bet) => bet.status === "lost") || [];
         
-        const totalWon = wonBets.reduce((sum, bet) => sum + bet.potential_win, 0);
-        const totalLost = lostBets.reduce((sum, bet) => sum + bet.amount, 0);
+        const totalWon = wonBets.reduce((sum, bet) => sum + (bet.potential_win || 0), 0);
+        const totalLost = lostBets.reduce((sum, bet) => sum + (bet.amount || 0), 0);
         const netProfit = totalWon - totalLost;
 
         setStats({
@@ -258,17 +258,17 @@ export default function DashboardPage() {
                     <div className="flex items-center justify-between text-xs sm:text-sm">
                       <div>
                         <span className="text-gray-400">Apostado:</span>
-                        <span className="text-white font-bold ml-1">${bet.amount.toFixed(2)}</span>
+                        <span className="text-white font-bold ml-1">${bet.amount ? bet.amount.toFixed(2) : '0.00'}</span>
                       </div>
                       <div>
                         <span className="text-gray-400">Posible:</span>
                         <span className="text-[#00ff87] font-bold ml-1">
-                          ${bet.potential_win.toFixed(2)}
+                          ${bet.potential_win ? bet.potential_win.toFixed(2) : '0.00'}
                         </span>
                       </div>
                     </div>
                     <div className="mt-1 sm:mt-2 text-[0.625rem] sm:text-xs text-gray-500 text-right">
-                      Cuota: {bet.odds.toFixed(2)}x
+                      Cuota: {bet.odds ? bet.odds.toFixed(2) : 'N/A'}x
                     </div>
                   </div>
                 );
@@ -337,11 +337,11 @@ export default function DashboardPage() {
                               </span>
                             </td>
                             <td className="px-2 sm:px-3 md:px-4 py-2 sm:py-3 text-xs sm:text-sm text-right text-white font-semibold">
-                              ${bet.amount.toFixed(2)}
+                              ${bet.amount ? bet.amount.toFixed(2) : '0.00'}
                             </td>
                             <td className="px-2 sm:px-3 md:px-4 py-2 sm:py-3 text-xs sm:text-sm text-right font-bold">
                               <span className={isWon ? 'text-[#00ff87]' : 'text-red-500'}>
-                                {isWon ? '+' : '-'}${isWon ? bet.potential_win.toFixed(2) : bet.amount.toFixed(2)}
+                                {isWon ? '+' : '-'}${isWon ? (bet.potential_win ? bet.potential_win.toFixed(2) : '0.00') : (bet.amount ? bet.amount.toFixed(2) : '0.00')}
                               </span>
                             </td>
                           </tr>
