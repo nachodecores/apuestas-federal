@@ -515,19 +515,14 @@ export default function UpcomingMatches() {
                   <button
                     type="button"
                     onClick={() => handleDecrementAmount(idx)}
-                    className="w-12 h-8 sm:w-14 sm:h-9 md:w-16 md:h-10 rounded-md sm:rounded-lg bg-white border border-gray-200 text-gray-700 font-bold text-lg hover:bg-gray-50 active:border-0 transition-colors flex items-center justify-center flex-shrink-0"
-                    style={{}}
-                    onMouseDown={(e) => e.currentTarget.style.background = 'linear-gradient(to right, rgb(2, 239, 255), rgb(0, 255, 135))'}
-                    onMouseUp={(e) => e.currentTarget.style.background = ''}
-                    onMouseLeave={(e) => e.currentTarget.style.background = ''}
-                    onTouchStart={(e) => e.currentTarget.style.background = 'linear-gradient(to right, rgb(2, 239, 255), rgb(0, 255, 135))'}
-                    onTouchEnd={(e) => e.currentTarget.style.background = ''}
+                    className="w-12 h-8 sm:w-14 sm:h-9 md:w-16 md:h-10 rounded-md sm:rounded-lg text-[#37003c] font-bold text-lg hover:opacity-80 transition-opacity flex items-center justify-center flex-shrink-0"
+                    style={{ background: 'linear-gradient(to right, rgb(2, 239, 255), rgb(0, 255, 135))' }}
                   >
                     −
                   </button>
                   
                   {/* Contador central */}
-                  <div className="flex-1 text-center py-1.5 sm:py-2 rounded-md sm:rounded-lg bg-white border border-gray-200">
+                  <div className="flex-1 text-center py-1.5 sm:py-2 rounded-md sm:rounded-lg bg-white">
                     <div className="text-sm sm:text-base md:text-lg font-bold text-gray-900">
                       ${parseFloat(bets[idx]?.amount || '0').toFixed(0)}
                     </div>
@@ -537,13 +532,8 @@ export default function UpcomingMatches() {
                   <button
                     type="button"
                     onClick={() => handleIncrementAmount(idx)}
-                    className="w-12 h-8 sm:w-14 sm:h-9 md:w-16 md:h-10 rounded-md sm:rounded-lg bg-white border border-gray-200 text-gray-700 font-bold text-lg hover:bg-gray-50 active:border-0 transition-colors flex items-center justify-center flex-shrink-0"
-                    style={{}}
-                    onMouseDown={(e) => e.currentTarget.style.background = 'linear-gradient(to right, rgb(2, 239, 255), rgb(0, 255, 135))'}
-                    onMouseUp={(e) => e.currentTarget.style.background = ''}
-                    onMouseLeave={(e) => e.currentTarget.style.background = ''}
-                    onTouchStart={(e) => e.currentTarget.style.background = 'linear-gradient(to right, rgb(2, 239, 255), rgb(0, 255, 135))'}
-                    onTouchEnd={(e) => e.currentTarget.style.background = ''}
+                    className="w-12 h-8 sm:w-14 sm:h-9 md:w-16 md:h-10 rounded-md sm:rounded-lg text-[#37003c] font-bold text-lg hover:opacity-80 transition-opacity flex items-center justify-center flex-shrink-0"
+                    style={{ background: 'linear-gradient(to right, rgb(2, 239, 255), rgb(0, 255, 135))' }}
                   >
                     +
                   </button>
