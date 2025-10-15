@@ -79,7 +79,7 @@ export default function Header() {
           const leagueResponse = await fetch('/api/league');
           const leagueData = await leagueResponse.json();
           
-          const participantsData: Participant[] = data.profiles.map((profile: any) => {
+          const participantsData: Participant[] = data.profiles.map((profile: { display_name: string; league_entry_id: number; team_logo: string | null; fpl_entry_id: number | null }) => {
             const entry = leagueData.league_entries?.find(
               (e: { id: number; entry_name: string }) => e.id === profile.league_entry_id
             );
