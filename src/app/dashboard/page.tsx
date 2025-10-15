@@ -1,62 +1,129 @@
-import { createClient } from "@/lib/supabase/server";
-import { redirect } from "next/navigation";
+"use client";
+
+import { createClient } from "@/lib/supabase/client";
+import { useRouter } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
 import Header from "@/components/Header";
+import { useEffect, useState } from "react";
 
-export default async function DashboardPage() {
-  const supabase = await createClient();
+export default function DashboardPage() {
+  const router = useRouter();
+  const supabase = createClient();
+  const [user, setUser] = useState(null);
+  const [loading, setLoading] = useState(true);
 
-  // Obtenemos el usuario actual
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  useEffect(() => {
+    async function getUser() {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        router.push("/login");
+        return;
+      }
+      setUser(user);
+      setLoading(false);
+    }
+    
+    getUser();
+  }, [supabase, router]);
 
-  // Si no hay usuario, redirigir al login
-  if (!user) {
-    redirect("/login");
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-[#0a0a0a] flex items-center justify-center">
+        <div className="text-white text-xl">Cargando...</div>
+      </div>
+    );
   }
 
-  // Obtener el perfil del usuario
-  const { data: profile } = await supabase
-    .from("profiles")
-    .select("*")
-    .eq("id", user.id)
-    .single();
-
-  // Obtener TODAS las apuestas del usuario (ordenadas por fecha)
-  const { data: allBets } = await supabase
-    .from("bets")
-    .select("*")
-    .eq("user_id", user.id)
-    .order("created_at", { ascending: false });
-
-  // Filtrar apuestas activas (status='pending')
-  const activeBets = allBets?.filter((bet) => bet.status === "pending") || [];
-
-  // Calcular estadísticas
-  const wonBets = allBets?.filter((bet) => bet.status === "won") || [];
-  const lostBets = allBets?.filter((bet) => bet.status === "lost") || [];
-  
-  const totalWon = wonBets.reduce((sum, bet) => sum + bet.potential_win, 0);
-  const totalLost = lostBets.reduce((sum, bet) => sum + bet.amount, 0);
-  const netProfit = totalWon - totalLost;
-
-  // Obtener nombres de equipos para las apuestas activas
-  const teamIds = new Set<number>();
-  activeBets.forEach((bet) => {
-    teamIds.add(bet.match_league_entry_1);
-    teamIds.add(bet.match_league_entry_2);
+  const [profile, setProfile] = useState(null);
+  const [allBets, setAllBets] = useState([]);
+  const [activeBets, setActiveBets] = useState([]);
+  const [stats, setStats] = useState({
+    totalWon: 0,
+    totalLost: 0,
+    netProfit: 0,
+    wonBets: [],
+    lostBets: []
   });
+  const [teamMap, setTeamMap] = useState(new Map());
+  const [dataLoading, setDataLoading] = useState(true);
 
-  const { data: profiles } = await supabase
-    .from("profiles")
-    .select("league_entry_id, display_name, team_logo")
-    .in("league_entry_id", Array.from(teamIds));
+  useEffect(() => {
+    async function loadDashboardData() {
+      if (!user) return;
 
-  const teamMap = new Map(
-    profiles?.map((p) => [p.league_entry_id, { name: p.display_name, logo: p.team_logo }]) || []
-  );
+      try {
+        // Obtener el perfil del usuario
+        const { data: profileData } = await supabase
+          .from("profiles")
+          .select("*")
+          .eq("id", user.id)
+          .single();
+        setProfile(profileData);
+
+        // Obtener TODAS las apuestas del usuario (ordenadas por fecha)
+        const { data: betsData } = await supabase
+          .from("bets")
+          .select("*")
+          .eq("user_id", user.id)
+          .order("created_at", { ascending: false });
+        setAllBets(betsData || []);
+
+        // Filtrar apuestas activas (status='pending')
+        const active = betsData?.filter((bet) => bet.status === "pending") || [];
+        setActiveBets(active);
+
+        // Calcular estadísticas
+        const wonBets = betsData?.filter((bet) => bet.status === "won") || [];
+        const lostBets = betsData?.filter((bet) => bet.status === "lost") || [];
+        
+        const totalWon = wonBets.reduce((sum, bet) => sum + bet.potential_win, 0);
+        const totalLost = lostBets.reduce((sum, bet) => sum + bet.amount, 0);
+        const netProfit = totalWon - totalLost;
+
+        setStats({
+          totalWon,
+          totalLost,
+          netProfit,
+          wonBets,
+          lostBets
+        });
+
+        // Obtener nombres de equipos para las apuestas activas
+        const teamIds = new Set();
+        active.forEach((bet) => {
+          teamIds.add(bet.match_league_entry_1);
+          teamIds.add(bet.match_league_entry_2);
+        });
+
+        if (teamIds.size > 0) {
+          const { data: profilesData } = await supabase
+            .from("profiles")
+            .select("league_entry_id, display_name, team_logo")
+            .in("league_entry_id", Array.from(teamIds));
+
+          const newTeamMap = new Map(
+            profilesData?.map((p) => [p.league_entry_id, { name: p.display_name, logo: p.team_logo }]) || []
+          );
+          setTeamMap(newTeamMap);
+        }
+      } catch (error) {
+        console.error("Error loading dashboard data:", error);
+      } finally {
+        setDataLoading(false);
+      }
+    }
+
+    loadDashboardData();
+  }, [user, supabase]);
+
+  if (dataLoading) {
+    return (
+      <div className="min-h-screen bg-[#0a0a0a] flex items-center justify-center">
+        <div className="text-white text-xl">Cargando dashboard...</div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-[#0a0a0a]">
@@ -93,14 +160,14 @@ export default async function DashboardPage() {
           {/* Victorias */}
           <div className="bg-white/5 border border-white/10 rounded-xl sm:rounded-2xl p-3 sm:p-4 md:p-6">
             <div className="text-xs sm:text-sm text-gray-400 mb-1 sm:mb-2">Apuestas ganadas</div>
-            <div className="text-2xl sm:text-3xl md:text-4xl font-black text-[#ff2882]">{wonBets.length}</div>
+            <div className="text-2xl sm:text-3xl md:text-4xl font-black text-[#ff2882]">{stats.wonBets.length}</div>
           </div>
 
           {/* Ganancia neta */}
           <div className="bg-white/5 border border-white/10 rounded-xl sm:rounded-2xl p-3 sm:p-4 md:p-6">
             <div className="text-xs sm:text-sm text-gray-400 mb-1 sm:mb-2">Ganancia neta</div>
-            <div className={`text-2xl sm:text-3xl md:text-4xl font-black ${netProfit >= 0 ? 'text-[#00ff87]' : 'text-red-500'}`}>
-              ${netProfit.toFixed(2)}
+            <div className={`text-2xl sm:text-3xl md:text-4xl font-black ${stats.netProfit >= 0 ? 'text-[#00ff87]' : 'text-red-500'}`}>
+              ${stats.netProfit.toFixed(2)}
             </div>
           </div>
         </div>
@@ -223,7 +290,7 @@ export default async function DashboardPage() {
         )}
 
         {/* Historial de apuestas */}
-        {(wonBets.length > 0 || lostBets.length > 0) && (
+        {(stats.wonBets.length > 0 || stats.lostBets.length > 0) && (
           <div className="mb-4 sm:mb-6 md:mb-8">
             <h3 className="text-xl sm:text-2xl font-black text-white mb-3 sm:mb-4">Historial</h3>
             <div className="bg-white/5 border border-white/10 rounded-xl sm:rounded-2xl overflow-hidden">
@@ -246,7 +313,7 @@ export default async function DashboardPage() {
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-white/10">
-                    {[...wonBets, ...lostBets]
+                    {[...stats.wonBets, ...stats.lostBets]
                       .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
                       .slice(0, 10)
                       .map((bet) => {
