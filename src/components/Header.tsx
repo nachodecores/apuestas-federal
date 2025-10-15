@@ -32,8 +32,12 @@ export default function Header() {
   const supabase = createClient();
 
   useEffect(() => {
-    // Obtener usuario actual, nombre y participantes
+    // Limpiar sesión al cargar - siempre empezar sin usuario logueado
     async function getUserData() {
+      // Logout automático para limpiar cualquier sesión persistente
+      await supabase.auth.signOut();
+      
+      // Ahora verificar que no hay usuario
       const { data: { user } } = await supabase.auth.getUser();
       setUser(user);
       
