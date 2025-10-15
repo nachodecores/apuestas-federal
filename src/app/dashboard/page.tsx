@@ -12,6 +12,20 @@ export default function DashboardPage() {
   const supabase = createClient();
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
+  
+  // Todos los hooks deben ir aquí, antes de cualquier early return
+  const [profile, setProfile] = useState(null);
+  const [allBets, setAllBets] = useState([]);
+  const [activeBets, setActiveBets] = useState([]);
+  const [stats, setStats] = useState({
+    totalWon: 0,
+    totalLost: 0,
+    netProfit: 0,
+    wonBets: [],
+    lostBets: []
+  });
+  const [teamMap, setTeamMap] = useState(new Map());
+  const [dataLoading, setDataLoading] = useState(true);
 
   useEffect(() => {
     async function getUser() {
@@ -34,19 +48,6 @@ export default function DashboardPage() {
       </div>
     );
   }
-
-  const [profile, setProfile] = useState(null);
-  const [allBets, setAllBets] = useState([]);
-  const [activeBets, setActiveBets] = useState([]);
-  const [stats, setStats] = useState({
-    totalWon: 0,
-    totalLost: 0,
-    netProfit: 0,
-    wonBets: [],
-    lostBets: []
-  });
-  const [teamMap, setTeamMap] = useState(new Map());
-  const [dataLoading, setDataLoading] = useState(true);
 
   useEffect(() => {
     async function loadDashboardData() {
