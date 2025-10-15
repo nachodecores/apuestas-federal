@@ -510,30 +510,40 @@ export default function UpcomingMatches() {
 
               {/* Input de monto con botones + y - */}
               <div className="mb-3 sm:mb-4">
-                <div className="flex items-center gap-2">
-                  {/* Botón - */}
+                <div className="flex items-center gap-1.5 sm:gap-2">
+                  {/* Botón - (30%) */}
                   <button
                     type="button"
                     onClick={() => handleDecrementAmount(idx)}
-                    className="w-12 h-8 sm:w-14 sm:h-9 md:w-16 md:h-10 rounded-md sm:rounded-lg text-[#37003c] font-bold text-lg hover:opacity-80 transition-opacity flex items-center justify-center flex-shrink-0"
-                    style={{ background: 'linear-gradient(to right, rgb(2, 239, 255), rgb(0, 255, 135))' }}
+                    className="w-[30%] py-2 sm:py-2.5 md:py-3 rounded-md sm:rounded-lg text-gray-700 font-bold text-sm sm:text-base hover:opacity-80 transition-opacity flex items-center justify-center"
+                    style={{ backgroundColor: 'rgb(239, 239, 239)' }}
+                    onMouseDown={(e) => e.currentTarget.style.background = 'linear-gradient(to right, rgb(2, 239, 255), rgb(0, 255, 135))'}
+                    onMouseUp={(e) => e.currentTarget.style.background = 'rgb(239, 239, 239)'}
+                    onMouseLeave={(e) => e.currentTarget.style.background = 'rgb(239, 239, 239)'}
+                    onTouchStart={(e) => e.currentTarget.style.background = 'linear-gradient(to right, rgb(2, 239, 255), rgb(0, 255, 135))'}
+                    onTouchEnd={(e) => e.currentTarget.style.background = 'rgb(239, 239, 239)'}
                   >
                     −
                   </button>
                   
-                  {/* Contador central */}
-                  <div className="flex-1 text-center py-1.5 sm:py-2 rounded-md sm:rounded-lg bg-white">
-                    <div className="text-sm sm:text-base md:text-lg font-bold text-gray-900">
+                  {/* Contador central (40%) */}
+                  <div className="w-[40%] text-center py-2 sm:py-2.5 md:py-3 rounded-md sm:rounded-lg bg-white flex items-center justify-center">
+                    <div className="text-sm sm:text-base font-bold text-gray-900">
                       ${parseFloat(bets[idx]?.amount || '0').toFixed(0)}
                     </div>
                   </div>
                   
-                  {/* Botón + */}
+                  {/* Botón + (30%) */}
                   <button
                     type="button"
                     onClick={() => handleIncrementAmount(idx)}
-                    className="w-12 h-8 sm:w-14 sm:h-9 md:w-16 md:h-10 rounded-md sm:rounded-lg text-[#37003c] font-bold text-lg hover:opacity-80 transition-opacity flex items-center justify-center flex-shrink-0"
-                    style={{ background: 'linear-gradient(to right, rgb(2, 239, 255), rgb(0, 255, 135))' }}
+                    className="w-[30%] py-2 sm:py-2.5 md:py-3 rounded-md sm:rounded-lg text-gray-700 font-bold text-sm sm:text-base hover:opacity-80 transition-opacity flex items-center justify-center"
+                    style={{ backgroundColor: 'rgb(239, 239, 239)' }}
+                    onMouseDown={(e) => e.currentTarget.style.background = 'linear-gradient(to right, rgb(2, 239, 255), rgb(0, 255, 135))'}
+                    onMouseUp={(e) => e.currentTarget.style.background = 'rgb(239, 239, 239)'}
+                    onMouseLeave={(e) => e.currentTarget.style.background = 'rgb(239, 239, 239)'}
+                    onTouchStart={(e) => e.currentTarget.style.background = 'linear-gradient(to right, rgb(2, 239, 255), rgb(0, 255, 135))'}
+                    onTouchEnd={(e) => e.currentTarget.style.background = 'rgb(239, 239, 239)'}
                   >
                     +
                   </button>
