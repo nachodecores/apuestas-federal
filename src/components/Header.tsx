@@ -339,16 +339,14 @@ export default function Header() {
                 </Link>
               )}
 
-              {/* Botón Cerrar sesión (en dashboard y admin) */}
-              {(isDashboard || isAdminPage) && (
-                <button
-                  onClick={handleLogout}
-                  className="px-3 py-1.5 sm:px-4 sm:py-2 rounded-md sm:rounded-xl bg-white/5 border border-white/10 text-white hover:bg-white/10 transition-colors text-xs sm:text-sm font-semibold"
-                >
-                  <span className="hidden sm:inline">Cerrar sesión</span>
-                  <span className="sm:hidden">Salir</span>
-                </button>
-              )}
+              {/* Botón Cerrar sesión (siempre visible cuando está logueado) */}
+              <button
+                onClick={handleLogout}
+                className="px-3 py-1.5 sm:px-4 sm:py-2 rounded-md sm:rounded-xl bg-white/5 border border-white/10 text-white hover:bg-white/10 transition-colors text-xs sm:text-sm font-semibold"
+              >
+                <span className="hidden sm:inline">Cerrar sesión</span>
+                <span className="sm:hidden">Salir</span>
+              </button>
             </div>
           ) : (
             // Usuario NO logueado - mostrar dropdown
