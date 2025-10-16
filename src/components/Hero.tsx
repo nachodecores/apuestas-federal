@@ -7,6 +7,8 @@ export default function Hero() {
   const [activeBets, setActiveBets] = useState<number>(0);
   const [gwAmount, setGwAmount] = useState<number>(0);
   const [totalPool, setTotalPool] = useState<number>(0);
+  const [federalPool, setFederalPool] = useState<number>(0);
+  const [realPool] = useState<number>(10000);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -23,6 +25,7 @@ export default function Hero() {
         setActiveBets(data.activeBets);
         setGwAmount(data.gwAmount);
         setTotalPool(data.totalPool);
+        setFederalPool(data.federalPool || 0);
         setLoading(false);
       } catch (error) {
         console.error('Error fetching stats:', error);
@@ -57,7 +60,7 @@ export default function Hero() {
         <div className="px-3 sm:px-4 md:px-6 lg:px-8 py-8 sm:py-10 md:py-12 lg:py-16">
           <div className="text-center">
           {/* Stats */}
-          <div className="grid grid-cols-3 gap-3 sm:gap-6 md:gap-8 max-w-3xl mx-auto">
+          <div className="grid grid-cols-2 gap-3 sm:gap-6 md:gap-8 max-w-2xl mx-auto">
             {/* Apuestas Activas */}
             <div className="text-center">
               <div className="text-[0.625rem] sm:text-xs md:text-sm text-gray-300 tracking-wider mb-2 sm:mb-3">
@@ -93,11 +96,37 @@ export default function Hero() {
                 {loading ? '...' : `$${gwAmount.toLocaleString()}`}
               </div>
             </div>
+            </div>
+          </div>
+        </div>
+      </div>
 
-            {/* Pozo Total */}
+      {/* Pozo Stats - Fuera del div violeta */}
+      <div className="px-3 sm:px-4 md:px-6 lg:px-8 py-6 sm:py-8 md:py-10">
+        <div className="max-w-2xl mx-auto">
+          <div className="grid grid-cols-2 gap-3 sm:gap-6 md:gap-8">
+            {/* Pozo Real */}
             <div className="text-center">
-              <div className="text-[0.625rem] sm:text-xs md:text-sm text-gray-300 tracking-wider mb-2 sm:mb-3">
-                Pozo
+              <div className="text-[0.625rem] sm:text-xs md:text-sm text-gray-600 tracking-wider mb-2 sm:mb-3">
+                Pozo Real
+              </div>
+              <div 
+                className="text-2xl sm:text-3xl md:text-4xl font-bold mb-0"
+                style={{ 
+                  background: 'linear-gradient(to right, rgb(255, 40, 130), rgb(55, 0, 60))',
+                  WebkitBackgroundClip: 'text',
+                  WebkitTextFillColor: 'transparent',
+                  backgroundClip: 'text'
+                }}
+              >
+                ${realPool.toLocaleString()}
+              </div>
+            </div>
+
+            {/* Pozo Federal */}
+            <div className="text-center">
+              <div className="text-[0.625rem] sm:text-xs md:text-sm text-gray-600 tracking-wider mb-2 sm:mb-3">
+                Pozo Federal
               </div>
               <div 
                 className="text-2xl sm:text-3xl md:text-4xl font-bold mb-0"
@@ -108,9 +137,8 @@ export default function Hero() {
                   backgroundClip: 'text'
                 }}
               >
-                {loading ? '...' : `$${totalPool.toLocaleString()}`}
+                {loading ? '...' : `$${federalPool.toLocaleString()}`}
               </div>
-            </div>
             </div>
           </div>
         </div>

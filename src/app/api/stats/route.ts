@@ -10,7 +10,7 @@ export async function GET() {
         currentGameweek: 8,
         activeBets: 0,
         gwAmount: 0,
-        totalPool: 10000
+        federalPool: 0
       });
     }
 
@@ -26,7 +26,7 @@ export async function GET() {
         currentGameweek: 8,
         activeBets: 0,
         gwAmount: 0,
-        totalPool: 10000
+        federalPool: 0
       });
     }
     
@@ -62,23 +62,23 @@ export async function GET() {
       console.error('Error calculating GW amount:', error);
     }
 
-    // 4. Sumar todos los balances (pozo total) - con fallback
-    let totalPool = 10000; // Valor por defecto
+    // 4. Sumar todos los balances (pozo federal) - con fallback
+    let federalPool = 0;
     try {
       const { data: profiles } = await supabase
         .from('profiles')
         .select('balance');
       
-      totalPool = profiles?.reduce((sum, profile) => sum + profile.balance, 0) || 10000;
+      federalPool = profiles?.reduce((sum, profile) => sum + profile.balance, 0) || 0;
     } catch (error) {
-      console.error('Error calculating total pool:', error);
+      console.error('Error calculating federal pool:', error);
     }
 
     return NextResponse.json({
       currentGameweek,
       activeBets: activeBetsCount,
       gwAmount,
-      totalPool
+      federalPool
     });
   } catch (error) {
     console.error('Error in stats API:', error);
@@ -87,7 +87,7 @@ export async function GET() {
       currentGameweek: 8,
       activeBets: 0,
       gwAmount: 0,
-      totalPool: 10000
+      federalPool: 0
     });
   }
 }

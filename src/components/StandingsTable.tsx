@@ -174,9 +174,6 @@ export default function StandingsTable() {
                   <th className="px-2 py-2 sm:px-3 sm:py-3 md:px-4 md:py-3 lg:px-6 lg:py-4 text-[0.625rem] sm:text-xs font-light text-gray-600 uppercase tracking-wider">
                     Equipo
                   </th>
-                  <th className="hidden md:table-cell px-4 py-3 lg:px-6 lg:py-4 text-xs font-light text-gray-600 uppercase tracking-wider">
-                    Manager
-                  </th>
                   <th className="hidden lg:table-cell px-6 py-4 text-xs font-light text-gray-600 uppercase tracking-wider text-right">
                     Récord
                   </th>
@@ -217,10 +214,6 @@ export default function StandingsTable() {
                       </div>
                     </td>
                     
-                    {/* Manager - oculto en mobile */}
-                    <td className="hidden md:table-cell px-4 py-3 lg:px-6 lg:py-4">
-                      <span className="text-gray-900 font-bold text-sm">{player.name}</span>
-                    </td>
                     
                     {/* Récord - oculto en mobile y tablet */}
                     <td className="hidden lg:table-cell px-6 py-4 text-right">

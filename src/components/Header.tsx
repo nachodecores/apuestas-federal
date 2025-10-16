@@ -285,7 +285,7 @@ export default function Header() {
                     href="/dashboard"
                     className="px-2 py-1.5 sm:px-3 sm:py-2 rounded-md hover:opacity-90 transition-opacity flex items-center gap-1.5 sm:gap-2"
                     style={{ 
-                      backgroundColor: 'rgba(255, 255, 255, 0.75)', 
+                      backgroundColor: 'rgba(255, 255, 255, 1)', 
                       color: 'rgb(55, 0, 60)' 
                     }}
                   >
@@ -296,21 +296,15 @@ export default function Header() {
                     </div>
                     
                     {/* Avatar a la derecha */}
-                    {userTeamLogo ? (
-                      <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-full overflow-hidden bg-white border border-white/20 flex-shrink-0">
-                        <Image
-                          src={`/assets/${userTeamLogo}`}
-                          alt={userTeamName}
-                          width={32}
-                          height={32}
-                          className="object-cover w-full h-full"
-                        />
-                      </div>
-                    ) : (
-                      <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-gradient-to-br from-[#ff2882] to-[#37003c] flex items-center justify-center text-white font-bold text-[0.625rem] sm:text-xs flex-shrink-0">
-                        {userTeamName.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase()}
-                      </div>
-                    )}
+                    <div className="w-5 h-5 sm:w-6 sm:h-6 rounded-full overflow-hidden bg-white border border-white/20 flex-shrink-0">
+                      <Image
+                        src="/assets/Group170.svg"
+                        alt={userTeamName}
+                        width={24}
+                        height={24}
+                        className="object-cover w-full h-full"
+                      />
+                    </div>
                   </Link>
                 </div>
               )}

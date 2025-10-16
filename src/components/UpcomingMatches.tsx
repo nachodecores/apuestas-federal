@@ -183,8 +183,8 @@ export default function UpcomingMatches() {
             gameweek: match.event,
             team1Name: team1?.entry_name || 'Equipo 1',
             team2Name: team2?.entry_name || 'Equipo 2',
-            team1Manager: team1 ? `${team1.player_first_name} ${team1.player_last_name}` : 'Manager 1',
-            team2Manager: team2 ? `${team2.player_first_name} ${team2.player_last_name}` : 'Manager 2',
+            team1Manager: team1 ? team1.player_first_name : 'Manager 1',
+            team2Manager: team2 ? team2.player_first_name : 'Manager 2',
             team1Logo: (teamLogos.get(match.league_entry_1) as string) || null,
             team2Logo: (teamLogos.get(match.league_entry_2) as string) || null,
             league_entry_1: match.league_entry_1,
@@ -441,56 +441,18 @@ export default function UpcomingMatches() {
               
               {/* Equipos */}
               <div className="flex items-center justify-between mb-4 sm:mb-5 md:mb-6 gap-1 sm:gap-2">
-                {/* Local - Avatar izquierda, datos derecha */}
-                <div className="flex items-center gap-1.5 sm:gap-2 md:gap-3 flex-1 min-w-0">
-                  {/* Avatar */}
-                  {match.team1Logo ? (
-                    <div className="w-9 h-9 sm:w-11 sm:h-11 md:w-13 md:h-13 rounded-full overflow-hidden bg-white border border-white/20 sm:border-2 flex-shrink-0">
-                      <Image
-                        src={`/assets/${match.team1Logo}`}
-                        alt={match.team1Name}
-                        width={52}
-                        height={52}
-                        className="object-cover w-full h-full"
-                      />
-                    </div>
-                  ) : (
-                    <div className="w-9 h-9 sm:w-11 sm:h-11 md:w-13 md:h-13 rounded-full bg-gradient-to-br from-[#ff2882] to-[#37003c] flex items-center justify-center text-white font-bold text-[0.625rem] sm:text-xs flex-shrink-0">
-                      {match.team1Name.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase()}
-                    </div>
-                  )}
-                  {/* Datos */}
-                  <div className="flex flex-col min-w-0 overflow-hidden">
-                    <div className="text-gray-900 font-semibold text-[0.625rem] sm:text-xs md:text-sm truncate">{match.team1Name}</div>
-                    <div className="text-gray-600 text-[0.5rem] sm:text-[0.625rem] md:text-xs truncate">{match.team1Manager}</div>
-                  </div>
+                {/* Local - Solo datos */}
+                <div className="flex flex-col min-w-0 overflow-hidden flex-1">
+                  <div className="text-gray-900 font-semibold text-[0.625rem] sm:text-xs md:text-sm truncate">{match.team1Name}</div>
+                  <div className="text-gray-900 font-semibold text-[0.625rem] sm:text-xs md:text-sm truncate">{match.team1Manager}</div>
                 </div>
                 
                 <div className="text-gray-800 font-black text-xs sm:text-sm md:text-base px-0.5 sm:px-1 md:px-2 flex-shrink-0">VS</div>
                 
-                {/* Visitante - Avatar derecha, datos izquierda */}
-                <div className="flex items-center gap-1.5 sm:gap-2 md:gap-3 flex-1 flex-row-reverse min-w-0">
-                  {/* Avatar */}
-                  {match.team2Logo ? (
-                    <div className="w-9 h-9 sm:w-11 sm:h-11 md:w-13 md:h-13 rounded-full overflow-hidden bg-white border border-white/20 sm:border-2 flex-shrink-0">
-                      <Image
-                        src={`/assets/${match.team2Logo}`}
-                        alt={match.team2Name}
-                        width={52}
-                        height={52}
-                        className="object-cover w-full h-full"
-                      />
-                    </div>
-                  ) : (
-                    <div className="w-9 h-9 sm:w-11 sm:h-11 md:w-13 md:h-13 rounded-full bg-gradient-to-br from-[#37003c] to-[#00ff87] flex items-center justify-center text-white font-bold text-[0.625rem] sm:text-xs flex-shrink-0">
-                      {match.team2Name.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase()}
-                    </div>
-                  )}
-                  {/* Datos alineados a la derecha */}
-                  <div className="flex flex-col text-right min-w-0 overflow-hidden">
-                    <div className="text-gray-900 font-semibold text-[0.625rem] sm:text-xs md:text-sm truncate">{match.team2Name}</div>
-                    <div className="text-gray-600 text-[0.5rem] sm:text-[0.625rem] md:text-xs truncate">{match.team2Manager}</div>
-                  </div>
+                {/* Visitante - Solo datos */}
+                <div className="flex flex-col text-right min-w-0 overflow-hidden flex-1">
+                  <div className="text-gray-900 font-semibold text-[0.625rem] sm:text-xs md:text-sm truncate">{match.team2Name}</div>
+                  <div className="text-gray-900 font-semibold text-[0.625rem] sm:text-xs md:text-sm truncate">{match.team2Manager}</div>
                 </div>
               </div>
 
@@ -585,7 +547,7 @@ export default function UpcomingMatches() {
                   <button
                     type="button"
                     onClick={() => handleDecrementAmount(idx)}
-                    className="w-[30%] py-2 sm:py-2.5 md:py-3 rounded-md sm:rounded-lg text-gray-700 font-bold text-sm sm:text-base hover:opacity-80 transition-opacity flex items-center justify-center"
+                    className="w-[30%] py-2 sm:py-2.5 md:py-3 rounded-md sm:rounded-lg text-gray-700 font-bold text-xl sm:text-2xl md:text-3xl hover:opacity-80 transition-opacity flex items-center justify-center"
                     style={{ backgroundColor: 'rgb(239, 239, 239)' }}
                     onMouseDown={(e) => e.currentTarget.style.background = 'linear-gradient(to right, rgb(2, 239, 255), rgb(0, 255, 135))'}
                     onMouseUp={(e) => e.currentTarget.style.background = 'rgb(239, 239, 239)'}
@@ -617,7 +579,7 @@ export default function UpcomingMatches() {
                   <button
                     type="button"
                     onClick={() => handleIncrementAmount(idx)}
-                    className="w-[30%] py-2 sm:py-2.5 md:py-3 rounded-md sm:rounded-lg text-gray-700 font-bold text-sm sm:text-base hover:opacity-80 transition-opacity flex items-center justify-center"
+                    className="w-[30%] py-2 sm:py-2.5 md:py-3 rounded-md sm:rounded-lg text-gray-700 font-bold text-xl sm:text-2xl md:text-3xl hover:opacity-80 transition-opacity flex items-center justify-center"
                     style={{ backgroundColor: 'rgb(239, 239, 239)' }}
                     onMouseDown={(e) => e.currentTarget.style.background = 'linear-gradient(to right, rgb(2, 239, 255), rgb(0, 255, 135))'}
                     onMouseUp={(e) => e.currentTarget.style.background = 'rgb(239, 239, 239)'}
