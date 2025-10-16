@@ -27,6 +27,14 @@ export default function DashboardPage() {
   const [teamMap, setTeamMap] = useState(new Map());
   const [dataLoading, setDataLoading] = useState(true);
 
+  // Estados para cambiar contraseña
+  const [showChangePasswordModal, setShowChangePasswordModal] = useState(false);
+  const [currentPassword, setCurrentPassword] = useState('');
+  const [newPassword, setNewPassword] = useState('');
+  const [confirmNewPassword, setConfirmNewPassword] = useState('');
+  const [changingPassword, setChangingPassword] = useState(false);
+  const [passwordError, setPasswordError] = useState<string | null>(null);
+
   useEffect(() => {
     async function getUser() {
       const { data: { user } } = await supabase.auth.getUser();
@@ -126,189 +134,320 @@ export default function DashboardPage() {
     );
   }
 
+  // Función para eliminar una apuesta
+  async function handleDeleteBet(betId: string) {
+    if (!confirm('¿Estás seguro que querés eliminar esta apuesta?')) {
+      return;
+    }
+
+    try {
+      const response = await fetch('/api/bets/delete', {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ betId }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Error al eliminar la apuesta');
+      }
+
+      // Actualizar la lista local removiendo la apuesta eliminada
+      setActiveBets(prev => prev.filter(bet => bet.id !== betId));
+      
+      // Actualizar el balance del usuario
+      const deletedBet = activeBets.find(bet => bet.id === betId);
+      if (deletedBet && profile) {
+        setProfile(prev => prev ? { ...prev, balance: prev.balance + (deletedBet.amount || 0) } : null);
+      }
+
+      alert('Apuesta eliminada correctamente');
+    } catch (error) {
+      console.error('Error al eliminar apuesta:', error);
+      alert('Error al eliminar la apuesta. Intentalo de nuevo.');
+    }
+  }
+
+  // Función para cambiar contraseña
+  async function handleChangePassword(e: React.FormEvent) {
+    e.preventDefault();
+    setPasswordError(null);
+    setChangingPassword(true);
+
+    try {
+      // Validaciones
+      if (newPassword !== confirmNewPassword) {
+        setPasswordError('Las contraseñas no coinciden');
+        setChangingPassword(false);
+        return;
+      }
+
+      if (newPassword.length < 6) {
+        setPasswordError('La nueva contraseña debe tener al menos 6 caracteres');
+        setChangingPassword(false);
+        return;
+      }
+
+      console.log('Intentando cambiar contraseña para usuario:', user?.email);
+
+      // Cambiar contraseña en Supabase
+      const { data, error } = await supabase.auth.updateUser({
+        password: newPassword
+      });
+
+      if (error) {
+        console.error('Error al cambiar contraseña:', error);
+        throw error;
+      }
+
+      if (!data.user) {
+        console.error('No se recibió usuario actualizado');
+        throw new Error('Error: No se pudo actualizar el usuario');
+      }
+
+      console.log('Contraseña cambiada exitosamente para:', data.user.email);
+
+      // Éxito
+      alert('¡Contraseña cambiada exitosamente!');
+      setShowChangePasswordModal(false);
+      setCurrentPassword('');
+      setNewPassword('');
+      setConfirmNewPassword('');
+
+    } catch (error) {
+      console.error('Error completo en cambio de contraseña:', error);
+      
+      let errorMessage = 'Error al cambiar contraseña';
+      
+      if (error instanceof Error) {
+        // Mensajes de error más específicos y amigables
+        if (error.message.includes('Password should be at least')) {
+          errorMessage = 'La contraseña debe tener al menos 6 caracteres (requerido por Supabase)';
+        } else if (error.message.includes('Invalid login credentials')) {
+          errorMessage = 'Credenciales inválidas. Por favor, volvé a iniciar sesión.';
+        } else if (error.message.includes('Email not confirmed')) {
+          errorMessage = 'Email no confirmado. Contactá al administrador.';
+        } else if (error.message.includes('Too many requests')) {
+          errorMessage = 'Demasiados intentos. Esperá unos minutos e intentá de nuevo.';
+        } else {
+          errorMessage = `Error: ${error.message}`;
+        }
+      }
+      
+      setPasswordError(errorMessage);
+    } finally {
+      setChangingPassword(false);
+    }
+  }
+
   return (
-    <div className="min-h-screen bg-[#0a0a0a]">
+    <div className="min-h-screen bg-[#ebe5eb]">
       <Header />
 
       {/* Contenido */}
       <div className="max-w-7xl mx-auto px-3 sm:px-4 md:px-6 lg:px-8 py-6 sm:py-8 md:py-10 lg:py-12">
         {/* Welcome card */}
-        <div className="bg-white/5 border border-white/10 rounded-xl sm:rounded-2xl p-4 sm:p-6 md:p-8 mb-4 sm:mb-6 md:mb-8">
-          <h2 className="text-xl sm:text-2xl md:text-3xl font-black text-white mb-1 sm:mb-2">
-            ¡Bienvenido, {profile?.display_name || user.email}!
-          </h2>
-          <p className="text-sm sm:text-base text-gray-400">
-            Tu cuenta está lista para empezar a apostar
-          </p>
+        <div 
+          className="border border-white/10 rounded-xl sm:rounded-2xl p-4 sm:p-6 md:p-8 mb-4 sm:mb-6 md:mb-8 relative overflow-hidden"
+          style={{ backgroundColor: 'rgba(237, 237, 237, 0.85)' }}
+        >
+          <div className="relative z-10">
+              <h2 className="text-xl sm:text-2xl md:text-3xl font-black text-gray-900 mb-1 sm:mb-2">
+                ¡Bienvenido, {profile?.display_name || user.email}!
+              </h2>
+              <p className="text-sm sm:text-base text-gray-600">
+                Saldo de tu cuenta: <span className="font-bold text-[#00ff87]">${profile?.balance?.toFixed(2) || "0"}</span>
+              </p>
+          </div>
+          {/* Patrón de fondo sutil */}
+          <div className="absolute inset-0 opacity-5">
+            <div className="w-full h-full bg-gradient-to-br from-[#953bff] to-[#02efff]"></div>
+          </div>
         </div>
 
         {/* Stats cards */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4 md:gap-6 mb-4 sm:mb-6 md:mb-8">
-          {/* Balance */}
-          <div className="bg-white/5 border border-white/10 rounded-xl sm:rounded-2xl p-3 sm:p-4 md:p-6">
-            <div className="text-xs sm:text-sm text-gray-400 mb-1 sm:mb-2">Tu balance</div>
-            <div className="text-2xl sm:text-3xl md:text-4xl font-black text-[#00ff87]">
-              ${profile?.balance?.toFixed(2) || "0"}
-            </div>
-          </div>
-
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3 sm:gap-4 md:gap-6 mb-4 sm:mb-6 md:mb-8">
           {/* Apuestas activas */}
-          <div className="bg-white/5 border border-white/10 rounded-xl sm:rounded-2xl p-3 sm:p-4 md:p-6">
-            <div className="text-xs sm:text-sm text-gray-400 mb-1 sm:mb-2">Apuestas activas</div>
-            <div className="text-2xl sm:text-3xl md:text-4xl font-black text-white">{activeBets.length}</div>
+          <div 
+            className="border border-white/10 rounded-xl sm:rounded-2xl p-3 sm:p-4 md:p-6 relative overflow-hidden"
+            style={{ backgroundColor: 'rgba(237, 237, 237, 0.85)' }}
+          >
+            <div className="relative z-10">
+              <div className="text-xs sm:text-sm text-gray-600 mb-1 sm:mb-2 font-medium">Apuestas activas</div>
+              <div className="text-2xl sm:text-3xl md:text-4xl font-black text-gray-900">{activeBets.length}</div>
+            </div>
+            <div className="absolute inset-0 opacity-5 bg-gradient-to-br from-[#953bff] to-[#02efff]"></div>
           </div>
 
-          {/* Victorias */}
-          <div className="bg-white/5 border border-white/10 rounded-xl sm:rounded-2xl p-3 sm:p-4 md:p-6">
-            <div className="text-xs sm:text-sm text-gray-400 mb-1 sm:mb-2">Apuestas ganadas</div>
-            <div className="text-2xl sm:text-3xl md:text-4xl font-black text-[#ff2882]">{stats.wonBets.length}</div>
+          {/* Total apostado GW actual */}
+          <div 
+            className="border border-white/10 rounded-xl sm:rounded-2xl p-3 sm:p-4 md:p-6 relative overflow-hidden"
+            style={{ backgroundColor: 'rgba(237, 237, 237, 0.85)' }}
+          >
+            <div className="relative z-10">
+              <div className="text-xs sm:text-sm text-gray-600 mb-1 sm:mb-2 font-medium">Total apostado GW</div>
+              <div className="text-2xl sm:text-3xl md:text-4xl font-black text-[#ff2882]">
+                ${activeBets.reduce((sum, bet) => sum + (bet.amount || 0), 0).toFixed(0)}
+              </div>
+            </div>
+            <div className="absolute inset-0 opacity-5 bg-gradient-to-br from-[#ff2882] to-[#953bff]"></div>
           </div>
 
           {/* Ganancia neta */}
-          <div className="bg-white/5 border border-white/10 rounded-xl sm:rounded-2xl p-3 sm:p-4 md:p-6">
-            <div className="text-xs sm:text-sm text-gray-400 mb-1 sm:mb-2">Ganancia neta</div>
-            <div className={`text-2xl sm:text-3xl md:text-4xl font-black ${stats.netProfit >= 0 ? 'text-[#00ff87]' : 'text-red-500'}`}>
-              ${stats.netProfit.toFixed(2)}
+          <div 
+            className="border border-white/10 rounded-xl sm:rounded-2xl p-3 sm:p-4 md:p-6 relative overflow-hidden"
+            style={{ backgroundColor: 'rgba(237, 237, 237, 0.85)' }}
+          >
+            <div className="relative z-10">
+              <div className="text-xs sm:text-sm text-gray-600 mb-1 sm:mb-2 font-medium">Ganancia neta</div>
+              <div className={`text-2xl sm:text-3xl md:text-4xl font-black ${stats.netProfit >= 0 ? 'text-[#00ff87]' : 'text-red-500'}`}>
+                ${stats.netProfit.toFixed(2)}
+              </div>
             </div>
+            <div className={`absolute inset-0 opacity-5 ${stats.netProfit >= 0 ? 'bg-gradient-to-br from-[#00ff87] to-[#02efff]' : 'bg-gradient-to-br from-red-500 to-[#ff2882]'}`}></div>
           </div>
         </div>
 
         {/* Apuestas activas */}
         {activeBets.length > 0 ? (
           <div className="mb-4 sm:mb-6 md:mb-8">
-            <h3 className="text-xl sm:text-2xl font-black text-white mb-3 sm:mb-4">Apuestas Activas</h3>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
-              {activeBets.map((bet) => {
-                const team1 = teamMap.get(bet.match_league_entry_1);
-                const team2 = teamMap.get(bet.match_league_entry_2);
-                
-                let predictionText = '';
-                if (bet.prediction === 'home') predictionText = `Gana ${team1?.name || 'Local'}`;
-                else if (bet.prediction === 'away') predictionText = `Gana ${team2?.name || 'Visitante'}`;
-                else predictionText = 'Empate';
-
-                return (
-                  <div
-                    key={bet.id}
-                    className="bg-white/5 border border-white/10 rounded-lg sm:rounded-xl p-3 sm:p-4 hover:border-[#ff2882]/50 transition-all"
-                  >
-                    <div className="flex items-center justify-between mb-2 sm:mb-3">
-                      <span className="text-[0.625rem] sm:text-xs text-gray-400 uppercase tracking-wider">
-                        GW{bet.gameweek}
-                      </span>
-                      <span className="text-[0.625rem] sm:text-xs px-1.5 sm:px-2 py-0.5 sm:py-1 rounded-full bg-[#00ff87]/10 text-[#00ff87]">
-                        En juego
-                      </span>
-                    </div>
-
-                    {/* Equipos */}
-                    <div className="flex items-center justify-between mb-2 sm:mb-3">
-                      <div className="text-center flex-1">
-                        {team1?.logo ? (
-                          <div className="w-8 h-8 sm:w-9 sm:h-9 md:w-10 md:h-10 rounded-full mx-auto mb-0.5 sm:mb-1 overflow-hidden bg-white border border-white/20 sm:border-2">
-                            <Image
-                              src={`/assets/${team1.logo}`}
-                              alt={team1.name || 'Team 1'}
-                              width={40}
-                              height={40}
-                              className="object-cover w-full h-full"
-                            />
-                          </div>
-                        ) : (
-                          <div className="w-8 h-8 sm:w-9 sm:h-9 md:w-10 md:h-10 rounded-full bg-gradient-to-br from-[#ff2882] to-[#37003c] mx-auto mb-0.5 sm:mb-1 flex items-center justify-center text-white font-bold text-[0.625rem] sm:text-xs">
-                            {team1?.name?.split(' ').map((n: string) => n[0]).join('').slice(0, 2).toUpperCase() || 'T1'}
-                          </div>
-                        )}
-                        <div className="text-white text-[0.625rem] sm:text-xs font-semibold truncate">
-                          {team1?.name || 'Equipo 1'}
-                        </div>
-                      </div>
+            <h3 className="text-xl sm:text-2xl font-black text-[#37003c] mb-3 sm:mb-4">Apuestas Activas</h3>
+            <div 
+              className="border border-gray-200 rounded-lg sm:rounded-xl overflow-hidden bg-white shadow-lg"
+            >
+              <div className="overflow-x-auto">
+                <table className="w-full">
+                  <thead>
+                    <tr className="border-b border-gray-200 text-left bg-gray-50">
+                      <th className="px-2 py-2 sm:px-3 sm:py-3 text-[0.625rem] sm:text-xs font-medium text-gray-600 uppercase tracking-wider">
+                        Partido
+                      </th>
+                      <th className="px-2 py-2 sm:px-3 sm:py-3 text-[0.625rem] sm:text-xs font-medium text-gray-600 uppercase tracking-wider">
+                        Predicción
+                      </th>
+                      <th className="px-2 py-2 sm:px-3 sm:py-3 text-[0.625rem] sm:text-xs font-medium text-gray-600 uppercase tracking-wider text-right">
+                        Apostado
+                      </th>
+                      <th className="px-2 py-2 sm:px-3 sm:py-3 text-[0.625rem] sm:text-xs font-medium text-gray-600 uppercase tracking-wider text-right">
+                        Posible
+                      </th>
+                      <th className="px-2 py-2 sm:px-3 sm:py-3 text-[0.625rem] sm:text-xs font-medium text-gray-600 uppercase tracking-wider text-right">
+                        Cuota
+                      </th>
+                      <th className="px-2 py-2 sm:px-3 sm:py-3 text-[0.625rem] sm:text-xs font-medium text-gray-600 uppercase tracking-wider text-center">
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {activeBets.map((bet) => {
+                      const team1 = teamMap.get(bet.match_league_entry_1);
+                      const team2 = teamMap.get(bet.match_league_entry_2);
                       
-                      <div className="text-gray-600 font-black text-xs sm:text-sm px-1 sm:px-2">VS</div>
-                      
-                      <div className="text-center flex-1">
-                        {team2?.logo ? (
-                          <div className="w-8 h-8 sm:w-9 sm:h-9 md:w-10 md:h-10 rounded-full mx-auto mb-0.5 sm:mb-1 overflow-hidden bg-white border border-white/20 sm:border-2">
-                            <Image
-                              src={`/assets/${team2.logo}`}
-                              alt={team2.name || 'Team 2'}
-                              width={40}
-                              height={40}
-                              className="object-cover w-full h-full"
-                            />
-                          </div>
-                        ) : (
-                          <div className="w-8 h-8 sm:w-9 sm:h-9 md:w-10 md:h-10 rounded-full bg-gradient-to-br from-[#37003c] to-[#00ff87] mx-auto mb-0.5 sm:mb-1 flex items-center justify-center text-white font-bold text-[0.625rem] sm:text-xs">
-                            {team2?.name?.split(' ').map((n: string) => n[0]).join('').slice(0, 2).toUpperCase() || 'T2'}
-                          </div>
-                        )}
-                        <div className="text-white text-[0.625rem] sm:text-xs font-semibold truncate">
-                          {team2?.name || 'Equipo 2'}
-                        </div>
-                      </div>
-                    </div>
+                      let predictionText = '';
+                      if (bet.prediction === 'home') predictionText = 'Local';
+                      else if (bet.prediction === 'away') predictionText = 'Visitante';
+                      else predictionText = 'Empate';
 
-                    {/* Predicción */}
-                    <div className="mb-2 sm:mb-3 p-1.5 sm:p-2 rounded-md sm:rounded-lg bg-[#ff2882]/10 border border-[#ff2882]/20">
-                      <div className="text-[0.625rem] sm:text-xs text-gray-400 mb-0.5 sm:mb-1">Tu predicción</div>
-                      <div className="text-xs sm:text-sm font-bold text-[#ff2882]">{predictionText}</div>
-                    </div>
-
-                    {/* Apuesta y ganancia */}
-                    <div className="flex items-center justify-between text-xs sm:text-sm">
-                      <div>
-                        <span className="text-gray-400">Apostado:</span>
-                        <span className="text-white font-bold ml-1">${bet.amount ? bet.amount.toFixed(2) : '0.00'}</span>
-                      </div>
-                      <div>
-                        <span className="text-gray-400">Posible:</span>
-                        <span className="text-[#00ff87] font-bold ml-1">
-                          ${bet.potential_win ? bet.potential_win.toFixed(2) : '0.00'}
-                        </span>
-                      </div>
-                    </div>
-                    <div className="mt-1 sm:mt-2 text-[0.625rem] sm:text-xs text-gray-500 text-right">
-                      Cuota: {bet.odds ? bet.odds.toFixed(2) : 'N/A'}x
-                    </div>
-                  </div>
-                );
-              })}
+                      return (
+                        <tr
+                          key={bet.id}
+                          className="border-b border-gray-100 hover:bg-gray-50 transition-colors"
+                        >
+                          {/* Partido */}
+                          <td className="px-2 py-2 sm:px-3 sm:py-3">
+                            <div className="text-xs sm:text-sm font-medium text-gray-900 truncate max-w-[8rem] sm:max-w-none">
+                              {team1?.name || 'Local'} vs {team2?.name || 'Visitante'}
+                            </div>
+                          </td>
+                          
+                          {/* Predicción */}
+                          <td className="px-2 py-2 sm:px-3 sm:py-3">
+                            <span className="inline-flex items-center px-1.5 py-0.5 rounded-full text-[0.625rem] sm:text-xs font-medium bg-[#ff2882]/10 text-[#ff2882]">
+                              {predictionText}
+                            </span>
+                          </td>
+                          
+                          {/* Apostado */}
+                          <td className="px-2 py-2 sm:px-3 sm:py-3 text-right">
+                            <span className="text-xs sm:text-sm font-medium text-gray-900">
+                              ${bet.amount ? bet.amount.toFixed(2) : '0.00'}
+                            </span>
+                          </td>
+                          
+                          {/* Posible */}
+                          <td className="px-2 py-2 sm:px-3 sm:py-3 text-right">
+                            <span className="text-xs sm:text-sm font-medium text-[#00ff87]">
+                              ${bet.potential_win ? bet.potential_win.toFixed(2) : '0.00'}
+                            </span>
+                          </td>
+                          
+                          {/* Cuota */}
+                          <td className="px-2 py-2 sm:px-3 sm:py-3 text-right">
+                            <span className="text-xs sm:text-sm font-medium text-gray-600">
+                              {bet.odds ? bet.odds.toFixed(2) : 'N/A'}
+                            </span>
+                          </td>
+                          
+                          {/* Botón eliminar */}
+                          <td className="px-2 py-2 sm:px-3 sm:py-3 text-center">
+                            <button
+                              onClick={() => handleDeleteBet(bet.id)}
+                              className="w-6 h-6 sm:w-7 sm:h-7 rounded-full bg-red-100 hover:bg-red-200 text-red-600 hover:text-red-700 transition-colors flex items-center justify-center text-xs sm:text-sm font-bold"
+                              title="Eliminar apuesta"
+                            >
+                              ×
+                            </button>
+                          </td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              </div>
             </div>
           </div>
         ) : (
-          <div className="mb-4 sm:mb-6 md:mb-8 bg-white/5 border border-white/10 rounded-xl sm:rounded-2xl p-4 sm:p-6 md:p-8 text-center">
-            <h3 className="text-lg sm:text-xl font-bold text-white mb-1 sm:mb-2">No tenés apuestas activas</h3>
-            <p className="text-sm sm:text-base text-gray-400 mb-3 sm:mb-4">
-              Andá a la página principal para hacer apuestas en los próximos partidos
-            </p>
-            <Link
-              href="/"
-              className="inline-block px-4 sm:px-5 md:px-6 py-2 sm:py-2.5 md:py-3 rounded-lg sm:rounded-xl gradient-fpl font-bold text-sm sm:text-base hover:opacity-90 transition-opacity"
-            >
-              Ver próximos partidos
-            </Link>
+          <div 
+            className="mb-4 sm:mb-6 md:mb-8 border border-white/10 rounded-xl sm:rounded-2xl p-4 sm:p-6 md:p-8 text-center relative overflow-hidden"
+            style={{ backgroundColor: 'rgba(237, 237, 237, 0.85)' }}
+          >
+            <div className="relative z-10">
+              <h3 className="text-lg sm:text-xl font-bold text-gray-900 mb-1 sm:mb-2">No tenés apuestas activas</h3>
+              <p className="text-sm sm:text-base text-gray-600 mb-3 sm:mb-4">
+                Andá a la página principal para hacer apuestas en los próximos partidos
+              </p>
+              <Link
+                href="/"
+                className="inline-block px-4 sm:px-5 md:px-6 py-2 sm:py-2.5 md:py-3 rounded-lg sm:rounded-xl font-bold text-sm sm:text-base hover:opacity-90 transition-opacity text-white"
+                style={{ background: 'linear-gradient(to right, #953bff, #02efff)' }}
+              >
+                Ver próximos partidos
+              </Link>
+            </div>
+            <div className="absolute inset-0 opacity-5 bg-gradient-to-br from-[#953bff] to-[#02efff]"></div>
           </div>
         )}
 
         {/* Historial de apuestas */}
         {(stats.wonBets.length > 0 || stats.lostBets.length > 0) && (
           <div className="mb-4 sm:mb-6 md:mb-8">
-            <h3 className="text-xl sm:text-2xl font-black text-white mb-3 sm:mb-4">Historial</h3>
-            <div className="bg-white/5 border border-white/10 rounded-xl sm:rounded-2xl overflow-hidden">
+            <h3 className="text-xl sm:text-2xl font-black text-[#37003c] mb-3 sm:mb-4">Historial</h3>
+            <div className="border border-gray-200 rounded-xl sm:rounded-2xl overflow-hidden bg-white shadow-lg">
               <div className="overflow-x-auto">
                 <table className="w-full">
-                  <thead className="bg-white/5">
+                  <thead className="bg-gray-50">
                     <tr>
-                      <th className="px-2 sm:px-3 md:px-4 py-2 sm:py-3 text-left text-[0.625rem] sm:text-xs font-semibold text-gray-400 uppercase tracking-wider">
+                      <th className="px-2 sm:px-3 md:px-4 py-2 sm:py-3 text-left text-xs sm:text-sm font-semibold text-gray-600 uppercase tracking-wider">
                         GW
                       </th>
-                      <th className="px-2 sm:px-3 md:px-4 py-2 sm:py-3 text-left text-[0.625rem] sm:text-xs font-semibold text-gray-400 uppercase tracking-wider">
+                      <th className="px-2 sm:px-3 md:px-4 py-2 sm:py-3 text-left text-xs sm:text-sm font-semibold text-gray-600 uppercase tracking-wider">
                         Resultado
                       </th>
-                      <th className="px-2 sm:px-3 md:px-4 py-2 sm:py-3 text-right text-[0.625rem] sm:text-xs font-semibold text-gray-400 uppercase tracking-wider">
+                      <th className="px-2 sm:px-3 md:px-4 py-2 sm:py-3 text-right text-xs sm:text-sm font-semibold text-gray-600 uppercase tracking-wider">
                         Apostado
                       </th>
-                      <th className="px-2 sm:px-3 md:px-4 py-2 sm:py-3 text-right text-[0.625rem] sm:text-xs font-semibold text-gray-400 uppercase tracking-wider">
+                      <th className="px-2 sm:px-3 md:px-4 py-2 sm:py-3 text-right text-xs sm:text-sm font-semibold text-gray-600 uppercase tracking-wider">
                         Ganancia
                       </th>
                     </tr>
@@ -327,7 +466,7 @@ export default function DashboardPage() {
                             </td>
                             <td className="px-2 sm:px-3 md:px-4 py-2 sm:py-3">
                               <span
-                                className={`inline-flex items-center px-1.5 sm:px-2 py-0.5 sm:py-1 rounded-full text-[0.625rem] sm:text-xs font-semibold ${
+                                className={`inline-flex items-center px-2 sm:px-3 py-1 sm:py-1.5 rounded-full text-xs sm:text-sm font-semibold ${
                                   isWon
                                     ? 'bg-green-500/10 text-green-500'
                                     : 'bg-red-500/10 text-red-500'
@@ -353,7 +492,94 @@ export default function DashboardPage() {
             </div>
           </div>
         )}
+
+        {/* Footer con botón cambiar contraseña */}
+        <div className="text-center mt-8 sm:mt-12">
+          <button
+            onClick={() => setShowChangePasswordModal(true)}
+            className="text-gray-500 hover:text-[#ff2882] transition-colors text-sm font-medium"
+          >
+            Cambiar contraseña
+          </button>
+        </div>
       </div>
+
+      {/* Modal cambiar contraseña */}
+      {showChangePasswordModal && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
+          <div className="bg-white rounded-xl p-6 w-full max-w-md">
+            <h3 className="text-xl font-bold text-gray-900 mb-4">Cambiar contraseña</h3>
+            
+            <form onSubmit={handleChangePassword} className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Contraseña actual
+                </label>
+                <input
+                  type="password"
+                  value={currentPassword}
+                  onChange={(e) => setCurrentPassword(e.target.value)}
+                  required
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-[#ff2882]"
+                  placeholder="Tu contraseña actual"
+                />
+              </div>
+              
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Nueva contraseña
+                </label>
+                <input
+                  type="password"
+                  value={newPassword}
+                  onChange={(e) => setNewPassword(e.target.value)}
+                  required
+                  minLength={6}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-[#ff2882]"
+                  placeholder="Mínimo 6 caracteres (requerido por Supabase)"
+                />
+              </div>
+              
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Confirmar nueva contraseña
+                </label>
+                <input
+                  type="password"
+                  value={confirmNewPassword}
+                  onChange={(e) => setConfirmNewPassword(e.target.value)}
+                  required
+                  minLength={6}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-[#ff2882]"
+                  placeholder="Repetí la nueva contraseña (mínimo 6 caracteres)"
+                />
+              </div>
+
+              {passwordError && (
+                <div className="text-red-500 text-sm">{passwordError}</div>
+              )}
+
+              <div className="flex gap-3">
+                <button
+                  type="button"
+                  onClick={() => setShowChangePasswordModal(false)}
+                  className="flex-1 px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors"
+                >
+                  Cancelar
+                </button>
+                <button
+                  type="submit"
+                  disabled={changingPassword}
+                  className="flex-1 px-4 py-2 rounded-lg text-white font-medium transition-colors disabled:opacity-50"
+                  style={{ backgroundColor: 'rgb(150, 60, 255)' }}
+                >
+                  {changingPassword ? 'Cambiando...' : 'Cambiar'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

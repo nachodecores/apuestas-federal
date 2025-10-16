@@ -257,7 +257,77 @@ export default function UpcomingMatches() {
     });
   }
 
-  // Función para confirmar TODAS las apuestas del gameweek
+  // Función para confirmar una apuesta individual
+  async function handleConfirmSingleBet(matchIndex: number) {
+    // Validaciones
+    if (!user) {
+      alert('Necesitás iniciar sesión para apostar');
+      return;
+    }
+    
+    const bet = bets[matchIndex];
+    const match = matches[matchIndex];
+    
+    if (!bet?.prediction || !bet.amount || parseFloat(bet.amount) <= 0) {
+      alert('Seleccioná una predicción y monto válido');
+      return;
+    }
+    
+    const betAmount = parseFloat(bet.amount);
+    
+    if (betAmount > userBalance) {
+      alert(`No tenés suficiente saldo. Necesitás: $${betAmount.toFixed(2)}, Disponible: $${userBalance}`);
+      return;
+    }
+    
+    // Preparar datos para enviar al backend
+    const betData = {
+      gameweek: match.gameweek,
+      match_league_entry_1: match.league_entry_1,
+      match_league_entry_2: match.league_entry_2,
+      prediction: bet.prediction,
+      amount: betAmount,
+      odds: match.odds[bet.prediction],
+      potential_win: betAmount * match.odds[bet.prediction]
+    };
+    
+    try {
+      // Llamar al endpoint para crear la apuesta
+      const response = await fetch('/api/bets/create', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ bets: [betData] }),
+      });
+      
+      const result = await response.json();
+      
+      if (!response.ok) {
+        throw new Error(result.error || 'Error al crear apuesta');
+      }
+      
+      // Éxito! Actualizar el balance local
+      setUserBalance(result.new_balance);
+      
+      // Mostrar mensaje de éxito
+      alert(`🎉 ¡Apuesta confirmada!\n\nMonto: $${betAmount.toFixed(2)}\nGanancia potencial: $${(betAmount * match.odds[bet.prediction]).toFixed(2)}\nNuevo balance: $${result.new_balance.toFixed(2)}`);
+      
+      // Limpiar la apuesta de esta card específica
+      setBets(prev => {
+        const newBets = { ...prev };
+        delete newBets[matchIndex];
+        return newBets;
+      });
+      
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Error desconocido';
+      alert(`Error: ${errorMessage}`);
+      console.error('Error al confirmar apuesta:', error);
+    }
+  }
+
+  // Función para confirmar TODAS las apuestas del gameweek (mantenida por compatibilidad)
   async function handleConfirmAllBets() {
     // Validaciones
     if (!user) {
@@ -450,7 +520,7 @@ export default function UpcomingMatches() {
                     <div className={`text-[0.625rem] sm:text-xs mt-0.5 sm:mt-1 ${
                       bets[idx]?.prediction === 'home' ? 'text-[#37003c]' : 'text-gray-800'
                     }`}>
-                      {match.odds.home.toFixed(2)}x
+                      {match.odds.home.toFixed(2)}
                     </div>
                   </button>
                   
@@ -476,7 +546,7 @@ export default function UpcomingMatches() {
                     <div className={`text-[0.625rem] sm:text-xs mt-0.5 sm:mt-1 ${
                       bets[idx]?.prediction === 'draw' ? 'text-[#37003c]' : 'text-gray-800'
                     }`}>
-                      {match.odds.draw.toFixed(2)}x
+                      {match.odds.draw.toFixed(2)}
                     </div>
                   </button>
                   
@@ -502,7 +572,7 @@ export default function UpcomingMatches() {
                     <div className={`text-[0.625rem] sm:text-xs mt-0.5 sm:mt-1 ${
                       bets[idx]?.prediction === 'away' ? 'text-[#37003c]' : 'text-gray-800'
                     }`}>
-                      {match.odds.away.toFixed(2)}x
+                      {match.odds.away.toFixed(2)}
                     </div>
                   </button>
                 </div>
@@ -527,8 +597,18 @@ export default function UpcomingMatches() {
                   </button>
                   
                   {/* Contador central (40%) */}
-                  <div className="w-[40%] text-center py-2 sm:py-2.5 md:py-3 rounded-md sm:rounded-lg bg-white flex items-center justify-center">
-                    <div className="text-sm sm:text-base font-bold text-gray-900">
+                  <div 
+                    className={`w-[40%] text-center py-2 sm:py-2.5 md:py-3 rounded-md sm:rounded-lg flex items-center justify-center transition-all ${
+                      parseFloat(bets[idx]?.amount || '0') > 0 ? '' : 'bg-white'
+                    }`}
+                    style={parseFloat(bets[idx]?.amount || '0') > 0 
+                      ? { background: 'linear-gradient(to right, rgb(2, 239, 255), rgb(0, 255, 135))' }
+                      : {}
+                    }
+                  >
+                    <div className={`text-sm sm:text-base font-bold ${
+                      parseFloat(bets[idx]?.amount || '0') > 0 ? 'text-[#37003c]' : 'text-gray-900'
+                    }`}>
                       ${parseFloat(bets[idx]?.amount || '0').toFixed(0)}
                     </div>
                   </div>
@@ -549,55 +629,31 @@ export default function UpcomingMatches() {
                   </button>
                 </div>
                 
-                {/* Mostrar ganancia potencial */}
-                {bets[idx]?.prediction && bets[idx]?.amount && parseFloat(bets[idx].amount) > 0 && (
-                  <div className="mt-1.5 sm:mt-2 text-[0.625rem] sm:text-xs text-gray-600 text-center">
-                    Ganancia potencial: 
-                    <span className="text-[#00a85a] font-bold ml-1">
-                      ${(parseFloat(bets[idx].amount) * match.odds[bets[idx].prediction!]).toFixed(2)}
-                    </span>
-                  </div>
+                {/* Botón confirmar apuesta individual */}
+                {user && (
+                  <button
+                    onClick={() => handleConfirmSingleBet(idx)}
+                    disabled={!bets[idx]?.prediction || !bets[idx]?.amount || parseFloat(bets[idx].amount) <= 0}
+                    className={`w-full mt-3 sm:mt-4 py-2 sm:py-2.5 md:py-3 rounded-lg sm:rounded-xl font-bold text-sm sm:text-base transition-all shadow-lg ${
+                      !bets[idx]?.prediction || !bets[idx]?.amount || parseFloat(bets[idx].amount) <= 0
+                        ? 'opacity-50 cursor-not-allowed bg-gray-300 text-gray-500'
+                        : 'hover:opacity-90 shadow-[#963cff]/20'
+                    }`}
+                    style={!bets[idx]?.prediction || !bets[idx]?.amount || parseFloat(bets[idx].amount) <= 0 
+                      ? {} 
+                      : { backgroundColor: 'rgb(150, 60, 255)', color: 'white' }
+                    }
+                  >
+                    Confirmar Apuesta
+                  </button>
                 )}
+                
               </div>
 
             </div>
           ))}
         </div>
 
-        {/* Botón para confirmar TODAS las apuestas */}
-        {user && (
-          <div className="mt-6 sm:mt-8 md:mt-12 max-w-2xl mx-auto">
-            <div className="bg-white/5 border border-white/10 rounded-xl sm:rounded-2xl p-4 sm:p-5 md:p-6">
-              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-4 sm:mb-5 gap-3 sm:gap-0">
-                <div>
-                  <h4 className="text-base sm:text-lg font-bold text-white mb-1">
-                    Resumen de apuestas
-                  </h4>
-                  <p className="text-xs sm:text-sm text-gray-400">
-                    {Object.values(bets).filter(b => b?.prediction && b?.amount).length} apuesta(s) seleccionada(s)
-                  </p>
-                </div>
-                <div className="text-left sm:text-right">
-                  <div className="text-xs sm:text-sm text-gray-400">Total a apostar</div>
-                  <div className="text-xl sm:text-2xl font-black text-[#ff2882]">
-                    ${Object.values(bets)
-                      .filter(b => b?.amount)
-                      .reduce((sum, b) => sum + parseFloat(b.amount || '0'), 0)
-                      .toFixed(2)}
-                  </div>
-                </div>
-              </div>
-              
-              <button
-                onClick={handleConfirmAllBets}
-                disabled={Object.values(bets).filter(b => b?.prediction && b?.amount).length === 0}
-                className="w-full py-3 sm:py-4 rounded-lg sm:rounded-xl gradient-fpl font-bold text-base sm:text-lg hover:opacity-90 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed shadow-xl shadow-[#00ff87]/20"
-              >
-                Confirmar Apuestas
-              </button>
-            </div>
-          </div>
-        )}
       </div>
     </section>
   );

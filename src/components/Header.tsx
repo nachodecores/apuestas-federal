@@ -35,12 +35,8 @@ export default function Header() {
   const supabase = createClient();
 
   useEffect(() => {
-    // Limpiar sesión al cargar - siempre empezar sin usuario logueado
+    // Obtener usuario actual, nombre y participantes
     async function getUserData() {
-      // Logout automático para limpiar cualquier sesión persistente
-      await supabase.auth.signOut();
-      
-      // Ahora verificar que no hay usuario
       const { data: { user } } = await supabase.auth.getUser();
       setUser(user);
       
@@ -189,8 +185,8 @@ export default function Header() {
   async function handleLoginWithPassword() {
     if (!selectedParticipant) return;
     
-    if (password !== '1234') {
-      alert('Contraseña incorrecta. La contraseña es: 1234');
+    if (password !== '123456') {
+      alert('Contraseña incorrecta. La contraseña es: 123456');
       return;
     }
     
@@ -201,7 +197,7 @@ export default function Header() {
       
       const { error } = await supabase.auth.signInWithPassword({
         email,
-        password: '1234',
+        password: '123456',
       });
 
       if (error) throw error;
@@ -339,14 +335,16 @@ export default function Header() {
                 </Link>
               )}
 
-              {/* Botón Cerrar sesión (siempre visible cuando está logueado) */}
-              <button
-                onClick={handleLogout}
-                className="px-3 py-1.5 sm:px-4 sm:py-2 rounded-md sm:rounded-xl bg-white/5 border border-white/10 text-white hover:bg-white/10 transition-colors text-xs sm:text-sm font-semibold"
-              >
-                <span className="hidden sm:inline">Cerrar sesión</span>
-                <span className="sm:hidden">Salir</span>
-              </button>
+              {/* Botón Cerrar sesión (en dashboard y admin) */}
+              {(isDashboard || isAdminPage) && (
+                <button
+                  onClick={handleLogout}
+                  className="px-3 py-1.5 sm:px-4 sm:py-2 rounded-md sm:rounded-xl bg-white/5 border border-white/10 text-white hover:bg-white/10 transition-colors text-xs sm:text-sm font-semibold"
+                >
+                  <span className="hidden sm:inline">Cerrar sesión</span>
+                  <span className="sm:hidden">Salir</span>
+                </button>
+              )}
             </div>
           ) : (
             // Usuario NO logueado - mostrar dropdown
@@ -464,7 +462,7 @@ export default function Header() {
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#953bff] focus:border-transparent"
                 autoFocus
               />
-              <p className="text-xs text-gray-500 mt-1">Contraseña por defecto: 1234</p>
+              <p className="text-xs text-gray-500 mt-1">Contraseña por defecto: 123456</p>
             </div>
 
             <div className="flex gap-3">

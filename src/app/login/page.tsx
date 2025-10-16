@@ -113,14 +113,8 @@ export default function LoginPage() {
                 {profiles.length === 0 ? (
                   <div className="text-center py-8">
                     <p className="text-gray-400 mb-4">
-                      No hay cuentas creadas todavía
+                      No hay cuentas disponibles
                     </p>
-                    <Link
-                      href="/claim"
-                      className="text-[#ff2882] font-semibold hover:underline"
-                    >
-                      Reclamá tu cuenta acá →
-                    </Link>
                   </div>
                 ) : (
                   profiles.map((profile) => (
@@ -206,13 +200,6 @@ export default function LoginPage() {
             </>
           )}
 
-          {/* Link a claim */}
-          <p className="text-center text-gray-400 text-sm mt-6">
-            ¿No tenés cuenta?{" "}
-            <Link href="/claim" className="text-[#ff2882] font-semibold hover:underline">
-              Reclamá tu cuenta acá
-            </Link>
-          </p>
         </div>
 
         {/* Link a home */}

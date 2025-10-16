@@ -1,6 +1,3 @@
-// Cliente de Supabase para el servidor (server-side)
-// Este archivo se usa en API routes, Server Components, etc.
-
 import { createServerClient } from '@supabase/ssr';
 import { cookies } from 'next/headers';
 
@@ -21,11 +18,12 @@ export async function createClient() {
               cookieStore.set(name, value, options)
             );
           } catch {
-            // Puede fallar en Server Components, pero está OK
+            // The `setAll` method was called from a Server Component.
+            // This can be ignored if you have middleware refreshing
+            // user sessions.
           }
         },
       },
     }
   );
 }
-

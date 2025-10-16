@@ -51,7 +51,7 @@ export default function AdminPage() {
     setResult(null);
 
     try {
-      const response = await fetch('/api/bets/resolve', {
+      const response = await fetch('/api/admin/simulate-and-resolve', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
