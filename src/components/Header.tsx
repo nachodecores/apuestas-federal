@@ -377,37 +377,25 @@ export default function Header() {
                 >
                   
                   <div className="max-h-[70vh] sm:max-h-96 overflow-y-auto">
-                    {participants.map((participant) => (
-                      <button
-                        key={participant.league_entry_id}
-                        onClick={() => handleSelectUser(participant)}
-                        disabled={loggingIn}
-                        className="w-full px-3 py-2.5 sm:px-4 sm:py-3 text-left text-gray-900 hover:bg-gray-50 transition-colors disabled:opacity-50 flex items-center gap-2 sm:gap-3 group"
-                      >
-                        {/* Avatar - Escudo o iniciales del equipo */}
-                        {participant.team_logo ? (
-                          <div className="w-8 h-8 sm:w-9 sm:h-9 md:w-10 md:h-10 rounded-full overflow-hidden bg-white border border-white/20 flex-shrink-0">
-                            <Image
-                              src={`/assets/${participant.team_logo}`}
-                              alt={participant.teamName}
-                              width={40}
-                              height={40}
-                              className="object-cover w-full h-full"
-                            />
+                    {participants.map((participant, index) => (
+                      <div key={participant.league_entry_id}>
+                        <button
+                          onClick={() => handleSelectUser(participant)}
+                          disabled={loggingIn}
+                          className="w-full px-4 py-3 sm:py-3.5 text-left text-gray-900 hover:bg-gray-50 transition-colors disabled:opacity-50 flex items-center justify-between group"
+                        >
+                          <div className="flex-1 min-w-0">
+                            <div className="font-semibold text-sm sm:text-base truncate">{participant.teamName}</div>
+                            <div className="text-xs text-gray-500 truncate">{participant.name}</div>
                           </div>
-                        ) : (
-                          <div className="w-8 h-8 sm:w-9 sm:h-9 md:w-10 md:h-10 rounded-full bg-gradient-to-br from-[#ff2882] to-[#37003c] flex items-center justify-center text-white font-bold text-xs sm:text-sm flex-shrink-0">
-                            {participant.teamName.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase()}
+                          <div className="text-[#00ff87] opacity-0 group-hover:opacity-100 transition-opacity text-lg ml-3">
+                            →
                           </div>
+                        </button>
+                        {index < participants.length - 1 && (
+                          <div className="mx-4 border-b border-gray-100"></div>
                         )}
-                        <div className="flex-1 min-w-0">
-                          <div className="font-semibold text-sm sm:text-base truncate">{participant.teamName}</div>
-                          <div className="text-xs text-gray-500 truncate">{participant.name}</div>
-                        </div>
-                        <div className="text-[#00ff87] opacity-0 group-hover:opacity-100 transition-opacity text-lg">
-                          →
-                        </div>
-                      </button>
+                      </div>
                     ))}
                   </div>
                 </div>

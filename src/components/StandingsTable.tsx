@@ -106,7 +106,7 @@ export default function StandingsTable() {
           
           return {
             position: standing.rank,
-            name: entry ? `${entry.player_first_name} ${entry.player_last_name}` : 'Desconocido',
+            name: entry ? entry.player_first_name : 'Desconocido',
             teamName: entry?.entry_name || 'Sin nombre',
             h2hPoints: standing.total, // Puntos de la tabla H2H
             fplPoints: standing.points_for, // Puntos totales FPL
@@ -211,7 +211,7 @@ export default function StandingsTable() {
                           {player.teamName}
                         </span>
                         {/* Mostrar manager name (bajo el equipo) */}
-                        <span className="text-gray-500 font-light text-[0.625rem] sm:text-xs truncate max-w-[8rem]">
+                        <span className="text-gray-900 font-bold text-xs sm:text-sm md:text-base truncate max-w-[8rem] sm:max-w-none">
                           {player.name}
                         </span>
                       </div>
@@ -219,7 +219,7 @@ export default function StandingsTable() {
                     
                     {/* Manager - oculto en mobile */}
                     <td className="hidden md:table-cell px-4 py-3 lg:px-6 lg:py-4">
-                      <span className="text-gray-600 font-light text-sm">{player.name}</span>
+                      <span className="text-gray-900 font-bold text-sm">{player.name}</span>
                     </td>
                     
                     {/* Récord - oculto en mobile y tablet */}
