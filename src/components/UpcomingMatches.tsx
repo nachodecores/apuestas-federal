@@ -162,6 +162,7 @@ export default function UpcomingMatches() {
         // 2. Obtener logos de los equipos desde Supabase (con fallback)
         let teamLogos = new Map();
         try {
+          console.log('📡 Obteniendo logos de equipos...');
           const { data: profiles } = await supabase
             .from('profiles')
             .select('league_entry_id, team_logo');
@@ -176,32 +177,45 @@ export default function UpcomingMatches() {
         }
         
         // 3. Encontramos el próximo gameweek (el primero que no haya terminado)
+        console.log('📡 Filtrando partidos próximos...');
         const upcomingMatches = data.matches.filter(match => !match.finished);
+        console.log('✅ Partidos próximos encontrados:', upcomingMatches.length);
         
         if (upcomingMatches.length === 0) {
           throw new Error('No hay partidos próximos');
         }
         
         // El gameweek del primer partido no terminado
+        console.log('📡 Obteniendo próxima gameweek...');
         const nextGW = upcomingMatches[0].event;
         setNextGameweek(nextGW);
+        console.log('✅ Próxima gameweek:', nextGW);
         
         // 3. Filtramos solo los partidos de ese gameweek
+        console.log('📡 Filtrando partidos de la próxima gameweek...');
         const nextGWMatches = upcomingMatches.filter(match => match.event === nextGW);
+        console.log('✅ Partidos de GW', nextGW, ':', nextGWMatches.length);
         
         // 4. Mapeamos los IDs de equipos a nombres Y calculamos odds
-        const processedMatches: MatchDisplay[] = nextGWMatches.map(match => {
+        console.log('📡 Procesando partidos...');
+        const processedMatches: MatchDisplay[] = nextGWMatches.map((match, index) => {
+          console.log(`📡 Procesando partido ${index + 1}/${nextGWMatches.length}...`);
+          
           // Buscamos los equipos por su league_entry ID
           const team1 = data.league_entries.find(e => e.id === match.league_entry_1);
           const team2 = data.league_entries.find(e => e.id === match.league_entry_2);
           
+          console.log(`📡 Equipos encontrados: ${team1?.entry_name} vs ${team2?.entry_name}`);
+          
           // Calcular odds dinámicos para este partido
+          console.log('📡 Calculando odds...');
           const odds = calculateOdds(
             match.league_entry_1,
             match.league_entry_2,
             data.standings,
             data.matches
           );
+          console.log('✅ Odds calculadas:', odds);
           
           return {
             gameweek: match.event,
@@ -218,8 +232,11 @@ export default function UpcomingMatches() {
         });
         
         console.log('✅ Partidos procesados:', processedMatches.length);
+        console.log('📡 Estableciendo estado de partidos...');
         setMatches(processedMatches);
+        console.log('📡 Estableciendo loading = false...');
         setLoading(false);
+        console.log('✅ UpcomingMatches inicializado completamente');
         
       } catch (err) {
         console.error('💥 Error en fetchMatches:', err);
