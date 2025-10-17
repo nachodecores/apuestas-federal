@@ -2,6 +2,7 @@
 
 import { createClient } from "@/lib/supabase/client";
 import Link from "next/link";
+import Image from "next/image";
 import { useEffect, useState } from "react";
 import type { User } from "@supabase/supabase-js";
 
@@ -16,6 +17,7 @@ export default function DashboardModal({ isOpen, onClose, user }: DashboardModal
   
   // Estados del dashboard
   const [profile, setProfile] = useState(null);
+  const [userTeamName, setUserTeamName] = useState<string>('');
   const [allBets, setAllBets] = useState([]);
   const [activeBets, setActiveBets] = useState([]);
   const [stats, setStats] = useState({
@@ -36,10 +38,35 @@ export default function DashboardModal({ isOpen, onClose, user }: DashboardModal
   const [changingPassword, setChangingPassword] = useState(false);
   const [passwordError, setPasswordError] = useState<string | null>(null);
 
+  // Resetear estados cuando se cierra el modal
+  useEffect(() => {
+    if (!isOpen) {
+      setProfile(null);
+      setUserTeamName('');
+      setAllBets([]);
+      setActiveBets([]);
+      setStats({
+        totalWon: 0,
+        totalLost: 0,
+        netProfit: 0,
+        wonBets: [],
+        lostBets: []
+      });
+      setTeamMap(new Map());
+      setDataLoading(true);
+    }
+  }, [isOpen]);
+
   // Cargar datos del dashboard cuando se abre el modal
   useEffect(() => {
     async function loadDashboardData() {
       if (!user || !isOpen) return;
+      
+      // Si ya tenemos datos y el modal se está abriendo, no recargar
+      if (profile && allBets.length > 0 && isOpen) {
+        setDataLoading(false);
+        return;
+      }
 
       setDataLoading(true);
       try {
@@ -50,6 +77,21 @@ export default function DashboardModal({ isOpen, onClose, user }: DashboardModal
           .eq("id", user.id)
           .single();
         setProfile(profileData);
+
+        // Obtener nombre del equipo de la API
+        if (profileData?.league_entry_id) {
+          try {
+            const leagueResponse = await fetch('/api/league');
+            const leagueData = await leagueResponse.json();
+            const entry = leagueData.league_entries?.find(
+              (e: { id: number; entry_name: string }) => e.id === profileData.league_entry_id
+            );
+            setUserTeamName(entry?.entry_name || '');
+          } catch (error) {
+            console.warn('⚠️ Error obteniendo nombre del equipo:', error);
+            setUserTeamName('');
+          }
+        }
 
         // Obtener TODAS las apuestas del usuario (ordenadas por fecha)
         const { data: betsData } = await supabase
@@ -87,15 +129,30 @@ export default function DashboardModal({ isOpen, onClose, user }: DashboardModal
         });
 
         if (teamIds.size > 0) {
-          const { data: profilesData } = await supabase
-            .from("profiles")
-            .select("league_entry_id, display_name, team_logo")
-            .in("league_entry_id", Array.from(teamIds));
-
-          const newTeamMap = new Map(
-            profilesData?.map((p) => [p.league_entry_id, { name: p.display_name, logo: p.team_logo }]) || []
-          );
-          setTeamMap(newTeamMap);
+          // Obtener nombres de equipos desde la API de la liga
+          try {
+            const leagueResponse = await fetch('/api/league');
+            const leagueData = await leagueResponse.json();
+            
+            const newTeamMap = new Map();
+            leagueData.league_entries?.forEach((entry: any) => {
+              if (teamIds.has(entry.id)) {
+                newTeamMap.set(entry.id, { 
+                  name: entry.entry_name, 
+                  logo: null // Por ahora no usamos logos en la tabla
+                });
+              }
+            });
+            setTeamMap(newTeamMap);
+          } catch (error) {
+            console.warn('⚠️ Error obteniendo nombres de equipos:', error);
+            // Fallback: usar IDs como nombres
+            const fallbackMap = new Map();
+            Array.from(teamIds).forEach(id => {
+              fallbackMap.set(id, { name: `Equipo ${id}`, logo: null });
+            });
+            setTeamMap(fallbackMap);
+          }
         }
       } catch (error) {
         console.error("Error loading dashboard data:", error);
@@ -105,7 +162,7 @@ export default function DashboardModal({ isOpen, onClose, user }: DashboardModal
     }
 
     loadDashboardData();
-  }, [user, isOpen, supabase]);
+  }, [user?.id, isOpen]); // Solo depende del ID del usuario y si está abierto
 
   // Función para eliminar una apuesta
   async function handleDeleteBet(betId: string) {
@@ -139,6 +196,18 @@ export default function DashboardModal({ isOpen, onClose, user }: DashboardModal
     } catch (error) {
       console.error('Error al eliminar apuesta:', error);
       alert('Error al eliminar la apuesta. Intentalo de nuevo.');
+    }
+  }
+
+  // Función para cerrar sesión
+  async function handleLogout() {
+    try {
+      await supabase.auth.signOut();
+      onClose(); // Cerrar el modal
+      // El Header se encargará de redirigir o actualizar la UI
+    } catch (error) {
+      console.error('Error al cerrar sesión:', error);
+      alert('Error al cerrar sesión. Intentalo de nuevo.');
     }
   }
 
@@ -236,28 +305,75 @@ export default function DashboardModal({ isOpen, onClose, user }: DashboardModal
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-[9999] p-4">
-      <div 
-        className="bg-white rounded-xl sm:rounded-2xl overflow-hidden flex flex-col"
-        style={{
-          width: '90vw',
-          height: '60vh',
-          maxWidth: '90vw',
-          maxHeight: '60vh'
-        }}
-      >
-        {/* Header del modal */}
-        <div className="flex items-center justify-between p-4 sm:p-6 border-b border-gray-200">
-          <h2 className="text-xl sm:text-2xl font-black text-gray-900">
-            Dashboard
-          </h2>
+    <div 
+      className="fixed inset-0 bg-black/50 backdrop-blur-md flex items-start justify-center z-[9999] p-4 pt-8"
+      onClick={onClose}
+    >
+        <div 
+          className="rounded-lg sm:rounded-xl overflow-hidden flex flex-col w-full max-w-6xl relative"
+          style={{
+            height: '80vh',
+            maxHeight: '80vh',
+            marginTop: '2rem',
+            background: `
+              linear-gradient(rgba(255, 255, 255, 0) 240px, white 360px), 
+              linear-gradient(to right, rgb(2, 239, 255), rgb(98, 123, 255))
+            `,
+            backgroundSize: 'cover, cover',
+            backgroundPosition: 'center, center',
+            backgroundRepeat: 'no-repeat, no-repeat'
+          }}
+          onClick={(e) => e.stopPropagation()}
+        >
+          {/* Botón cerrar - Esquina superior derecha */}
           <button
             onClick={onClose}
-            className="w-8 h-8 rounded-full bg-gray-100 hover:bg-gray-200 text-gray-600 hover:text-gray-800 transition-colors flex items-center justify-center text-lg font-bold"
+            className="absolute top-4 right-4 z-10 text-black hover:text-gray-700 transition-colors text-3xl font-bold"
           >
             ×
           </button>
-        </div>
+
+          {/* Header del modal */}
+          <div className="flex items-center p-4 sm:p-6 border-b border-gray-200">
+            <div className="flex items-center gap-4">
+              {/* Avatar del equipo */}
+              <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-full overflow-hidden bg-white flex-shrink-0">
+                {profile?.team_logo ? (
+                  <Image
+                    src={`/assets/${profile.team_logo}`}
+                    alt={profile.display_name || 'Equipo'}
+                    width={96}
+                    height={96}
+                    className="object-cover w-full h-full"
+                  />
+                ) : (
+                  <div className="w-full h-full bg-gradient-to-br from-[#ff2882] to-[#37003c] flex items-center justify-center text-white font-bold text-2xl sm:text-3xl">
+                    {profile?.display_name?.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase() || 'CC'}
+                  </div>
+                )}
+              </div>
+              
+              {/* Información del manager */}
+              <div className="flex flex-col" style={{ alignItems: 'flex-start' }}>
+                <div 
+                  className="text-xs uppercase tracking-wider font-medium px-1.5 py-0.5 rounded-b inline-block"
+                  style={{
+                    backgroundColor: '#37003c',
+                    color: '#05f0ff',
+                    width: 'fit-content'
+                  }}
+                >
+                  CCP
+                </div>
+                <div className="text-2xl sm:text-3xl font-semibold text-gray-900">
+                  {profile?.display_name || user?.email || 'Manager'}
+                </div>
+                <div className="text-xs sm:text-sm text-gray-600">
+                  {userTeamName || 'Equipo'}
+                </div>
+              </div>
+            </div>
+          </div>
 
         {/* Contenido del modal */}
         <div className="flex-1 overflow-y-auto p-4 sm:p-6">
@@ -267,66 +383,35 @@ export default function DashboardModal({ isOpen, onClose, user }: DashboardModal
             </div>
           ) : (
             <>
-              {/* Welcome card */}
+              {/* Stats unificadas */}
               <div 
-                className="border border-white/10 rounded-xl sm:rounded-2xl p-4 sm:p-6 md:p-8 mb-4 sm:mb-6 md:mb-8 relative overflow-hidden"
+                className="border border-white/10 rounded-lg sm:rounded-xl p-4 sm:p-6 md:p-8 mb-4 sm:mb-6 md:mb-8 relative overflow-hidden flex flex-row items-center justify-between"
                 style={{ backgroundColor: 'rgba(237, 237, 237, 0.85)' }}
               >
-                <div className="relative z-10">
-                    <h3 className="text-lg sm:text-xl md:text-2xl font-black text-gray-900 mb-1 sm:mb-2">
-                      ¡Bienvenido, {profile?.display_name || user?.email}!
-                    </h3>
-                    <p className="text-sm sm:text-base text-gray-600">
-                      Saldo de tu cuenta: <span className="font-bold text-[#00ff87]">${profile?.balance?.toFixed(2) || "0"}</span>
-                    </p>
+                <div className="relative z-10 flex-1 text-center">
+                  <div className="text-xs text-gray-600 mb-1">Apuestas activas</div>
+                  <div className="text-lg text-gray-900">{activeBets.length}</div>
                 </div>
-                {/* Patrón de fondo sutil */}
-                <div className="absolute inset-0 opacity-5">
-                  <div className="w-full h-full bg-gradient-to-br from-[#953bff] to-[#02efff]"></div>
-                </div>
-              </div>
-
-              {/* Stats cards */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3 sm:gap-4 md:gap-6 mb-4 sm:mb-6 md:mb-8">
-                {/* Apuestas activas */}
-                <div 
-                  className="border border-white/10 rounded-xl sm:rounded-2xl p-3 sm:p-4 md:p-6 relative overflow-hidden"
-                  style={{ backgroundColor: 'rgba(237, 237, 237, 0.85)' }}
-                >
-                  <div className="relative z-10">
-                    <div className="text-xs sm:text-sm text-gray-600 mb-1 sm:mb-2 font-medium">Apuestas activas</div>
-                    <div className="text-2xl sm:text-3xl md:text-4xl font-black text-gray-900">{activeBets.length}</div>
+                
+                <div className="w-px h-12" style={{ backgroundColor: 'rgb(20, 198, 236)' }}></div>
+                
+                <div className="relative z-10 flex-1 text-center">
+                  <div className="text-xs text-gray-600 mb-1">Total apostado</div>
+                  <div className="text-lg text-gray-900">
+                    ${activeBets.reduce((sum, bet) => sum + (bet.amount || 0), 0).toFixed(0)}
                   </div>
-                  <div className="absolute inset-0 opacity-5 bg-gradient-to-br from-[#953bff] to-[#02efff]"></div>
                 </div>
-
-                {/* Total apostado GW actual */}
-                <div 
-                  className="border border-white/10 rounded-xl sm:rounded-2xl p-3 sm:p-4 md:p-6 relative overflow-hidden"
-                  style={{ backgroundColor: 'rgba(237, 237, 237, 0.85)' }}
-                >
-                  <div className="relative z-10">
-                    <div className="text-xs sm:text-sm text-gray-600 mb-1 sm:mb-2 font-medium">Total apostado GW</div>
-                    <div className="text-2xl sm:text-3xl md:text-4xl font-black text-[#ff2882]">
-                      ${activeBets.reduce((sum, bet) => sum + (bet.amount || 0), 0).toFixed(0)}
-                    </div>
+                
+                <div className="w-px h-12" style={{ backgroundColor: 'rgb(20, 198, 236)' }}></div>
+                
+                <div className="relative z-10 flex-1 text-center">
+                  <div className="text-xs text-gray-600 mb-1">Ganancia potencial</div>
+                  <div className="text-lg text-gray-900">
+                    ${stats.netProfit.toFixed(2)}
                   </div>
-                  <div className="absolute inset-0 opacity-5 bg-gradient-to-br from-[#ff2882] to-[#953bff]"></div>
                 </div>
-
-                {/* Ganancia neta */}
-                <div 
-                  className="border border-white/10 rounded-xl sm:rounded-2xl p-3 sm:p-4 md:p-6 relative overflow-hidden"
-                  style={{ backgroundColor: 'rgba(237, 237, 237, 0.85)' }}
-                >
-                  <div className="relative z-10">
-                    <div className="text-xs sm:text-sm text-gray-600 mb-1 sm:mb-2 font-medium">Ganancia neta</div>
-                    <div className={`text-2xl sm:text-3xl md:text-4xl font-black ${stats.netProfit >= 0 ? 'text-[#00ff87]' : 'text-red-500'}`}>
-                      ${stats.netProfit.toFixed(2)}
-                    </div>
-                  </div>
-                  <div className={`absolute inset-0 opacity-5 ${stats.netProfit >= 0 ? 'bg-gradient-to-br from-[#00ff87] to-[#02efff]' : 'bg-gradient-to-br from-red-500 to-[#ff2882]'}`}></div>
-                </div>
+                
+                <div className="absolute inset-0 opacity-5 bg-gradient-to-br from-[#953bff] to-[#02efff]"></div>
               </div>
 
               {/* Apuestas activas */}
@@ -376,14 +461,14 @@ export default function DashboardModal({ isOpen, onClose, user }: DashboardModal
                               >
                                 {/* Partido */}
                                 <td className="px-2 py-2 sm:px-3 sm:py-3">
-                                  <div className="text-xs sm:text-sm font-medium text-gray-900 truncate max-w-[8rem] sm:max-w-none">
+                                  <div className="text-xs sm:text-sm font-medium text-gray-900 whitespace-nowrap">
                                     {team1?.name || 'Local'} vs {team2?.name || 'Visitante'}
                                   </div>
                                 </td>
                                 
                                 {/* Predicción */}
                                 <td className="px-2 py-2 sm:px-3 sm:py-3">
-                                  <span className="inline-flex items-center px-1.5 py-0.5 rounded-full text-[0.625rem] sm:text-xs font-medium bg-[#ff2882]/10 text-[#ff2882]">
+                                  <span className="text-xs sm:text-sm font-medium text-gray-900">
                                     {predictionText}
                                   </span>
                                 </td>
@@ -513,13 +598,19 @@ export default function DashboardModal({ isOpen, onClose, user }: DashboardModal
                 </div>
               )}
 
-              {/* Footer con botón cambiar contraseña */}
-              <div className="text-center mt-8 sm:mt-12">
+              {/* Footer con botones */}
+              <div className="text-center mt-8 sm:mt-12 flex justify-center gap-6">
                 <button
                   onClick={() => setShowChangePasswordModal(true)}
                   className="text-gray-500 hover:text-[#ff2882] transition-colors text-sm font-medium"
                 >
                   Cambiar contraseña
+                </button>
+                <button
+                  onClick={handleLogout}
+                  className="text-gray-500 hover:text-red-500 transition-colors text-sm font-medium"
+                >
+                  Cerrar sesión
                 </button>
               </div>
             </>

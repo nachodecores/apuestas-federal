@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import type { User } from "@supabase/supabase-js";
 import type { MatchDisplay } from "./UpcomingMatches";
 
@@ -8,6 +8,14 @@ import type { MatchDisplay } from "./UpcomingMatches";
 interface BetSelection {
   prediction: 'home' | 'draw' | 'away' | null;
   amount: string;
+}
+
+// Tipo para la apuesta existente del usuario
+interface UserBet {
+  id: number;
+  prediction: 'home' | 'draw' | 'away';
+  amount: number;
+  potential_win: number;
 }
 
 interface MatchCardProps {
@@ -30,6 +38,87 @@ export default function MatchCard({
     prediction: null,
     amount: ''
   });
+
+  // Estado para la apuesta existente del usuario
+  const [userBet, setUserBet] = useState<UserBet | null>(null);
+
+  // Limpiar el estado cuando cambia el usuario
+  useEffect(() => {
+    setUserBet(null);
+    setBet({
+      prediction: null,
+      amount: ''
+    });
+  }, [user?.id]); // Se ejecuta cuando cambia el ID del usuario
+
+  // Verificar si el usuario ya apostó en este partido
+  useEffect(() => {
+    if (user && match) {
+      checkExistingBet();
+    } else {
+      // Si no hay usuario, limpiar el estado
+      setUserBet(null);
+      setBet({
+        prediction: null,
+        amount: ''
+      });
+    }
+  }, [user, match]);
+
+  // Escuchar eventos de apuesta eliminada
+  useEffect(() => {
+    function handleBetDeleted(event: CustomEvent) {
+      const { gameweek, match_league_entry_1, match_league_entry_2 } = event.detail;
+      
+      console.log('📡 Evento betDeleted recibido:', {
+        eventGameweek: gameweek,
+        eventMatch1: match_league_entry_1,
+        eventMatch2: match_league_entry_2,
+        currentGameweek: match.gameweek,
+        currentMatch1: match.league_entry_1,
+        currentMatch2: match.league_entry_2
+      });
+      
+      // Si es el mismo partido, verificar nuevamente las apuestas
+      // Convertir a números para comparación segura
+      if (Number(gameweek) === Number(match.gameweek) && 
+          Number(match_league_entry_1) === Number(match.league_entry_1) && 
+          Number(match_league_entry_2) === Number(match.league_entry_2)) {
+        console.log('🔄 Apuesta eliminada detectada, verificando nuevamente...');
+        checkExistingBet();
+      } else {
+        console.log('❌ No es el mismo partido, ignorando evento');
+      }
+    }
+    
+    window.addEventListener('betDeleted', handleBetDeleted as EventListener);
+    return () => window.removeEventListener('betDeleted', handleBetDeleted as EventListener);
+  }, [match]);
+
+  async function checkExistingBet() {
+    try {
+      console.log('🔍 Verificando apuesta existente para:', {
+        gameweek: match.gameweek,
+        match_league_entry_1: match.league_entry_1,
+        match_league_entry_2: match.league_entry_2
+      });
+      
+      const response = await fetch(`/api/bets/user-bet?gameweek=${match.gameweek}&match_league_entry_1=${match.league_entry_1}&match_league_entry_2=${match.league_entry_2}`);
+      const data = await response.json();
+      
+      console.log('📊 Respuesta de checkExistingBet:', data);
+      
+      if (data.bet) {
+        console.log('✅ Apuesta encontrada, mostrando mensaje verde');
+        setUserBet(data.bet);
+      } else {
+        console.log('❌ No hay apuesta, mostrando botones');
+        setUserBet(null);
+      }
+    } catch (error) {
+      console.error('Error checking existing bet:', error);
+    }
+  }
 
   // Función para actualizar la predicción (toggle: clicar de nuevo des-selecciona)
   function handlePredictionChange(prediction: 'home' | 'draw' | 'away') {
@@ -116,6 +205,14 @@ export default function MatchCard({
       // Éxito! Actualizar el balance local
       onBetConfirmed(result.new_balance);
       
+      // Actualizar el estado local con la apuesta confirmada
+      setUserBet({
+        id: result.bet_id,
+        prediction: bet.prediction,
+        amount: betAmount,
+        potential_win: betAmount * match.odds[bet.prediction]
+      });
+      
       // Mostrar mensaje de éxito
       alert(`🎉 ¡Apuesta confirmada!\n\nMonto: $${betAmount.toFixed(2)}\nGanancia potencial: $${(betAmount * match.odds[bet.prediction]).toFixed(2)}\nNuevo balance: $${result.new_balance.toFixed(2)}`);
       
@@ -164,159 +261,181 @@ export default function MatchCard({
         </div>
       </div>
 
-      {/* Radio buttons para predicción */}
-      <div className="mb-3 sm:mb-4">
-        <div className="grid grid-cols-3 gap-1.5 sm:gap-2">
-          {/* Local */}
-          <button
-            type="button"
-            onClick={() => handlePredictionChange('home')}
-            className={`py-2 sm:py-2.5 md:py-3 px-2 sm:px-3 rounded-md sm:rounded-lg transition-all ${
-              bet.prediction === 'home'
-                ? ''
-                : 'hover:opacity-80'
-            }`}
-            style={bet.prediction === 'home' 
-              ? { background: 'linear-gradient(to right, rgb(2, 239, 255), rgb(0, 255, 135))' }
-              : { backgroundColor: 'rgb(239, 239, 239)' }
-            }
-          >
-            <div className={`font-semibold text-xs sm:text-sm ${
-              bet.prediction === 'home' ? 'text-[#37003c]' : 'text-gray-700'
-            }`}>
-              Local
+      {/* Botones de apuesta - SOLO SI HAY USUARIO LOGUEADO */}
+      {user && (
+        <>
+          {userBet ? (
+            // Mostrar apuesta existente
+            <div className="mb-3 sm:mb-4 p-3 bg-green-50 border border-green-200 rounded-lg">
+              <div className="text-center">
+                <div className="text-sm font-medium text-green-800">
+                  {userBet.prediction === 'home' && `Apostaste $${userBet.amount} a que gana ${match.team1Name}`}
+                  {userBet.prediction === 'away' && `Apostaste $${userBet.amount} a que gana ${match.team2Name}`}
+                  {userBet.prediction === 'draw' && `Apostaste $${userBet.amount} a un empate`}
+                </div>
+                <div className="text-xs text-green-600 mt-1">
+                  Ganancia potencial: ${userBet.potential_win?.toFixed(2)}
+                </div>
+              </div>
             </div>
-            <div className={`text-[0.625rem] sm:text-xs mt-0.5 sm:mt-1 ${
-              bet.prediction === 'home' ? 'text-[#37003c]' : 'text-gray-800'
-            }`}>
-              {match.odds.home.toFixed(2)}
-            </div>
-          </button>
-          
-          {/* Empate */}
-          <button
-            type="button"
-            onClick={() => handlePredictionChange('draw')}
-            className={`py-2 sm:py-2.5 md:py-3 px-2 sm:px-3 rounded-md sm:rounded-lg transition-all ${
-              bet.prediction === 'draw'
-                ? ''
-                : 'hover:opacity-80'
-            }`}
-            style={bet.prediction === 'draw' 
-              ? { background: 'linear-gradient(to right, rgb(2, 239, 255), rgb(0, 255, 135))' }
-              : { backgroundColor: 'rgb(239, 239, 239)' }
-            }
-          >
-            <div className={`font-semibold text-xs sm:text-sm ${
-              bet.prediction === 'draw' ? 'text-[#37003c]' : 'text-gray-700'
-            }`}>
-              Empate
-            </div>
-            <div className={`text-[0.625rem] sm:text-xs mt-0.5 sm:mt-1 ${
-              bet.prediction === 'draw' ? 'text-[#37003c]' : 'text-gray-800'
-            }`}>
-              {match.odds.draw.toFixed(2)}
-            </div>
-          </button>
-          
-          {/* Visitante */}
-          <button
-            type="button"
-            onClick={() => handlePredictionChange('away')}
-            className={`py-2 sm:py-2.5 md:py-3 px-2 sm:px-3 rounded-md sm:rounded-lg transition-all ${
-              bet.prediction === 'away'
-                ? ''
-                : 'hover:opacity-80'
-            }`}
-            style={bet.prediction === 'away' 
-              ? { background: 'linear-gradient(to right, rgb(2, 239, 255), rgb(0, 255, 135))' }
-              : { backgroundColor: 'rgb(239, 239, 239)' }
-            }
-          >
-            <div className={`font-semibold text-xs sm:text-sm ${
-              bet.prediction === 'away' ? 'text-[#37003c]' : 'text-gray-700'
-            }`}>
-              Visitante
-            </div>
-            <div className={`text-[0.625rem] sm:text-xs mt-0.5 sm:mt-1 ${
-              bet.prediction === 'away' ? 'text-[#37003c]' : 'text-gray-800'
-            }`}>
-              {match.odds.away.toFixed(2)}
-            </div>
-          </button>
-        </div>
-      </div>
+          ) : (
+            // Mostrar botones de apuesta
+            <>
+              {/* Radio buttons para predicción */}
+              <div className="mb-3 sm:mb-4">
+                <div className="grid grid-cols-3 gap-1.5 sm:gap-2">
+                  {/* Local */}
+                  <button
+                    type="button"
+                    onClick={() => handlePredictionChange('home')}
+                    className={`py-2 sm:py-2.5 md:py-3 px-2 sm:px-3 rounded-md sm:rounded-lg transition-all ${
+                      bet.prediction === 'home'
+                        ? ''
+                        : 'hover:opacity-80'
+                    }`}
+                    style={bet.prediction === 'home' 
+                      ? { background: 'linear-gradient(to right, rgb(2, 239, 255), rgb(0, 255, 135))' }
+                      : { backgroundColor: 'rgb(239, 239, 239)' }
+                    }
+                  >
+                    <div className={`font-semibold text-xs sm:text-sm ${
+                      bet.prediction === 'home' ? 'text-[#37003c]' : 'text-gray-700'
+                    }`}>
+                      Local
+                    </div>
+                    <div className={`text-[0.625rem] sm:text-xs mt-0.5 sm:mt-1 ${
+                      bet.prediction === 'home' ? 'text-[#37003c]' : 'text-gray-800'
+                    }`}>
+                      {match.odds.home.toFixed(2)}
+                    </div>
+                  </button>
+                  
+                  {/* Empate */}
+                  <button
+                    type="button"
+                    onClick={() => handlePredictionChange('draw')}
+                    className={`py-2 sm:py-2.5 md:py-3 px-2 sm:px-3 rounded-md sm:rounded-lg transition-all ${
+                      bet.prediction === 'draw'
+                        ? ''
+                        : 'hover:opacity-80'
+                    }`}
+                    style={bet.prediction === 'draw' 
+                      ? { background: 'linear-gradient(to right, rgb(2, 239, 255), rgb(0, 255, 135))' }
+                      : { backgroundColor: 'rgb(239, 239, 239)' }
+                    }
+                  >
+                    <div className={`font-semibold text-xs sm:text-sm ${
+                      bet.prediction === 'draw' ? 'text-[#37003c]' : 'text-gray-700'
+                    }`}>
+                      Empate
+                    </div>
+                    <div className={`text-[0.625rem] sm:text-xs mt-0.5 sm:mt-1 ${
+                      bet.prediction === 'draw' ? 'text-[#37003c]' : 'text-gray-800'
+                    }`}>
+                      {match.odds.draw.toFixed(2)}
+                    </div>
+                  </button>
+                  
+                  {/* Visitante */}
+                  <button
+                    type="button"
+                    onClick={() => handlePredictionChange('away')}
+                    className={`py-2 sm:py-2.5 md:py-3 px-2 sm:px-3 rounded-md sm:rounded-lg transition-all ${
+                      bet.prediction === 'away'
+                        ? ''
+                        : 'hover:opacity-80'
+                    }`}
+                    style={bet.prediction === 'away' 
+                      ? { background: 'linear-gradient(to right, rgb(2, 239, 255), rgb(0, 255, 135))' }
+                      : { backgroundColor: 'rgb(239, 239, 239)' }
+                    }
+                  >
+                    <div className={`font-semibold text-xs sm:text-sm ${
+                      bet.prediction === 'away' ? 'text-[#37003c]' : 'text-gray-700'
+                    }`}>
+                      Visitante
+                    </div>
+                    <div className={`text-[0.625rem] sm:text-xs mt-0.5 sm:mt-1 ${
+                      bet.prediction === 'away' ? 'text-[#37003c]' : 'text-gray-800'
+                    }`}>
+                      {match.odds.away.toFixed(2)}
+                    </div>
+                  </button>
+                </div>
+              </div>
 
-      {/* Input de monto con botones + y - */}
-      <div className="mb-3 sm:mb-4">
-        <div className="flex items-center gap-1.5 sm:gap-2">
-          {/* Botón - (30%) */}
-          <button
-            type="button"
-            onClick={handleDecrementAmount}
-            className="w-[30%] py-2 sm:py-2.5 md:py-3 rounded-md sm:rounded-lg text-gray-700 font-bold text-xl sm:text-2xl md:text-3xl hover:opacity-80 transition-opacity flex items-center justify-center"
-            style={{ backgroundColor: 'rgb(239, 239, 239)' }}
-            onMouseDown={(e) => e.currentTarget.style.background = 'linear-gradient(to right, rgb(2, 239, 255), rgb(0, 255, 135))'}
-            onMouseUp={(e) => e.currentTarget.style.background = 'rgb(239, 239, 239)'}
-            onMouseLeave={(e) => e.currentTarget.style.background = 'rgb(239, 239, 239)'}
-            onTouchStart={(e) => e.currentTarget.style.background = 'linear-gradient(to right, rgb(2, 239, 255), rgb(0, 255, 135))'}
-            onTouchEnd={(e) => e.currentTarget.style.background = 'rgb(239, 239, 239)'}
-          >
-            −
-          </button>
-          
-          {/* Contador central (40%) */}
-          <div 
-            className={`w-[40%] text-center py-2 sm:py-2.5 md:py-3 rounded-md sm:rounded-lg flex items-center justify-center transition-all ${
-              parseFloat(bet.amount || '0') > 0 ? '' : 'bg-white'
-            }`}
-            style={parseFloat(bet.amount || '0') > 0 
-              ? { background: 'linear-gradient(to right, rgb(2, 239, 255), rgb(0, 255, 135))' }
-              : {}
-            }
-          >
-            <div className={`text-sm sm:text-base font-bold ${
-              parseFloat(bet.amount || '0') > 0 ? 'text-[#37003c]' : 'text-gray-900'
-            }`}>
-              ${parseFloat(bet.amount || '0').toFixed(0)}
-            </div>
-          </div>
-          
-          {/* Botón + (30%) */}
-          <button
-            type="button"
-            onClick={handleIncrementAmount}
-            className="w-[30%] py-2 sm:py-2.5 md:py-3 rounded-md sm:rounded-lg text-gray-700 font-bold text-xl sm:text-2xl md:text-3xl hover:opacity-80 transition-opacity flex items-center justify-center"
-            style={{ backgroundColor: 'rgb(239, 239, 239)' }}
-            onMouseDown={(e) => e.currentTarget.style.background = 'linear-gradient(to right, rgb(2, 239, 255), rgb(0, 255, 135))'}
-            onMouseUp={(e) => e.currentTarget.style.background = 'rgb(239, 239, 239)'}
-            onMouseLeave={(e) => e.currentTarget.style.background = 'rgb(239, 239, 239)'}
-            onTouchStart={(e) => e.currentTarget.style.background = 'linear-gradient(to right, rgb(2, 239, 255), rgb(0, 255, 135))'}
-            onTouchEnd={(e) => e.currentTarget.style.background = 'rgb(239, 239, 239)'}
-          >
-            +
-          </button>
-        </div>
-        
-        {/* Botón confirmar apuesta individual */}
-        {user && (
-          <button
-            onClick={handleConfirmBet}
-            disabled={!bet.prediction || !bet.amount || parseFloat(bet.amount) <= 0}
-            className={`w-full mt-3 sm:mt-4 py-2 sm:py-2.5 md:py-3 rounded-lg sm:rounded-xl font-bold text-sm sm:text-base transition-all shadow-lg ${
-              !bet.prediction || !bet.amount || parseFloat(bet.amount) <= 0
-                ? 'opacity-50 cursor-not-allowed bg-gray-300 text-gray-500'
-                : 'hover:opacity-90 shadow-[#963cff]/20'
-            }`}
-            style={!bet.prediction || !bet.amount || parseFloat(bet.amount) <= 0 
-              ? {} 
-              : { backgroundColor: 'rgb(150, 60, 255)', color: 'white' }
-            }
-          >
-            Confirmar Apuesta
-          </button>
-        )}
-      </div>
+              {/* Input de monto con botones + y - */}
+              <div className="mb-3 sm:mb-4">
+                <div className="flex items-center gap-1.5 sm:gap-2">
+                  {/* Botón - (30%) */}
+                  <button
+                    type="button"
+                    onClick={handleDecrementAmount}
+                    className="w-[30%] py-2 sm:py-2.5 md:py-3 rounded-md sm:rounded-lg text-gray-700 font-bold text-xl sm:text-2xl md:text-3xl hover:opacity-80 transition-opacity flex items-center justify-center"
+                    style={{ backgroundColor: 'rgb(239, 239, 239)' }}
+                    onMouseDown={(e) => e.currentTarget.style.background = 'linear-gradient(to right, rgb(2, 239, 255), rgb(0, 255, 135))'}
+                    onMouseUp={(e) => e.currentTarget.style.background = 'rgb(239, 239, 239)'}
+                    onMouseLeave={(e) => e.currentTarget.style.background = 'rgb(239, 239, 239)'}
+                    onTouchStart={(e) => e.currentTarget.style.background = 'linear-gradient(to right, rgb(2, 239, 255), rgb(0, 255, 135))'}
+                    onTouchEnd={(e) => e.currentTarget.style.background = 'rgb(239, 239, 239)'}
+                  >
+                    −
+                  </button>
+                  
+                  {/* Contador central (40%) */}
+                  <div 
+                    className={`w-[40%] text-center py-2 sm:py-2.5 md:py-3 rounded-md sm:rounded-lg flex items-center justify-center transition-all ${
+                      parseFloat(bet.amount || '0') > 0 ? '' : 'bg-white'
+                    }`}
+                    style={parseFloat(bet.amount || '0') > 0 
+                      ? { background: 'linear-gradient(to right, rgb(2, 239, 255), rgb(0, 255, 135))' }
+                      : {}
+                    }
+                  >
+                    <div className={`text-sm sm:text-base font-bold ${
+                      parseFloat(bet.amount || '0') > 0 ? 'text-[#37003c]' : 'text-gray-900'
+                    }`}>
+                      ${parseFloat(bet.amount || '0').toFixed(0)}
+                    </div>
+                  </div>
+                  
+                  {/* Botón + (30%) */}
+                  <button
+                    type="button"
+                    onClick={handleIncrementAmount}
+                    className="w-[30%] py-2 sm:py-2.5 md:py-3 rounded-md sm:rounded-lg text-gray-700 font-bold text-xl sm:text-2xl md:text-3xl hover:opacity-80 transition-opacity flex items-center justify-center"
+                    style={{ backgroundColor: 'rgb(239, 239, 239)' }}
+                    onMouseDown={(e) => e.currentTarget.style.background = 'linear-gradient(to right, rgb(2, 239, 255), rgb(0, 255, 135))'}
+                    onMouseUp={(e) => e.currentTarget.style.background = 'rgb(239, 239, 239)'}
+                    onMouseLeave={(e) => e.currentTarget.style.background = 'rgb(239, 239, 239)'}
+                    onTouchStart={(e) => e.currentTarget.style.background = 'linear-gradient(to right, rgb(2, 239, 255), rgb(0, 255, 135))'}
+                    onTouchEnd={(e) => e.currentTarget.style.background = 'rgb(239, 239, 239)'}
+                  >
+                    +
+                  </button>
+                </div>
+                
+                {/* Botón confirmar apuesta individual */}
+                <button
+                  onClick={handleConfirmBet}
+                  disabled={!bet.prediction || !bet.amount || parseFloat(bet.amount) <= 0}
+                  className={`w-full mt-3 sm:mt-4 py-2 sm:py-2.5 md:py-3 rounded-lg sm:rounded-xl font-bold text-sm sm:text-base transition-all shadow-lg ${
+                    !bet.prediction || !bet.amount || parseFloat(bet.amount) <= 0
+                      ? 'opacity-50 cursor-not-allowed bg-gray-300 text-gray-500'
+                      : 'hover:opacity-90 shadow-[#963cff]/20'
+                  }`}
+                  style={!bet.prediction || !bet.amount || parseFloat(bet.amount) <= 0 
+                    ? {} 
+                    : { backgroundColor: 'rgb(150, 60, 255)', color: 'white' }
+                  }
+                >
+                  Confirmar Apuesta
+                </button>
+              </div>
+            </>
+          )}
+        </>
+      )}
     </div>
   );
 }

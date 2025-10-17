@@ -315,7 +315,7 @@ export default function Header() {
     : 'rgba(0, 0, 0, 0.5)';
 
   return (
-    <nav className="border-b border-white/10 sticky top-0 z-50 backdrop-blur-sm overflow-visible" style={{ background: headerBg }}>
+    <nav className="border-b border-white/10 sticky top-0 z-50 overflow-visible" style={{ background: headerBg }}>
       <div className="max-w-7xl mx-auto px-3 sm:px-4 md:px-6 lg:px-8">
         <div className="flex justify-between items-center h-14 sm:h-16 md:h-20 relative">
           {/* Logo y título */}

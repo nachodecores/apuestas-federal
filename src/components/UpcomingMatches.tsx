@@ -161,13 +161,13 @@ export default function UpcomingMatches() {
         let teamLogos = new Map();
         try {
           console.log('📡 Obteniendo logos de equipos...');
-          const { data: profiles } = await supabase
-            .from('profiles')
-            .select('league_entry_id, team_logo');
-          
+        const { data: profiles } = await supabase
+          .from('profiles')
+          .select('league_entry_id, team_logo');
+        
           teamLogos = new Map(
-            profiles?.map(p => [p.league_entry_id, p.team_logo]) || []
-          );
+          profiles?.map(p => [p.league_entry_id, p.team_logo]) || []
+        );
           console.log('✅ Logos obtenidos:', teamLogos.size);
         } catch (logoError) {
           console.warn('⚠️ Error obteniendo logos, continuando sin logos:', logoError);
@@ -301,7 +301,7 @@ export default function UpcomingMatches() {
     <section className="py-8 sm:py-12 md:py-16 lg:py-20 bg-[#37003c]">
       <div className="max-w-7xl mx-auto px-3 sm:px-4 md:px-6 lg:px-8">
         <h3 className="text-2xl sm:text-3xl md:text-4xl font-black text-white mb-6 sm:mb-8 md:mb-12">
-          Próximos Partidos - GW{nextGameweek}
+          Próximos Partidos
         </h3>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5 md:gap-6">
