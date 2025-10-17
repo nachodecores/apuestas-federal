@@ -40,11 +40,26 @@ export default function Header() {
       console.log('🚀 Inicializando Header...');
       
       try {
-        // 1. Primero verificar autenticación
+        // 1. Primero verificar autenticación con timeout
         console.log('📡 Verificando autenticación...');
-        const { data: { user } } = await supabase.auth.getUser();
+        
+        // Crear una promesa con timeout para evitar que se cuelgue
+        const authPromise = supabase.auth.getUser();
+        const timeoutPromise = new Promise((_, reject) => 
+          setTimeout(() => reject(new Error('Auth timeout')), 5000)
+        );
+        
+        let user = null;
+        try {
+          const { data: { user: authUser } } = await Promise.race([authPromise, timeoutPromise]) as any;
+          user = authUser;
+          console.log('✅ Usuario verificado:', user ? 'Logueado' : 'No logueado');
+        } catch (error) {
+          console.warn('⚠️ Error o timeout en autenticación, continuando sin usuario:', error);
+          user = null;
+        }
+        
         setUser(user);
-        console.log('✅ Usuario verificado:', user ? 'Logueado' : 'No logueado');
       
         if (user) {
           // Obtener datos completos del perfil (incluyendo balance)
