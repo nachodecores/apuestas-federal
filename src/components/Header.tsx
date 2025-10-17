@@ -5,6 +5,7 @@ import Image from "next/image";
 import { useEffect, useState, useRef } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { useRouter, usePathname } from "next/navigation";
+import DashboardModal from "./DashboardModal";
 import type { User } from "@supabase/supabase-js";
 
 // Tipo para participantes con sus datos
@@ -31,6 +32,7 @@ export default function Header() {
   const [showPasswordModal, setShowPasswordModal] = useState(false);
   const [selectedParticipant, setSelectedParticipant] = useState<Participant | null>(null);
   const [password, setPassword] = useState('');
+  const [showDashboardModal, setShowDashboardModal] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
   const supabase = createClient();
 
@@ -354,9 +356,9 @@ export default function Header() {
                     </span>
                   </div>
                   
-                  {/* Link al dashboard con avatar */}
-                  <Link
-                    href="/dashboard"
+                  {/* Botón al dashboard con avatar */}
+                  <button
+                    onClick={() => setShowDashboardModal(true)}
                     className="px-2 py-1.5 sm:px-3 sm:py-2 rounded-md hover:opacity-90 transition-opacity flex items-center gap-1.5 sm:gap-2"
                     style={{ 
                       backgroundColor: 'rgba(255, 255, 255, 1)', 
@@ -379,18 +381,18 @@ export default function Header() {
                         className="object-cover w-full h-full"
                       />
                     </div>
-                  </Link>
+                  </button>
                 </div>
               )}
 
               {/* Botón Dashboard (en admin) */}
               {isAdminPage && (
-                <Link
-                  href="/dashboard"
+                <button
+                  onClick={() => setShowDashboardModal(true)}
                   className="px-3 py-1.5 sm:px-4 sm:py-2 rounded-md sm:rounded-xl bg-white/5 border border-white/10 text-white hover:bg-white/10 transition-colors text-xs sm:text-sm font-semibold"
                 >
                   Dashboard
-                </Link>
+                </button>
               )}
 
               {/* Botón Admin (en dashboard) - SOLO si es Ignacio de Cores */}
@@ -539,6 +541,13 @@ export default function Header() {
           </div>
         </div>
       )}
+
+      {/* Modal del Dashboard */}
+      <DashboardModal
+        isOpen={showDashboardModal}
+        onClose={() => setShowDashboardModal(false)}
+        user={user}
+      />
     </nav>
   );
 }
