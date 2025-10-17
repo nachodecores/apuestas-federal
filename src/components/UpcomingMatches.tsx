@@ -86,34 +86,48 @@ export default function UpcomingMatches() {
     async function initializeComponent() {
       console.log('🚀 Inicializando UpcomingMatches...');
       
-      // 1. Primero verificar autenticación
-      const { data: { user } } = await supabase.auth.getUser();
-      setUser(user);
-      console.log('✅ Usuario verificado:', user ? 'Logueado' : 'No logueado');
+      try {
+        // 1. Primero verificar autenticación
+        console.log('📡 Verificando autenticación...');
+        const { data: { user } } = await supabase.auth.getUser();
+        setUser(user);
+        console.log('✅ Usuario verificado:', user ? 'Logueado' : 'No logueado');
       
-      if (user) {
-        // Obtener balance del usuario
-        try {
-          const { data: profile } = await supabase
-            .from('profiles')
-            .select('balance')
-            .eq('id', user.id)
-            .single();
-          
-          if (profile) {
-            setUserBalance(profile.balance);
-            console.log('✅ Balance obtenido:', profile.balance);
+        if (user) {
+          // Obtener balance del usuario
+          try {
+            console.log('📡 Obteniendo balance del usuario...');
+            const { data: profile } = await supabase
+              .from('profiles')
+              .select('balance')
+              .eq('id', user.id)
+              .single();
+            
+            if (profile) {
+              setUserBalance(profile.balance);
+              console.log('✅ Balance obtenido:', profile.balance);
+            } else {
+              console.warn('⚠️ No se encontró perfil para el usuario');
+              setUserBalance(0);
+            }
+          } catch (error) {
+            console.warn('⚠️ Error obteniendo balance:', error);
+            setUserBalance(0);
           }
-        } catch (error) {
-          console.warn('⚠️ Error obteniendo balance:', error);
+        } else {
+          console.log('👤 Usuario no logueado, balance = 0');
           setUserBalance(0);
         }
-      } else {
-        setUserBalance(0);
+        
+        // 2. DESPUÉS cargar partidos (independiente de autenticación)
+        console.log('📡 Iniciando carga de partidos...');
+        await fetchMatches();
+        
+        console.log('✅ UpcomingMatches inicializado completamente');
+      } catch (error) {
+        console.error('💥 Error en initializeComponent:', error);
+        setLoading(false);
       }
-      
-      // 2. DESPUÉS cargar partidos (independiente de autenticación)
-      await fetchMatches();
     }
     
     async function fetchMatches() {

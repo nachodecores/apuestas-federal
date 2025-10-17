@@ -39,52 +39,67 @@ export default function Header() {
     async function initializeComponent() {
       console.log('🚀 Inicializando Header...');
       
-      // 1. Primero verificar autenticación
-      const { data: { user } } = await supabase.auth.getUser();
-      setUser(user);
-      console.log('✅ Usuario verificado:', user ? 'Logueado' : 'No logueado');
+      try {
+        // 1. Primero verificar autenticación
+        console.log('📡 Verificando autenticación...');
+        const { data: { user } } = await supabase.auth.getUser();
+        setUser(user);
+        console.log('✅ Usuario verificado:', user ? 'Logueado' : 'No logueado');
       
-      if (user) {
-        // Obtener datos completos del perfil (incluyendo balance)
-        const { data: profile } = await supabase
-          .from('profiles')
-          .select('display_name, league_entry_id, team_logo, balance')
-          .eq('id', user.id)
-          .single();
-        
-        if (profile) {
-          setUserName(profile.display_name);
-          setUserTeamLogo(profile.team_logo);
-          setUserBalance(profile.balance || 0);
+        if (user) {
+          // Obtener datos completos del perfil (incluyendo balance)
+          console.log('📡 Obteniendo perfil del usuario...');
+          const { data: profile } = await supabase
+            .from('profiles')
+            .select('display_name, league_entry_id, team_logo, balance')
+            .eq('id', user.id)
+            .single();
           
-          // Verificar si es admin (Ignacio de Cores)
-          setIsAdmin(profile.display_name === 'Ignacio de Cores');
-          
-          // Obtener nombre del equipo de la API
-          try {
-            const leagueResponse = await fetch('/api/league');
-            const leagueData = await leagueResponse.json();
-            const entry = leagueData.league_entries?.find(
-              (e: { id: number; entry_name: string }) => e.id === profile.league_entry_id
-            );
-            setUserTeamName(entry?.entry_name || '');
-          } catch (error) {
-            console.warn('⚠️ Error obteniendo nombre del equipo:', error);
-            setUserTeamName('');
+          if (profile) {
+            console.log('✅ Perfil obtenido:', profile.display_name);
+            setUserName(profile.display_name);
+            setUserTeamLogo(profile.team_logo);
+            setUserBalance(profile.balance || 0);
+            
+            // Verificar si es admin (Ignacio de Cores)
+            setIsAdmin(profile.display_name === 'Ignacio de Cores');
+            
+            // Obtener nombre del equipo de la API
+            try {
+              console.log('📡 Obteniendo nombre del equipo...');
+              const leagueResponse = await fetch('/api/league');
+              const leagueData = await leagueResponse.json();
+              const entry = leagueData.league_entries?.find(
+                (e: { id: number; entry_name: string }) => e.id === profile.league_entry_id
+              );
+              setUserTeamName(entry?.entry_name || '');
+              console.log('✅ Nombre del equipo obtenido:', entry?.entry_name || 'Sin equipo');
+            } catch (error) {
+              console.warn('⚠️ Error obteniendo nombre del equipo:', error);
+              setUserTeamName('');
+            }
+          } else {
+            console.warn('⚠️ No se encontró perfil para el usuario');
           }
+        } else {
+          console.log('👤 Usuario no logueado, configurando valores por defecto');
+          setUserName('');
+          setUserTeamName('');
+          setUserTeamLogo(null);
+          setUserBalance(0);
+          setIsAdmin(false);
         }
-      } else {
-        setUserName('');
-        setUserTeamName('');
-        setUserTeamLogo(null);
-        setUserBalance(0);
-        setIsAdmin(false);
+        
+        // 2. DESPUÉS cargar participantes (independiente de autenticación)
+        console.log('📡 Iniciando carga de participantes...');
+        await loadParticipants();
+        
+        console.log('✅ Header inicializado completamente');
+        setLoading(false);
+      } catch (error) {
+        console.error('💥 Error en initializeComponent:', error);
+        setLoading(false);
       }
-      
-      // 2. DESPUÉS cargar participantes (independiente de autenticación)
-      await loadParticipants();
-      
-      setLoading(false);
     }
     
     async function loadParticipants() {
