@@ -138,43 +138,26 @@ export default function UpcomingMatches() {
       try {
         console.log('🚀 Iniciando fetchMatches...');
         
-        // 1. Primero obtenemos los datos básicos para determinar el próximo gameweek
-        const response = await fetch('/api/league');
+        // 1. Una sola llamada optimizada que trae solo los datos necesarios
+        console.log('📡 Obteniendo datos optimizados...');
+        const response = await fetch('/api/league?upcoming=true');
         
         if (!response.ok) {
           throw new Error(`Error ${response.status}: ${response.statusText}`);
         }
         
-        const data: DraftLeagueData = await response.json();
-        console.log('✅ Datos de liga recibidos:', data);
+        const data = await response.json();
+        console.log('✅ Datos optimizados recibidos:', data);
         
-        // 2. Encontramos el próximo gameweek (el primero que no haya terminado)
-        console.log('📡 Filtrando partidos próximos...');
-        const upcomingMatches = data.matches.filter(match => !match.finished);
-        console.log('✅ Partidos próximos encontrados:', upcomingMatches.length);
+        // 2. Los datos ya vienen filtrados y optimizados
+        const nextGW = data.gameweek;
+        const nextGWMatches = data.matches;
         
-        if (upcomingMatches.length === 0) {
-          throw new Error('No hay partidos próximos');
-        }
-        
-        // El gameweek del primer partido no terminado
-        console.log('📡 Obteniendo próxima gameweek...');
-        const nextGW = upcomingMatches[0].event;
         setNextGameweek(nextGW);
         console.log('✅ Próxima gameweek:', nextGW);
+        console.log('✅ Partidos de GW', nextGW, ':', nextGWMatches.length);
         
-        // 3. Ahora obtenemos los datos con odds pre-calculadas para este gameweek
-        console.log('📡 Obteniendo odds pre-calculadas...');
-        const oddsResponse = await fetch(`/api/league?gameweek=${nextGW}`);
-        
-        if (!oddsResponse.ok) {
-          throw new Error(`Error obteniendo odds: ${oddsResponse.status}`);
-        }
-        
-        const dataWithOdds = await oddsResponse.json();
-        console.log('✅ Datos con odds recibidos:', dataWithOdds);
-        
-        // 4. Obtener logos de los equipos desde Supabase (con fallback)
+        // 3. Obtener logos de los equipos desde Supabase (con fallback)
         let teamLogos = new Map();
         try {
           console.log('📡 Obteniendo logos de equipos...');
@@ -191,11 +174,6 @@ export default function UpcomingMatches() {
           // Continuamos sin logos, no es crítico
         }
         
-        // 5. Filtramos solo los partidos de ese gameweek
-        console.log('📡 Filtrando partidos de la próxima gameweek...');
-        const nextGWMatches = upcomingMatches.filter(match => match.event === nextGW);
-        console.log('✅ Partidos de GW', nextGW, ':', nextGWMatches.length);
-        
         // 4. Mapeamos los IDs de equipos a nombres Y usamos odds pre-calculadas
         console.log('📡 Procesando partidos...');
         const processedMatches: MatchDisplay[] = nextGWMatches.map((match, index) => {
@@ -210,8 +188,8 @@ export default function UpcomingMatches() {
           // Buscar odds pre-calculadas para este partido
           let odds = { home: 2.0, draw: 3.0, away: 2.0 }; // Fallback por defecto
           
-          if (dataWithOdds.gameweek_odds) {
-            const matchOdds = dataWithOdds.gameweek_odds.find(
+          if (data.gameweek_odds) {
+            const matchOdds = data.gameweek_odds.find(
               (odd: any) => 
                 odd.league_entry_1 === match.league_entry_1 && 
                 odd.league_entry_2 === match.league_entry_2
