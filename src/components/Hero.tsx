@@ -63,7 +63,7 @@ export default function Hero() {
           <div className="grid grid-cols-2 gap-3 sm:gap-6 md:gap-8 max-w-2xl mx-auto">
             {/* Apuestas Activas */}
             <div className="text-center">
-              <div className="text-[0.625rem] sm:text-xs md:text-sm text-gray-300 tracking-wider mb-2 sm:mb-3">
+              <div className="text-[0.625rem] sm:text-xs md:text-sm text-gray-300 tracking-normal mb-2 sm:mb-3">
                 n° apuestas
               </div>
               <div 
@@ -81,7 +81,7 @@ export default function Hero() {
 
             {/* Monto Apostado GW */}
             <div className="text-center">
-              <div className="text-[0.625rem] sm:text-xs md:text-sm text-gray-300 tracking-wider mb-2 sm:mb-3">
+              <div className="text-[0.625rem] sm:text-xs md:text-sm text-gray-300 tracking-normal mb-2 sm:mb-3">
                 Total apostado
               </div>
               <div 
@@ -103,11 +103,11 @@ export default function Hero() {
 
       {/* Pozo Stats - Fuera del div violeta */}
       <div className="px-3 sm:px-4 md:px-6 lg:px-8 py-6 sm:py-8 md:py-10">
-        <div className="max-w-2xl mx-auto">
-          <div className="grid grid-cols-2 gap-3 sm:gap-6 md:gap-8">
+        <div className="max-w-3xl mx-auto">
+          <div className="grid grid-cols-3 gap-3 sm:gap-6 md:gap-8">
             {/* Pozo Real */}
             <div className="text-center">
-              <div className="text-[0.625rem] sm:text-xs md:text-sm text-gray-600 tracking-wider mb-2 sm:mb-3">
+              <div className="text-[0.625rem] sm:text-xs md:text-sm text-gray-600 tracking-normal mb-2 sm:mb-3">
                 Pozo Real
               </div>
               <div 
@@ -125,19 +125,37 @@ export default function Hero() {
 
             {/* Pozo Federal */}
             <div className="text-center">
-              <div className="text-[0.625rem] sm:text-xs md:text-sm text-gray-600 tracking-wider mb-2 sm:mb-3">
+              <div className="text-[0.625rem] sm:text-xs md:text-sm text-gray-600 tracking-normal mb-2 sm:mb-3">
                 Pozo Federal
               </div>
               <div 
                 className="text-2xl sm:text-3xl md:text-4xl font-bold mb-0"
                 style={{ 
-                  background: 'linear-gradient(to right, rgb(0, 255, 135), rgb(2, 239, 255))',
+                  background: 'linear-gradient(to left, rgb(255, 40, 130), rgb(55, 0, 60))',
                   WebkitBackgroundClip: 'text',
                   WebkitTextFillColor: 'transparent',
                   backgroundClip: 'text'
                 }}
               >
                 {loading ? '...' : `$${federalPool.toLocaleString()}`}
+              </div>
+            </div>
+
+            {/* TC (Tipo de Cambio) */}
+            <div className="text-center">
+              <div className="text-[0.625rem] sm:text-xs md:text-sm text-gray-600 tracking-normal mb-2 sm:mb-3">
+                TC
+              </div>
+              <div 
+                className="text-2xl sm:text-3xl md:text-4xl font-bold mb-0"
+                style={{ 
+                  background: 'linear-gradient(to right, rgb(255, 40, 130), rgb(55, 0, 60))',
+                  WebkitBackgroundClip: 'text',
+                  WebkitTextFillColor: 'transparent',
+                  backgroundClip: 'text'
+                }}
+              >
+                {loading ? '...' : (federalPool / realPool).toFixed(2)}
               </div>
             </div>
           </div>
