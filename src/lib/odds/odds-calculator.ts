@@ -54,7 +54,7 @@ interface DraftLeagueData {
  * @returns Array de odds calculadas y guardadas
  */
 export async function calculateAndSaveGameweekOdds(gameweek: number): Promise<GameweekOdds[]> {
-  const supabase = createClient();
+  const supabase = await createClient();
   
   try {
     console.log(`🎯 Calculando odds para GW${gameweek}...`);
@@ -130,7 +130,7 @@ export async function calculateAndSaveGameweekOdds(gameweek: number): Promise<Ga
  * @returns Array de odds o null si no existen
  */
 export async function getGameweekOdds(gameweek: number): Promise<GameweekOdds[] | null> {
-  const supabase = createClient();
+  const supabase = await createClient();
   
   try {
     const { data, error } = await supabase
@@ -164,7 +164,7 @@ export async function getMatchOdds(
   league_entry_1: number, 
   league_entry_2: number
 ): Promise<GameweekOdds | null> {
-  const supabase = createClient();
+  const supabase = await createClient();
   
   try {
     const { data, error } = await supabase

@@ -7,7 +7,7 @@ import { calculateAndSaveGameweekOdds } from '@/lib/odds/odds-calculator';
 export async function POST(request: Request) {
   try {
     // Verificar autenticación de admin
-    const supabase = createClient();
+    const supabase = await createClient();
     const { data: { user } } = await supabase.auth.getUser();
     
     if (!user) {

@@ -267,7 +267,6 @@ export default function UpcomingMatches() {
     });
     
     return () => subscription.unsubscribe();
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // Función para manejar cuando se confirma una apuesta desde MatchCard
