@@ -35,10 +35,14 @@ export default function Header() {
   const supabase = createClient();
 
   useEffect(() => {
-    // Obtener usuario actual, nombre y participantes
-    async function getUserData() {
+    // Inicializar componente: primero autenticación, luego participantes
+    async function initializeComponent() {
+      console.log('🚀 Inicializando Header...');
+      
+      // 1. Primero verificar autenticación
       const { data: { user } } = await supabase.auth.getUser();
       setUser(user);
+      console.log('✅ Usuario verificado:', user ? 'Logueado' : 'No logueado');
       
       if (user) {
         // Obtener datos completos del perfil (incluyendo balance)
@@ -57,12 +61,17 @@ export default function Header() {
           setIsAdmin(profile.display_name === 'Ignacio de Cores');
           
           // Obtener nombre del equipo de la API
-          const leagueResponse = await fetch('/api/league');
-          const leagueData = await leagueResponse.json();
-          const entry = leagueData.league_entries?.find(
-            (e: { id: number; entry_name: string }) => e.id === profile.league_entry_id
-          );
-          setUserTeamName(entry?.entry_name || '');
+          try {
+            const leagueResponse = await fetch('/api/league');
+            const leagueData = await leagueResponse.json();
+            const entry = leagueData.league_entries?.find(
+              (e: { id: number; entry_name: string }) => e.id === profile.league_entry_id
+            );
+            setUserTeamName(entry?.entry_name || '');
+          } catch (error) {
+            console.warn('⚠️ Error obteniendo nombre del equipo:', error);
+            setUserTeamName('');
+          }
         }
       } else {
         setUserName('');
@@ -72,7 +81,13 @@ export default function Header() {
         setIsAdmin(false);
       }
       
-      // Obtener todos los participantes con sus logos y nombres de equipo
+      // 2. DESPUÉS cargar participantes (independiente de autenticación)
+      await loadParticipants();
+      
+      setLoading(false);
+    }
+    
+    async function loadParticipants() {
       try {
         console.log('🚀 Cargando participantes...');
         const response = await fetch('/api/participants');
@@ -144,11 +159,9 @@ export default function Header() {
           { name: 'Ángel Cal', teamName: 'Pirarajá United', league_entry_id: 5865, team_logo: null },
         ]);
       }
-      
-      setLoading(false);
     }
     
-    getUserData();
+    initializeComponent();
 
     // Escuchar cambios de autenticación
     const {

@@ -81,56 +81,41 @@ export default function UpcomingMatches() {
   // Usamos un objeto con key = índice del partido
   const [bets, setBets] = useState<Record<number, BetSelection>>({});
 
-  // useEffect 1: Obtener usuario y su balance
+  // useEffect: Inicializar componente - primero autenticación, luego partidos
   useEffect(() => {
-    async function getUser() {
+    async function initializeComponent() {
+      console.log('🚀 Inicializando UpcomingMatches...');
+      
+      // 1. Primero verificar autenticación
       const { data: { user } } = await supabase.auth.getUser();
       setUser(user);
+      console.log('✅ Usuario verificado:', user ? 'Logueado' : 'No logueado');
       
       if (user) {
         // Obtener balance del usuario
-        const { data: profile } = await supabase
-          .from('profiles')
-          .select('balance')
-          .eq('id', user.id)
-          .single();
-        
-        if (profile) {
-          setUserBalance(profile.balance);
-        }
-      }
-    }
-    
-    getUser();
-    
-    // Escuchar cambios de autenticación en TIEMPO REAL
-    const {
-      data: { subscription },
-    } = supabase.auth.onAuthStateChange(async (_event, session) => {
-      setUser(session?.user ?? null);
-      
-      if (session?.user) {
-        // Actualizar balance cuando el usuario se loguea
-        const { data: profile } = await supabase
-          .from('profiles')
-          .select('balance')
-          .eq('id', session.user.id)
-          .single();
-        
-        if (profile) {
-          setUserBalance(profile.balance);
+        try {
+          const { data: profile } = await supabase
+            .from('profiles')
+            .select('balance')
+            .eq('id', user.id)
+            .single();
+          
+          if (profile) {
+            setUserBalance(profile.balance);
+            console.log('✅ Balance obtenido:', profile.balance);
+          }
+        } catch (error) {
+          console.warn('⚠️ Error obteniendo balance:', error);
+          setUserBalance(0);
         }
       } else {
         setUserBalance(0);
       }
-    });
+      
+      // 2. DESPUÉS cargar partidos (independiente de autenticación)
+      await fetchMatches();
+    }
     
-    return () => subscription.unsubscribe();
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
-  // useEffect 2: Obtener partidos de la API
-  useEffect(() => {
     async function fetchMatches() {
       try {
         console.log('🚀 Iniciando fetchMatches...');
@@ -214,7 +199,36 @@ export default function UpcomingMatches() {
       }
     }
     
-    fetchMatches();
+    initializeComponent();
+    
+    // Escuchar cambios de autenticación en TIEMPO REAL
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange(async (_event, session) => {
+      setUser(session?.user ?? null);
+      
+      if (session?.user) {
+        // Actualizar balance cuando el usuario se loguea
+        try {
+          const { data: profile } = await supabase
+            .from('profiles')
+            .select('balance')
+            .eq('id', session.user.id)
+            .single();
+          
+          if (profile) {
+            setUserBalance(profile.balance);
+          }
+        } catch (error) {
+          console.warn('⚠️ Error actualizando balance:', error);
+          setUserBalance(0);
+        }
+      } else {
+        setUserBalance(0);
+      }
+    });
+    
+    return () => subscription.unsubscribe();
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
