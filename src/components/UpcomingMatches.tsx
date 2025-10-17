@@ -133,23 +133,33 @@ export default function UpcomingMatches() {
   useEffect(() => {
     async function fetchMatches() {
       try {
+        console.log('🚀 Iniciando fetchMatches...');
+        
         // 1. Traemos los datos de nuestra API
         const response = await fetch('/api/league');
         
         if (!response.ok) {
-          throw new Error('Error al obtener datos de la liga');
+          throw new Error(`Error ${response.status}: ${response.statusText}`);
         }
         
         const data: DraftLeagueData = await response.json();
+        console.log('✅ Datos de liga recibidos:', data);
         
-        // 2. Obtener logos de los equipos desde Supabase
-        const { data: profiles } = await supabase
-          .from('profiles')
-          .select('league_entry_id, team_logo');
-        
-        const teamLogos = new Map(
-          profiles?.map(p => [p.league_entry_id, p.team_logo]) || []
-        );
+        // 2. Obtener logos de los equipos desde Supabase (con fallback)
+        let teamLogos = new Map();
+        try {
+          const { data: profiles } = await supabase
+            .from('profiles')
+            .select('league_entry_id, team_logo');
+          
+          teamLogos = new Map(
+            profiles?.map(p => [p.league_entry_id, p.team_logo]) || []
+          );
+          console.log('✅ Logos obtenidos:', teamLogos.size);
+        } catch (logoError) {
+          console.warn('⚠️ Error obteniendo logos, continuando sin logos:', logoError);
+          // Continuamos sin logos, no es crítico
+        }
         
         // 3. Encontramos el próximo gameweek (el primero que no haya terminado)
         const upcomingMatches = data.matches.filter(match => !match.finished);
@@ -193,10 +203,12 @@ export default function UpcomingMatches() {
           };
         });
         
+        console.log('✅ Partidos procesados:', processedMatches.length);
         setMatches(processedMatches);
         setLoading(false);
         
       } catch (err) {
+        console.error('💥 Error en fetchMatches:', err);
         setError(err instanceof Error ? err.message : 'Error desconocido');
         setLoading(false);
       }

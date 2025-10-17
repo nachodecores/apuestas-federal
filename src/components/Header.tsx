@@ -74,31 +74,62 @@ export default function Header() {
       
       // Obtener todos los participantes con sus logos y nombres de equipo
       try {
+        console.log('🚀 Cargando participantes...');
         const response = await fetch('/api/participants');
         const data = await response.json();
         
         if (data.profiles) {
-          // Obtener nombres de equipos de la API de FPL
-          const leagueResponse = await fetch('/api/league');
-          const leagueData = await leagueResponse.json();
+          console.log('✅ Perfiles obtenidos:', data.profiles.length);
           
-          const participantsData: Participant[] = data.profiles.map((profile: { display_name: string; league_entry_id: number; team_logo: string | null; fpl_entry_id: number | null }) => {
-            const entry = leagueData.league_entries?.find(
-              (e: { id: number; entry_name: string }) => e.id === profile.league_entry_id
-            );
+          // Obtener nombres de equipos de la API de FPL (con fallback)
+          try {
+            const leagueResponse = await fetch('/api/league');
+            const leagueData = await leagueResponse.json();
             
-            return {
+            const participantsData: Participant[] = data.profiles.map((profile: { display_name: string; league_entry_id: number; team_logo: string | null; fpl_entry_id: number | null }) => {
+              const entry = leagueData.league_entries?.find(
+                (e: { id: number; entry_name: string }) => e.id === profile.league_entry_id
+              );
+              
+              return {
+                name: profile.display_name,
+                teamName: entry?.entry_name || 'Sin equipo',
+                league_entry_id: profile.league_entry_id,
+                team_logo: profile.team_logo
+              };
+            });
+            
+            console.log('✅ Participantes procesados:', participantsData.length);
+            setParticipants(participantsData);
+          } catch (leagueError) {
+            console.warn('⚠️ Error obteniendo datos de liga, usando datos por defecto:', leagueError);
+            // Usar datos por defecto si falla la API de liga
+            const participantsData: Participant[] = data.profiles.map((profile: { display_name: string; league_entry_id: number; team_logo: string | null; fpl_entry_id: number | null }) => ({
               name: profile.display_name,
-              teamName: entry?.entry_name || 'Sin equipo',
+              teamName: 'Equipo',
               league_entry_id: profile.league_entry_id,
               team_logo: profile.team_logo
-            };
-          });
-          
-          setParticipants(participantsData);
+            }));
+            setParticipants(participantsData);
+          }
+        } else {
+          console.warn('⚠️ No se encontraron perfiles, usando datos por defecto');
+          // Usar datos por defecto si no hay perfiles
+          setParticipants([
+            { name: 'Chacho Bonino', teamName: 'Quebracho', league_entry_id: 6753, team_logo: null },
+            { name: 'Marcos Arocena', teamName: 'Tranqueras', league_entry_id: 5156, team_logo: null },
+            { name: 'Ignacio de Cores', teamName: 'CA Tambores RF', league_entry_id: 38904, team_logo: null },
+            { name: 'Manuel Domenech', teamName: 'Sportivo Nico Perez', league_entry_id: 44346, team_logo: null },
+            { name: 'Juan Dehl', teamName: 'CA Tres Islas', league_entry_id: 54556, team_logo: null },
+            { name: 'Juan Francisco Sienra', teamName: 'Palmitas City', league_entry_id: 5769, team_logo: null },
+            { name: 'Felipe Migues', teamName: 'Migues', league_entry_id: 5997, team_logo: null },
+            { name: 'Joaquin Sarachaga', teamName: 'Deportivo Sauce', league_entry_id: 6494, team_logo: null },
+            { name: 'Javier Villaamil', teamName: 'Mal Abrigo Town', league_entry_id: 6479, team_logo: null },
+            { name: 'Ángel Cal', teamName: 'Pirarajá United', league_entry_id: 5865, team_logo: null },
+          ]);
         }
       } catch (error) {
-        console.error('Error cargando participantes:', error);
+        console.error('💥 Error cargando participantes:', error);
         // Usar datos por defecto si falla
         setParticipants([
           { name: 'Chacho Bonino', teamName: 'Quebracho', league_entry_id: 6753, team_logo: null },
