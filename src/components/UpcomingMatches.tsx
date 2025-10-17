@@ -2,7 +2,6 @@
 
 import { useEffect, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
-import { calculateOdds } from "@/lib/odds-calculator";
 import MatchCard from "./MatchCard";
 import type { User } from "@supabase/supabase-js";
 
@@ -139,7 +138,7 @@ export default function UpcomingMatches() {
       try {
         console.log('🚀 Iniciando fetchMatches...');
         
-        // 1. Traemos los datos de nuestra API
+        // 1. Primero obtenemos los datos básicos para determinar el próximo gameweek
         const response = await fetch('/api/league');
         
         if (!response.ok) {
@@ -149,24 +148,7 @@ export default function UpcomingMatches() {
         const data: DraftLeagueData = await response.json();
         console.log('✅ Datos de liga recibidos:', data);
         
-        // 2. Obtener logos de los equipos desde Supabase (con fallback)
-        let teamLogos = new Map();
-        try {
-          console.log('📡 Obteniendo logos de equipos...');
-        const { data: profiles } = await supabase
-          .from('profiles')
-          .select('league_entry_id, team_logo');
-        
-          teamLogos = new Map(
-          profiles?.map(p => [p.league_entry_id, p.team_logo]) || []
-        );
-          console.log('✅ Logos obtenidos:', teamLogos.size);
-        } catch (logoError) {
-          console.warn('⚠️ Error obteniendo logos, continuando sin logos:', logoError);
-          // Continuamos sin logos, no es crítico
-        }
-        
-        // 3. Encontramos el próximo gameweek (el primero que no haya terminado)
+        // 2. Encontramos el próximo gameweek (el primero que no haya terminado)
         console.log('📡 Filtrando partidos próximos...');
         const upcomingMatches = data.matches.filter(match => !match.finished);
         console.log('✅ Partidos próximos encontrados:', upcomingMatches.length);
@@ -181,12 +163,40 @@ export default function UpcomingMatches() {
         setNextGameweek(nextGW);
         console.log('✅ Próxima gameweek:', nextGW);
         
-        // 3. Filtramos solo los partidos de ese gameweek
+        // 3. Ahora obtenemos los datos con odds pre-calculadas para este gameweek
+        console.log('📡 Obteniendo odds pre-calculadas...');
+        const oddsResponse = await fetch(`/api/league?gameweek=${nextGW}`);
+        
+        if (!oddsResponse.ok) {
+          throw new Error(`Error obteniendo odds: ${oddsResponse.status}`);
+        }
+        
+        const dataWithOdds = await oddsResponse.json();
+        console.log('✅ Datos con odds recibidos:', dataWithOdds);
+        
+        // 4. Obtener logos de los equipos desde Supabase (con fallback)
+        let teamLogos = new Map();
+        try {
+          console.log('📡 Obteniendo logos de equipos...');
+          const { data: profiles } = await supabase
+            .from('profiles')
+            .select('league_entry_id, team_logo');
+          
+          teamLogos = new Map(
+            profiles?.map(p => [p.league_entry_id, p.team_logo]) || []
+          );
+          console.log('✅ Logos obtenidos:', teamLogos.size);
+        } catch (logoError) {
+          console.warn('⚠️ Error obteniendo logos, continuando sin logos:', logoError);
+          // Continuamos sin logos, no es crítico
+        }
+        
+        // 5. Filtramos solo los partidos de ese gameweek
         console.log('📡 Filtrando partidos de la próxima gameweek...');
         const nextGWMatches = upcomingMatches.filter(match => match.event === nextGW);
         console.log('✅ Partidos de GW', nextGW, ':', nextGWMatches.length);
         
-        // 4. Mapeamos los IDs de equipos a nombres Y calculamos odds
+        // 4. Mapeamos los IDs de equipos a nombres Y usamos odds pre-calculadas
         console.log('📡 Procesando partidos...');
         const processedMatches: MatchDisplay[] = nextGWMatches.map((match, index) => {
           console.log(`📡 Procesando partido ${index + 1}/${nextGWMatches.length}...`);
@@ -197,15 +207,29 @@ export default function UpcomingMatches() {
           
           console.log(`📡 Equipos encontrados: ${team1?.entry_name} vs ${team2?.entry_name}`);
           
-          // Calcular odds dinámicos para este partido
-          console.log('📡 Calculando odds...');
-          const odds = calculateOdds(
-            match.league_entry_1,
-            match.league_entry_2,
-            data.standings,
-            data.matches
-          );
-          console.log('✅ Odds calculadas:', odds);
+          // Buscar odds pre-calculadas para este partido
+          let odds = { home: 2.0, draw: 3.0, away: 2.0 }; // Fallback por defecto
+          
+          if (dataWithOdds.gameweek_odds) {
+            const matchOdds = dataWithOdds.gameweek_odds.find(
+              (odd: any) => 
+                odd.league_entry_1 === match.league_entry_1 && 
+                odd.league_entry_2 === match.league_entry_2
+            );
+            
+            if (matchOdds) {
+              odds = {
+                home: matchOdds.home_odds,
+                draw: matchOdds.draw_odds,
+                away: matchOdds.away_odds
+              };
+              console.log('✅ Odds pre-calculadas encontradas:', odds);
+            } else {
+              console.warn('⚠️ No se encontraron odds pre-calculadas, usando fallback');
+            }
+          } else {
+            console.warn('⚠️ No hay odds pre-calculadas disponibles, usando fallback');
+          }
           
           return {
             gameweek: match.event,

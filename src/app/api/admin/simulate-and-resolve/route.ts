@@ -2,6 +2,7 @@ import { createClient } from '@/lib/supabase/server';
 import { NextResponse } from 'next/server';
 import { generateSimulatedResults } from '@/lib/simulation/result-generator';
 import { resolveGameweekBets, ResolutionSummary } from '@/lib/resolution/bet-resolver';
+import { calculateAndSaveGameweekOdds } from '@/lib/odds/odds-calculator';
 
 export async function POST(request: Request) {
   try {
@@ -139,6 +140,17 @@ export async function POST(request: Request) {
       console.error('Error marcando apuestas como resueltas:', updateBetsError);
     }
 
+    // 8. Calcular odds para el próximo gameweek
+    let nextGameweekOdds = null;
+    try {
+      console.log(`🎯 Calculando odds para el próximo gameweek (GW${gameweek + 1})...`);
+      nextGameweekOdds = await calculateAndSaveGameweekOdds(gameweek + 1);
+      console.log(`✅ Odds calculadas para GW${gameweek + 1}: ${nextGameweekOdds.length} partidos`);
+    } catch (oddsError) {
+      console.error(`⚠️ Error calculando odds para GW${gameweek + 1}:`, oddsError);
+      // No fallar la resolución por error en odds
+    }
+
     return NextResponse.json({
       success: true,
       message: `Gameweek ${gameweek} resuelta exitosamente`,
@@ -148,7 +160,17 @@ export async function POST(request: Request) {
       balance_updates: Array.from(balanceUpdates.entries()).map(([userId, change]) => ({
         user_id: userId,
         balance_change: change
-      }))
+      })),
+      next_gameweek_odds: nextGameweekOdds ? {
+        gameweek: gameweek + 1,
+        odds_count: nextGameweekOdds.length,
+        calculated: true
+      } : {
+        gameweek: gameweek + 1,
+        odds_count: 0,
+        calculated: false,
+        error: 'No se pudieron calcular las odds del próximo gameweek'
+      }
     });
 
   } catch (error) {
