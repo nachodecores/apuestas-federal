@@ -268,12 +268,12 @@ export default function MatchCard({
             // Mostrar apuesta existente
             <div className="mb-3 sm:mb-4 p-3 bg-green-50 border border-green-200 rounded-lg">
               <div className="text-center">
-                <div className="text-sm font-medium text-green-800">
+                <div className="text-[0.625rem] tablet:text-xs font-medium text-green-800">
                   {userBet.prediction === 'home' && `Apostaste $${userBet.amount} a que gana ${match.team1Name}`}
                   {userBet.prediction === 'away' && `Apostaste $${userBet.amount} a que gana ${match.team2Name}`}
                   {userBet.prediction === 'draw' && `Apostaste $${userBet.amount} a un empate`}
                 </div>
-                <div className="text-xs text-green-600 mt-1">
+                <div className="text-[0.625rem] tablet:text-xs text-green-600 mt-1">
                   Ganancia potencial: ${userBet.potential_win?.toFixed(2)}
                 </div>
               </div>

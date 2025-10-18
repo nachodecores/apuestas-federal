@@ -317,7 +317,7 @@ export default function Header() {
   return (
     <nav className="border-b border-white/10 sticky top-0 z-50 overflow-visible" style={{ background: headerBg }}>
       <div className="max-w-7xl mx-auto px-3 sm:px-4 md:px-6 lg:px-8">
-        <div className="flex justify-between items-center h-14 sm:h-16 md:h-20 relative">
+        <div className="flex justify-between items-center h-14 relative">
           {/* Logo y título */}
           <Link href="/" className="flex items-center gap-2 sm:gap-3 hover:opacity-80 transition-opacity">
             <Image 
@@ -325,15 +325,15 @@ export default function Header() {
               alt="Premier League"
               width={40}
               height={50}
-              className="h-7 sm:h-9 md:h-10 w-auto"
+              className="h-7 w-auto"
             />
             {isHome ? (
-              <h1 className="text-lg sm:text-xl md:text-2xl lg:text-3xl text-white">
+              <h1 className="text-lg text-white">
                 <span className="font-black">Bet</span>
                 <span className="font-normal">Federal</span>
               </h1>
             ) : (
-              <h1 className="text-base sm:text-lg md:text-xl lg:text-2xl text-white font-semibold uppercase tracking-wide">
+              <h1 className="text-base text-white font-semibold uppercase tracking-wide">
                 Volver
               </h1>
             )}
@@ -341,25 +341,25 @@ export default function Header() {
 
           {/* Botones de navegación */}
           {loading ? (
-            <div className="w-20 h-8 sm:w-24 sm:h-10 bg-white/5 rounded-full animate-pulse"></div>
+            <div className="w-20 h-8 bg-white/5 rounded-full animate-pulse"></div>
           ) : user ? (
             // Usuario logueado - mostrar opciones
-            <div className="flex items-center gap-2 sm:gap-3">
+            <div className="flex items-center gap-2">
               {/* Avatar + Nombre + Balance (solo en home) */}
               {isHome && (
-                <div className="flex items-center gap-2 sm:gap-3">
+                <div className="flex items-center gap-2">
                   {/* Balance disponible */}
-                  <div className="hidden md:flex flex-col items-end">
+                  <div className="hidden min-[768px]:flex flex-col items-end">
                     <span className="text-[0.625rem] text-white/70 uppercase tracking-wider">Disponible</span>
-                    <span className="text-sm sm:text-base font-bold text-[#00ff87]">
-                      ${userBalance.toFixed(2)}
+                    <span className="text-sm font-bold text-[#00ff87]">
+                      ₣{userBalance.toFixed(2)}
                     </span>
                   </div>
                   
                   {/* Botón al dashboard con avatar */}
                   <button
                     onClick={() => setShowDashboardModal(true)}
-                    className="px-2 py-1.5 sm:px-3 sm:py-2 rounded-md hover:opacity-90 transition-opacity flex items-center gap-1.5 sm:gap-2"
+                    className="px-2 py-1.5 rounded-md hover:opacity-90 transition-opacity flex items-center gap-1.5"
                     style={{ 
                       backgroundColor: 'rgba(255, 255, 255, 1)', 
                       color: 'rgb(55, 0, 60)' 
@@ -367,12 +367,12 @@ export default function Header() {
                   >
                     {/* Texto a la izquierda, alineado a la derecha */}
                     <div className="flex flex-col items-end text-right">
-                      <span className="font-semibold text-[0.625rem] sm:text-xs leading-tight">{userName}</span>
-                      <span className="text-[0.625rem] sm:text-xs text-gray-600 leading-tight font-light">{userTeamName}</span>
+                      <span className="font-semibold text-[0.625rem] leading-tight">{userName}</span>
+                      <span className="text-[0.625rem] text-gray-600 leading-tight font-light">{userTeamName}</span>
                     </div>
                     
                     {/* Avatar a la derecha */}
-                    <div className="w-5 h-5 sm:w-6 sm:h-6 rounded-full overflow-hidden bg-white border border-white/20 flex-shrink-0">
+                    <div className="w-5 h-5 rounded-full overflow-hidden bg-white border border-white/20 flex-shrink-0">
                       <Image
                         src="/assets/Group170.svg"
                         alt={userTeamName}
@@ -389,7 +389,7 @@ export default function Header() {
               {isAdminPage && (
                 <button
                   onClick={() => setShowDashboardModal(true)}
-                  className="px-3 py-1.5 sm:px-4 sm:py-2 rounded-md sm:rounded-xl bg-white/5 border border-white/10 text-white hover:bg-white/10 transition-colors text-xs sm:text-sm font-semibold"
+                  className="px-3 py-1.5 rounded-md bg-white/5 border border-white/10 text-white hover:bg-white/10 transition-colors text-xs font-semibold"
                 >
                   Dashboard
                 </button>
@@ -399,7 +399,7 @@ export default function Header() {
               {isDashboard && isAdmin && (
                 <Link
                   href="/admin"
-                  className="px-3 py-1.5 sm:px-4 sm:py-2 rounded-md sm:rounded-xl bg-[#ff2882]/10 border border-[#ff2882]/50 text-[#ff2882] hover:bg-[#ff2882]/20 transition-colors text-xs sm:text-sm font-semibold"
+                  className="px-3 py-1.5 rounded-md bg-[#ff2882]/10 border border-[#ff2882]/50 text-[#ff2882] hover:bg-[#ff2882]/20 transition-colors text-xs font-semibold"
                 >
                   Admin
                 </Link>
@@ -409,10 +409,10 @@ export default function Header() {
               {(isDashboard || isAdminPage) && (
                 <button
                   onClick={handleLogout}
-                  className="px-3 py-1.5 sm:px-4 sm:py-2 rounded-md sm:rounded-xl bg-white/5 border border-white/10 text-white hover:bg-white/10 transition-colors text-xs sm:text-sm font-semibold"
+                  className="px-3 py-1.5 rounded-md bg-white/5 border border-white/10 text-white hover:bg-white/10 transition-colors text-xs font-semibold"
                 >
-                  <span className="hidden sm:inline">Cerrar sesión</span>
-                  <span className="sm:hidden">Salir</span>
+                  <span className="hidden min-[768px]:inline">Cerrar sesión</span>
+                  <span className="min-[768px]:hidden">Salir</span>
                 </button>
               )}
             </div>
@@ -425,19 +425,19 @@ export default function Header() {
                   setShowDropdown(!showDropdown);
                 }}
                 disabled={loggingIn}
-                className="px-3 py-1.5 sm:px-5 sm:py-2 md:px-6 text-sm sm:text-base rounded-md font-semibold hover:opacity-90 transition-opacity disabled:opacity-50"
+                className="px-3 py-1.5 text-sm rounded-md font-semibold hover:opacity-90 transition-opacity disabled:opacity-50"
                 style={{ 
                   backgroundColor: 'rgba(255, 255, 255, 0.75)', 
                   color: 'rgb(55, 0, 60)' 
                 }}
               >
-                {loggingIn ? "Ingresando..." : "¿Quién sos?"}
+                {loggingIn ? "Ingresando..." : "Iniciar sesión"}
               </button>
 
               {/* Dropdown */}
               {showDropdown && (
                 <div 
-                  className="absolute right-0 mt-2 w-[calc(100vw-2rem)] sm:w-72 md:w-80 max-w-sm bg-white border border-gray-200 rounded-xl shadow-2xl overflow-hidden z-[9999]"
+                  className="absolute right-0 mt-2 w-[calc(100vw-2rem)] max-w-sm bg-white border border-gray-200 rounded-xl shadow-2xl overflow-hidden z-[9999]"
                   style={{ display: 'block' }}
                   ref={(el) => {
                     if (el) {
@@ -446,16 +446,16 @@ export default function Header() {
                   }}
                 >
                   
-                  <div className="max-h-[70vh] sm:max-h-96 overflow-y-auto">
+                  <div className="max-h-[70vh] overflow-y-auto">
                     {participants.map((participant, index) => (
                       <div key={participant.league_entry_id}>
                         <button
                           onClick={() => handleSelectUser(participant)}
                           disabled={loggingIn}
-                          className="w-full px-4 py-3 sm:py-3.5 text-left text-gray-900 hover:bg-gray-50 transition-colors disabled:opacity-50 flex items-center justify-between group"
+                          className="w-full px-4 py-3 text-left text-gray-900 hover:bg-gray-50 transition-colors disabled:opacity-50 flex items-center justify-between group"
                         >
                           <div className="flex-1 min-w-0">
-                            <div className="font-semibold text-sm sm:text-base truncate">{participant.teamName}</div>
+                            <div className="font-semibold text-sm truncate">{participant.teamName}</div>
                             <div className="text-xs text-gray-500 truncate">{participant.name}</div>
                           </div>
                           <div className="text-[#00ff87] opacity-0 group-hover:opacity-100 transition-opacity text-lg ml-3">
@@ -478,7 +478,7 @@ export default function Header() {
       {/* Modal de contraseña */}
       {showPasswordModal && selectedParticipant && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-[9999] p-4">
-          <div className="bg-white rounded-xl sm:rounded-2xl p-6 sm:p-8 w-full max-w-md">
+          <div className="bg-white rounded-xl p-6 w-full max-w-md">
             <div className="flex items-center gap-3 mb-4">
               {/* Avatar del participante */}
               {selectedParticipant.team_logo ? (

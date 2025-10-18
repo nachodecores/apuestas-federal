@@ -134,9 +134,9 @@ export default function StandingsTable() {
   // Mientras está cargando, mostramos un spinner
   if (loading) {
     return (
-      <section className="py-8 sm:py-12 md:py-16 lg:py-20 bg-[#ebe5eb]">
-        <div className="max-w-7xl mx-auto px-3 sm:px-4 md:px-6 lg:px-8 text-center">
-          <div className="text-[#37003c] text-base sm:text-lg md:text-xl">Cargando tabla de posiciones...</div>
+      <section className="bg-[#ebe5eb] h-full pb-4 mobile:pb-6 tablet:pb-8">
+        <div className="h-full flex items-center justify-center px-2 mobile:px-3 tablet:px-4">
+          <div className="text-[#37003c] text-sm mobile:text-base tablet:text-lg">Cargando tabla de posiciones...</div>
         </div>
       </section>
     );
@@ -145,9 +145,9 @@ export default function StandingsTable() {
   // Si hay error, lo mostramos
   if (error) {
     return (
-      <section className="py-8 sm:py-12 md:py-16 lg:py-20 bg-[#ebe5eb]">
-        <div className="max-w-7xl mx-auto px-3 sm:px-4 md:px-6 lg:px-8 text-center">
-          <div className="text-red-500 text-base sm:text-lg md:text-xl">Error: {error}</div>
+      <section className="bg-[#ebe5eb] h-full pb-4 mobile:pb-6 tablet:pb-8">
+        <div className="h-full flex items-center justify-center px-2 mobile:px-3 tablet:px-4">
+          <div className="text-red-500 text-sm mobile:text-base tablet:text-lg">Error: {error}</div>
         </div>
       </section>
     );
@@ -155,35 +155,35 @@ export default function StandingsTable() {
   
   // Renderizamos la tabla con los datos reales
   return (
-    <section className="py-8 sm:py-12 md:py-16 lg:py-20 bg-[#ebe5eb]">
-      <div className="max-w-7xl mx-auto px-3 sm:px-4 md:px-6 lg:px-8">
-        <div className="flex justify-between items-center mb-4 sm:mb-6 md:mb-8">
-          <h3 className="text-2xl sm:text-3xl md:text-4xl font-black text-[#37003c]">
+    <section className="bg-[#ebe5eb] h-full pb-4 mobile:pb-6 tablet:pb-8">
+      <div className="h-full flex flex-col px-2 mobile:px-3 tablet:px-4">
+        <div className="flex justify-between items-center mb-3 mobile:mb-4 tablet:mb-6">
+          <h3 className="text-lg mobile:text-xl tablet:text-2xl font-black text-[#37003c]">
             Tabla de Posiciones
           </h3>
         </div>
 
-        <div className="rounded-lg sm:rounded-xl md:rounded-2xl overflow-hidden border border-gray-200 bg-white shadow-lg">
-          <div className="overflow-x-auto">
+        <div className="rounded-lg mobile:rounded-xl tablet:rounded-2xl overflow-hidden border border-gray-200 bg-white shadow-lg flex-1 mx-2 mobile:mx-3 tablet:mx-4">
+          <div className="overflow-x-auto h-full px-3 mobile:px-4 tablet:px-6">
             <table className="w-full">
               <thead>
                 <tr className="border-b border-gray-200 text-left bg-gray-50">
-                  <th className="px-2 py-2 sm:px-3 sm:py-3 md:px-4 md:py-3 lg:px-6 lg:py-4">
+                  <th className="px-1 py-1 mobile:px-2 mobile:py-2 tablet:px-3 tablet:py-2">
                     {/* Columna vacía para posición sin header */}
                   </th>
-                  <th className="px-2 py-2 sm:px-3 sm:py-3 md:px-4 md:py-3 lg:px-6 lg:py-4 text-[0.625rem] sm:text-xs font-light text-gray-600 uppercase tracking-wider">
+                  <th className="px-1 py-1 mobile:px-2 mobile:py-2 tablet:px-3 tablet:py-2 text-[0.5rem] mobile:text-[0.625rem] tablet:text-xs font-light text-gray-600 uppercase tracking-wider">
                     Equipo
                   </th>
-                  <th className="hidden lg:table-cell px-6 py-4 text-xs font-light text-gray-600 uppercase tracking-wider text-right">
+                  <th className="hidden tablet:table-cell px-3 py-2 text-xs font-light text-gray-600 uppercase tracking-wider text-right">
                     Récord
                   </th>
-                  <th className="px-2 py-2 sm:px-3 sm:py-3 md:px-4 md:py-3 lg:px-6 lg:py-4 text-[0.625rem] sm:text-xs font-light text-gray-600 uppercase tracking-wider text-center">
+                  <th className="px-1 py-1 mobile:px-2 mobile:py-2 tablet:px-3 tablet:py-2 text-[0.5rem] mobile:text-[0.625rem] tablet:text-xs font-light text-gray-600 uppercase tracking-wider text-center">
                     Racha
                   </th>
-                  <th className="px-2 py-2 sm:px-3 sm:py-3 md:px-4 md:py-3 lg:px-6 lg:py-4 text-[0.625rem] sm:text-xs font-light text-gray-600 uppercase tracking-wider text-right">
+                  <th className="px-1 py-1 mobile:px-2 mobile:py-2 tablet:px-3 tablet:py-2 text-[0.5rem] mobile:text-[0.625rem] tablet:text-xs font-light text-gray-600 uppercase tracking-wider text-right">
                     +
                   </th>
-                  <th className="px-2 py-2 sm:px-3 sm:py-3 md:px-4 md:py-3 lg:px-6 lg:py-4 text-[0.625rem] sm:text-xs font-light text-gray-600 uppercase tracking-wider text-right">
+                  <th className="px-1 py-1 mobile:px-2 mobile:py-2 tablet:px-3 tablet:py-2 text-[0.5rem] mobile:text-[0.625rem] tablet:text-xs font-light text-gray-600 uppercase tracking-wider text-right">
                     Pts
                   </th>
                 </tr>
@@ -195,20 +195,20 @@ export default function StandingsTable() {
                     className="border-b border-gray-100 hover:bg-gray-50 transition-colors"
                   >
                     {/* Posición */}
-                    <td className="px-2 py-2 sm:px-3 sm:py-3 md:px-4 md:py-3 lg:px-6 lg:py-4">
-                      <span className="font-light text-xs sm:text-sm md:text-base text-gray-700">
+                    <td className="px-1 py-1 mobile:px-2 mobile:py-2 tablet:px-3 tablet:py-2">
+                      <span className="font-light text-[0.625rem] mobile:text-xs tablet:text-sm text-gray-700">
                         {player.position}
                       </span>
                     </td>
                     
                     {/* Equipo y jugador */}
-                    <td className="px-2 py-2 sm:px-3 sm:py-3 md:px-4 md:py-3 lg:px-6 lg:py-4">
+                    <td className="px-1 py-1 mobile:px-2 mobile:py-2 tablet:px-3 tablet:py-2">
                       <div className="flex flex-col">
-                        <span className="text-gray-900 font-semibold text-xs sm:text-sm md:text-base truncate max-w-[8rem] sm:max-w-none">
+                        <span className="text-gray-900 font-semibold text-[0.625rem] mobile:text-xs tablet:text-sm truncate max-w-[6rem] mobile:max-w-[8rem] tablet:max-w-none">
                           {player.teamName}
                         </span>
                         {/* Mostrar manager name (bajo el equipo) */}
-                        <span className="text-gray-900 font-bold text-xs sm:text-sm md:text-base truncate max-w-[8rem] sm:max-w-none">
+                        <span className="text-gray-900 font-bold text-[0.5rem] mobile:text-[0.625rem] tablet:text-xs truncate max-w-[6rem] mobile:max-w-[8rem] tablet:max-w-none">
                           {player.name}
                         </span>
                       </div>
@@ -216,17 +216,17 @@ export default function StandingsTable() {
                     
                     
                     {/* Récord - oculto en mobile y tablet */}
-                    <td className="hidden lg:table-cell px-6 py-4 text-right">
-                      <span className="text-gray-700 font-light font-mono text-sm">{player.record}</span>
+                    <td className="hidden tablet:table-cell px-3 py-2 text-right">
+                      <span className="text-gray-700 font-light font-mono text-xs">{player.record}</span>
                     </td>
                     
                     {/* Racha (Últimos 5) - VISIBLE en mobile */}
-                    <td className="px-2 py-2 sm:px-3 sm:py-3 md:px-4 md:py-3 lg:px-6 lg:py-4">
-                      <div className="flex gap-0.5 sm:gap-1 justify-center">
+                    <td className="px-1 py-1 mobile:px-2 mobile:py-2 tablet:px-3 tablet:py-2">
+                      <div className="flex gap-0.5 mobile:gap-1 justify-center">
                         {[...player.recentForm].reverse().map((result, formIdx) => (
                           <div
                             key={formIdx}
-                            className={`w-3 h-3 sm:w-4 sm:h-4 md:w-5 md:h-5 lg:w-6 lg:h-6 rounded-full ${
+                            className={`w-2 h-2 mobile:w-3 mobile:h-3 tablet:w-4 tablet:h-4 rounded-full ${
                               result === 'win' ? 'bg-green-500' :
                               result === 'draw' ? 'bg-gray-400' :
                               'bg-red-500'
@@ -238,13 +238,13 @@ export default function StandingsTable() {
                     </td>
                     
                     {/* Puntos FPL (+) - VISIBLE en mobile */}
-                    <td className="px-2 py-2 sm:px-3 sm:py-3 md:px-4 md:py-3 lg:px-6 lg:py-4 text-right">
-                      <span className="text-[#37003c] font-light text-xs sm:text-sm md:text-base">{player.fplPoints}</span>
+                    <td className="px-1 py-1 mobile:px-2 mobile:py-2 tablet:px-3 tablet:py-2 text-right">
+                      <span className="text-[#37003c] font-light text-[0.625rem] mobile:text-xs tablet:text-sm">{player.fplPoints}</span>
                     </td>
                     
                     {/* Puntos H2H (Pts) - VISIBLE en mobile */}
-                    <td className="px-2 py-2 sm:px-3 sm:py-3 md:px-4 md:py-3 lg:px-6 lg:py-4 text-right">
-                      <span className="text-gray-700 font-light text-xs sm:text-sm md:text-base">{player.h2hPoints}</span>
+                    <td className="px-1 py-1 mobile:px-2 mobile:py-2 tablet:px-3 tablet:py-2 text-right">
+                      <span className="text-gray-700 font-light text-[0.625rem] mobile:text-xs tablet:text-sm">{player.h2hPoints}</span>
                     </td>
                   </tr>
                 ))}

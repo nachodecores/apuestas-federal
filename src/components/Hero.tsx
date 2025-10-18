@@ -93,7 +93,7 @@ export default function Hero() {
                   backgroundClip: 'text'
                 }}
               >
-                {loading ? '...' : `$${gwAmount.toLocaleString()}`}
+                {loading ? '...' : `₣${gwAmount.toLocaleString()}`}
               </div>
             </div>
             </div>
@@ -137,7 +137,7 @@ export default function Hero() {
                   backgroundClip: 'text'
                 }}
               >
-                {loading ? '...' : `$${federalPool.toLocaleString()}`}
+                {loading ? '...' : `₣${federalPool.toLocaleString()}`}
               </div>
             </div>
 

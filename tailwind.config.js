@@ -7,6 +7,10 @@ module.exports = {
   ],
   theme: {
     extend: {
+      screens: {
+        'mobile': '480px',
+        'tablet': '768px',
+      },
       fontFamily: {
         'poppins': ['var(--font-poppins)', 'system-ui', 'sans-serif'],
         'inter': ['var(--font-inter)', 'system-ui', 'sans-serif'],

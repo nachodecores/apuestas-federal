@@ -20,6 +20,9 @@ export default function DashboardModal({ isOpen, onClose, user }: DashboardModal
   const [userTeamName, setUserTeamName] = useState<string>('');
   const [allBets, setAllBets] = useState([]);
   const [activeBets, setActiveBets] = useState([]);
+  const [isAdmin, setIsAdmin] = useState(false);
+  const [allUsersBets, setAllUsersBets] = useState([]);
+  const [allUsersMap, setAllUsersMap] = useState(new Map());
   const [stats, setStats] = useState({
     totalWon: 0,
     totalLost: 0,
@@ -45,6 +48,9 @@ export default function DashboardModal({ isOpen, onClose, user }: DashboardModal
       setUserTeamName('');
       setAllBets([]);
       setActiveBets([]);
+      setIsAdmin(false);
+      setAllUsersBets([]);
+      setAllUsersMap(new Map());
       setStats({
         totalWon: 0,
         totalLost: 0,
@@ -78,6 +84,10 @@ export default function DashboardModal({ isOpen, onClose, user }: DashboardModal
           .single();
         setProfile(profileData);
 
+        // Detectar si es admin
+        const adminStatus = profileData?.display_name === 'Ignacio de Cores';
+        setIsAdmin(adminStatus);
+
         // Obtener nombre del equipo de la API
         if (profileData?.league_entry_id) {
           try {
@@ -93,21 +103,58 @@ export default function DashboardModal({ isOpen, onClose, user }: DashboardModal
           }
         }
 
-        // Obtener TODAS las apuestas del usuario (ordenadas por fecha)
-        const { data: betsData } = await supabase
-          .from("bets")
-          .select("*")
-          .eq("user_id", user.id)
-          .order("created_at", { ascending: false });
-        setAllBets(betsData || []);
+        // Si es admin, cargar TODAS las apuestas de todos los usuarios
+        if (adminStatus) {
+          // Obtener TODAS las apuestas de todos los usuarios
+          const { data: allBetsData } = await supabase
+            .from("bets")
+            .select(`
+              *,
+              profiles!bets_user_id_fkey (
+                display_name,
+                league_entry_id
+              )
+            `)
+            .order("created_at", { ascending: false });
+          
+          setAllUsersBets(allBetsData || []);
+          
+          // Filtrar apuestas activas globales
+          const globalActive = allBetsData?.filter((bet) => bet.status === "pending") || [];
+          setActiveBets(globalActive);
+          
+          // Crear mapa de usuarios
+          const usersMap = new Map();
+          allBetsData?.forEach(bet => {
+            if (bet.profiles) {
+              usersMap.set(bet.user_id, {
+                name: bet.profiles.display_name,
+                initials: bet.profiles.display_name?.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase() || 'N/A'
+              });
+            }
+          });
+          setAllUsersMap(usersMap);
+          
+          // Para admin, usar las apuestas globales para estadísticas
+          setAllBets(allBetsData || []);
+        } else {
+          // Usuario normal - obtener solo sus apuestas
+          const { data: betsData } = await supabase
+            .from("bets")
+            .select("*")
+            .eq("user_id", user.id)
+            .order("created_at", { ascending: false });
+          setAllBets(betsData || []);
 
-        // Filtrar apuestas activas (status='pending')
-        const active = betsData?.filter((bet) => bet.status === "pending") || [];
-        setActiveBets(active);
+          // Filtrar apuestas activas (status='pending')
+          const active = betsData?.filter((bet) => bet.status === "pending") || [];
+          setActiveBets(active);
+        }
 
         // Calcular estadísticas
-        const wonBets = betsData?.filter((bet) => bet.status === "won") || [];
-        const lostBets = betsData?.filter((bet) => bet.status === "lost") || [];
+        const currentBets = adminStatus ? allUsersBets : allBets;
+        const wonBets = currentBets?.filter((bet) => bet.status === "won") || [];
+        const lostBets = currentBets?.filter((bet) => bet.status === "lost") || [];
         
         const totalWon = wonBets.reduce((sum, bet) => sum + (bet.potential_win || 0), 0);
         const totalLost = lostBets.reduce((sum, bet) => sum + (bet.amount || 0), 0);
@@ -186,9 +233,14 @@ export default function DashboardModal({ isOpen, onClose, user }: DashboardModal
       // Actualizar la lista local removiendo la apuesta eliminada
       setActiveBets(prev => prev.filter(bet => bet.id !== betId));
       
-      // Actualizar el balance del usuario
+      // Si es admin, también actualizar allUsersBets
+      if (isAdmin) {
+        setAllUsersBets(prev => prev.filter(bet => bet.id !== betId));
+      }
+      
+      // Actualizar el balance del usuario (solo si es la apuesta del usuario actual)
       const deletedBet = activeBets.find(bet => bet.id === betId);
-      if (deletedBet && profile) {
+      if (deletedBet && profile && deletedBet.user_id === user?.id) {
         setProfile(prev => prev ? { ...prev, balance: prev.balance + (deletedBet.amount || 0) } : null);
       }
 
@@ -417,7 +469,9 @@ export default function DashboardModal({ isOpen, onClose, user }: DashboardModal
               {/* Apuestas activas */}
               {activeBets.length > 0 ? (
                 <div className="mb-4 sm:mb-6 md:mb-8">
-                  <h3 className="text-lg sm:text-xl font-black text-[#37003c] mb-3 sm:mb-4">Apuestas Activas</h3>
+                  <h3 className="text-lg sm:text-xl font-black text-[#37003c] mb-3 sm:mb-4">
+                    {isAdmin ? 'Todas las Apuestas Activas' : 'Apuestas Activas'}
+                  </h3>
                   <div 
                     className="border border-gray-200 rounded-lg sm:rounded-xl overflow-hidden bg-white shadow-lg"
                   >
@@ -425,6 +479,11 @@ export default function DashboardModal({ isOpen, onClose, user }: DashboardModal
                       <table className="w-full">
                         <thead>
                           <tr className="border-b border-gray-200 text-left bg-gray-50">
+                            {isAdmin && (
+                              <th className="px-2 py-2 sm:px-3 sm:py-3 text-[0.625rem] sm:text-xs font-medium text-gray-600 uppercase tracking-wider">
+                                Usuario
+                              </th>
+                            )}
                             <th className="px-2 py-2 sm:px-3 sm:py-3 text-[0.625rem] sm:text-xs font-medium text-gray-600 uppercase tracking-wider">
                               Partido
                             </th>
@@ -448,6 +507,7 @@ export default function DashboardModal({ isOpen, onClose, user }: DashboardModal
                           {activeBets.map((bet) => {
                             const team1 = teamMap.get(bet.match_league_entry_1);
                             const team2 = teamMap.get(bet.match_league_entry_2);
+                            const userInfo = allUsersMap.get(bet.user_id);
                             
                             let predictionText = '';
                             if (bet.prediction === 'home') predictionText = 'Local';
@@ -459,6 +519,15 @@ export default function DashboardModal({ isOpen, onClose, user }: DashboardModal
                                 key={bet.id}
                                 className="border-b border-gray-100 hover:bg-gray-50 transition-colors"
                               >
+                                {/* Usuario - Solo para admin */}
+                                {isAdmin && (
+                                  <td className="px-2 py-2 sm:px-3 sm:py-3">
+                                    <div className="text-xs sm:text-sm font-medium text-gray-900">
+                                      {userInfo?.initials || 'N/A'}
+                                    </div>
+                                  </td>
+                                )}
+                                
                                 {/* Partido */}
                                 <td className="px-2 py-2 sm:px-3 sm:py-3">
                                   <div className="text-xs sm:text-sm font-medium text-gray-900 whitespace-nowrap">
@@ -494,15 +563,17 @@ export default function DashboardModal({ isOpen, onClose, user }: DashboardModal
                                   </span>
                                 </td>
                                 
-                                {/* Botón eliminar */}
+                                {/* Botón eliminar - Solo para admin */}
                                 <td className="px-2 py-2 sm:px-3 sm:py-3 text-center">
-                                  <button
-                                    onClick={() => handleDeleteBet(bet.id)}
-                                    className="w-6 h-6 sm:w-7 sm:h-7 rounded-full bg-red-100 hover:bg-red-200 text-red-600 hover:text-red-700 transition-colors flex items-center justify-center text-xs sm:text-sm font-bold"
-                                    title="Eliminar apuesta"
-                                  >
-                                    ×
-                                  </button>
+                                  {isAdmin && (
+                                    <button
+                                      onClick={() => handleDeleteBet(bet.id)}
+                                      className="w-6 h-6 sm:w-7 sm:h-7 rounded-full bg-red-100 hover:bg-red-200 text-red-600 hover:text-red-700 transition-colors flex items-center justify-center text-xs sm:text-sm font-bold"
+                                      title="Eliminar apuesta"
+                                    >
+                                      ×
+                                    </button>
+                                  )}
                                 </td>
                               </tr>
                             );

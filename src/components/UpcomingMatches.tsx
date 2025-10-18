@@ -278,9 +278,9 @@ export default function UpcomingMatches() {
   // Estado de carga
   if (loading) {
     return (
-      <section className="py-8 sm:py-12 md:py-16 lg:py-20 bg-[#37003c]">
-        <div className="max-w-7xl mx-auto px-3 sm:px-4 md:px-6 lg:px-8 text-center">
-          <div className="text-white text-base sm:text-lg md:text-xl">Cargando próximos partidos...</div>
+      <section className="bg-[#ebe5eb] h-full pb-4 mobile:pb-6 tablet:pb-8">
+        <div className="h-full flex items-center justify-center px-3 min-[480px]:px-4 min-[768px]:px-6">
+          <div className="text-[#37003c] text-base min-[480px]:text-lg min-[768px]:text-xl">Cargando próximos partidos...</div>
         </div>
       </section>
     );
@@ -289,32 +289,34 @@ export default function UpcomingMatches() {
   // Estado de error
   if (error) {
     return (
-      <section className="py-8 sm:py-12 md:py-16 lg:py-20 bg-[#37003c]">
-        <div className="max-w-7xl mx-auto px-3 sm:px-4 md:px-6 lg:px-8 text-center">
-          <div className="text-red-500 text-base sm:text-lg md:text-xl">Error: {error}</div>
+      <section className="bg-[#ebe5eb] h-full pb-4 mobile:pb-6 tablet:pb-8">
+        <div className="h-full flex items-center justify-center px-3 min-[480px]:px-4 min-[768px]:px-6">
+          <div className="text-red-500 text-base min-[480px]:text-lg min-[768px]:text-xl">Error: {error}</div>
         </div>
       </section>
     );
   }
 
   return (
-    <section className="py-8 sm:py-12 md:py-16 lg:py-20 bg-[#37003c]">
-      <div className="max-w-7xl mx-auto px-3 sm:px-4 md:px-6 lg:px-8">
-        <h3 className="text-2xl sm:text-3xl md:text-4xl font-black text-white mb-6 sm:mb-8 md:mb-12">
+    <section className="bg-[#ebe5eb] h-full pb-4 mobile:pb-6 tablet:pb-8">
+      <div className="h-full flex flex-col px-3 min-[480px]:px-4 min-[768px]:px-6">
+        <h3 className="text-lg mobile:text-xl tablet:text-2xl font-black text-[#37003c] mb-6">
           Próximos Partidos
         </h3>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5 md:gap-6">
-          {matches.map((match, idx) => (
-            <MatchCard
-              key={idx}
-              match={match}
-              matchIndex={idx}
-              user={user}
-              userBalance={userBalance}
-              onBetConfirmed={handleBetConfirmed}
-            />
-          ))}
+        <div className="flex-1 overflow-y-auto">
+          <div className="grid grid-cols-1 gap-4 mobile:gap-5 tablet:gap-6">
+            {matches.map((match, idx) => (
+              <MatchCard
+                key={idx}
+                match={match}
+                matchIndex={idx}
+                user={user}
+                userBalance={userBalance}
+                onBetConfirmed={handleBetConfirmed}
+              />
+            ))}
+          </div>
         </div>
 
       </div>
