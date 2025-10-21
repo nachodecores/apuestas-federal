@@ -146,34 +146,7 @@ export default function StandingsTable() {
     return (
       <section className="bg-[#ebe5eb] h-full pb-4 mobile:pb-6 tablet:pb-8">
         <div className="h-full flex items-center justify-center px-2 mobile:px-3 tablet:px-4">
-          <div className="text-center">
-            <div className="text-red-500 text-sm mobile:text-base tablet:text-lg mb-4">Error: {error}</div>
-            <button 
-              onClick={() => fetchLeagueData()}
-              className="bg-[#37003c] text-white px-4 py-2 rounded hover:bg-[#4a004a] transition-colors"
-            >
-              Reintentar
-            </button>
-          </div>
-        </div>
-      </section>
-    );
-  }
-
-  // Si no hay datos, mostrar botón para cargar
-  if (!leagueData) {
-    return (
-      <section className="bg-[#ebe5eb] h-full pb-4 mobile:pb-6 tablet:pb-8">
-        <div className="h-full flex items-center justify-center px-2 mobile:px-3 tablet:px-4">
-          <div className="text-center">
-            <div className="text-[#37003c] text-sm mobile:text-base tablet:text-lg mb-4">No hay datos de liga disponibles</div>
-            <button 
-              onClick={() => fetchLeagueData()}
-              className="bg-[#37003c] text-white px-4 py-2 rounded hover:bg-[#4a004a] transition-colors"
-            >
-              Cargar datos
-            </button>
-          </div>
+          <div className="text-red-500 text-sm mobile:text-base tablet:text-lg">Error: {error}</div>
         </div>
       </section>
     );
