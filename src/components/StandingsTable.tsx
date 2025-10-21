@@ -26,6 +26,12 @@ export default function StandingsTable() {
   // Usar el contexto de liga
   const { leagueData, loading: contextLoading, error: contextError, fetchLeagueData, isDataLoaded } = useLeague();
   
+  console.log('🔍 StandingsTable: Renderizando componente');
+  console.log('🔍 StandingsTable: leagueData:', !!leagueData);
+  console.log('🔍 StandingsTable: contextLoading:', contextLoading);
+  console.log('🔍 StandingsTable: contextError:', contextError);
+  console.log('🔍 StandingsTable: isDataLoaded:', isDataLoaded);
+  
   // Estados: guardan los datos y el estado de carga
   const [players, setPlayers] = useState<PlayerDisplay[]>([]);
   const [loading, setLoading] = useState(true);
@@ -35,11 +41,20 @@ export default function StandingsTable() {
   useEffect(() => {
     // Función asíncrona para procesar los datos
     async function processLeagueData() {
+      console.log('🔍 StandingsTable: processLeagueData iniciado');
+      console.log('🔍 StandingsTable: leagueData disponible:', !!leagueData);
+      
       try {
         // Verificar si hay datos disponibles
         if (!leagueData) {
+          console.log('🔍 StandingsTable: No hay datos de liga disponibles');
           throw new Error('No hay datos de liga disponibles');
         }
+        
+        console.log('🔍 StandingsTable: Procesando datos de liga...');
+        console.log('🔍 StandingsTable: league_entries:', leagueData.league_entries?.length);
+        console.log('🔍 StandingsTable: standings:', leagueData.standings?.length);
+        console.log('🔍 StandingsTable: matches:', leagueData.matches?.length);
         
         const data = leagueData;
         
@@ -66,8 +81,10 @@ export default function StandingsTable() {
         });
         
         // 5. Guardamos los datos procesados en el estado
+        console.log('🔍 StandingsTable: Datos procesados:', processedPlayers.length, 'jugadores');
         setPlayers(processedPlayers);
         setLoading(false);
+        console.log('🔍 StandingsTable: Estado actualizado - loading: false');
         
       } catch (err) {
         // Si hay error, lo mostramos
@@ -82,6 +99,7 @@ export default function StandingsTable() {
   
   // Mientras está cargando, mostramos un spinner
   if (loading) {
+    console.log('🔍 StandingsTable: Renderizando estado de carga');
     return (
       <section className="bg-[#ebe5eb] h-full pb-4 mobile:pb-6 tablet:pb-8">
         <div className="h-full flex items-center justify-center px-2 mobile:px-3 tablet:px-4">
@@ -93,6 +111,7 @@ export default function StandingsTable() {
   
   // Si hay error, lo mostramos
   if (error) {
+    console.log('🔍 StandingsTable: Renderizando estado de error:', error);
     return (
       <section className="bg-[#ebe5eb] h-full pb-4 mobile:pb-6 tablet:pb-8">
         <div className="h-full flex items-center justify-center px-2 mobile:px-3 tablet:px-4">
@@ -103,6 +122,7 @@ export default function StandingsTable() {
   }
   
   // Renderizamos la tabla con los datos reales
+  console.log('🔍 StandingsTable: Renderizando tabla con datos:', players.length, 'jugadores');
   return (
     <section className="bg-[#ebe5eb] h-full pb-4 mobile:pb-6 tablet:pb-8">
       <div className="h-full flex flex-col px-2 mobile:px-3 tablet:px-4">

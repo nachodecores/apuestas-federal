@@ -13,6 +13,12 @@ export default function UpcomingMatches() {
   // Usar el contexto de liga
   const { leagueData, loading: contextLoading, error: contextError, fetchLeagueData, isDataLoaded } = useLeague();
   
+  console.log('🔍 UpcomingMatches: Renderizando componente');
+  console.log('🔍 UpcomingMatches: leagueData:', !!leagueData);
+  console.log('🔍 UpcomingMatches: contextLoading:', contextLoading);
+  console.log('🔍 UpcomingMatches: contextError:', contextError);
+  console.log('🔍 UpcomingMatches: isDataLoaded:', isDataLoaded);
+  
   // Estados de datos
   const [matches, setMatches] = useState<MatchDisplay[]>([]);
   const [loading, setLoading] = useState(true);
@@ -67,10 +73,10 @@ export default function UpcomingMatches() {
           } catch (error) {
             console.warn('⚠️ Error obteniendo balance:', error);
             setUserBalance(0);
-          }
-        } else {
-          setUserBalance(0);
         }
+      } else {
+        setUserBalance(0);
+      }
         
         // 2. DESPUÉS cargar partidos (independiente de autenticación)
         await fetchMatches();
@@ -189,7 +195,7 @@ export default function UpcomingMatches() {
           if (profile) {
             setUserBalance(profile.balance);
           }
-        } catch (error) {
+    } catch (error) {
           console.warn('⚠️ Error actualizando balance:', error);
           setUserBalance(0);
         }
@@ -209,6 +215,7 @@ export default function UpcomingMatches() {
 
   // Estado de carga
   if (loading) {
+    console.log('🔍 UpcomingMatches: Renderizando estado de carga');
     return (
       <section className="bg-[#ebe5eb] h-full pb-4 mobile:pb-6 tablet:pb-8">
         <div className="h-full flex items-center justify-center px-3 min-[480px]:px-4 min-[768px]:px-6">
@@ -220,6 +227,7 @@ export default function UpcomingMatches() {
 
   // Estado de error
   if (error) {
+    console.log('🔍 UpcomingMatches: Renderizando estado de error:', error);
     return (
       <section className="bg-[#ebe5eb] h-full pb-4 mobile:pb-6 tablet:pb-8">
         <div className="h-full flex items-center justify-center px-3 min-[480px]:px-4 min-[768px]:px-6">
@@ -229,6 +237,7 @@ export default function UpcomingMatches() {
     );
   }
 
+  console.log('🔍 UpcomingMatches: Renderizando partidos con datos:', matches.length, 'partidos');
   return (
     <section className="bg-[#ebe5eb] h-full pb-4 mobile:pb-6 tablet:pb-8">
       <div className="h-full flex flex-col px-3 min-[480px]:px-4 min-[768px]:px-6">
