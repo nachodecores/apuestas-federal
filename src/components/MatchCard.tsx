@@ -48,14 +48,6 @@ export default function MatchCard({
     function handleBetDeleted(event: CustomEvent) {
       const { gameweek, match_league_entry_1, match_league_entry_2 } = event.detail;
       
-        eventGameweek: gameweek,
-        eventMatch1: match_league_entry_1,
-        eventMatch2: match_league_entry_2,
-        currentGameweek: match.gameweek,
-        currentMatch1: match.league_entry_1,
-        currentMatch2: match.league_entry_2
-      });
-      
       // Si es el mismo partido, verificar nuevamente las apuestas
       // Convertir a números para comparación segura
       if (Number(gameweek) === Number(match.gameweek) && 
@@ -72,14 +64,8 @@ export default function MatchCard({
 
   async function checkExistingBet() {
     try {
-        gameweek: match.gameweek,
-        match_league_entry_1: match.league_entry_1,
-        match_league_entry_2: match.league_entry_2
-      });
-      
       const response = await fetch(`/api/bets/user-bet?gameweek=${match.gameweek}&match_league_entry_1=${match.league_entry_1}&match_league_entry_2=${match.league_entry_2}`);
       const data = await response.json();
-      
       
       if (data.bet) {
         setUserBet(data.bet);
