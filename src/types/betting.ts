@@ -42,3 +42,14 @@ export interface DashboardStats {
   wonBets: any[];
   lostBets: any[];
 }
+
+// Tipos para el botón de eliminar apuesta
+export interface DeleteBetButtonProps {
+  betId: string;
+  userId?: string; // For admin to delete other users' bets
+  onDeleteSuccess?: (betId: string, refundAmount: number) => void;
+  onDeleteError?: (error: string) => void;
+  size?: 'sm' | 'md' | 'lg';
+  variant?: 'icon' | 'button';
+  className?: string;
+}

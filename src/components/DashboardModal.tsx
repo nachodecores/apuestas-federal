@@ -7,6 +7,7 @@ import { useEffect, useState } from "react";
 import { useLeague } from "@/contexts/LeagueContext";
 import type { User } from "@supabase/supabase-js";
 import { DashboardModalProps, DashboardStats } from "@/types";
+import DeleteBetButton from "./DeleteBetButton";
 
 export default function DashboardModal({ isOpen, onClose, user }: DashboardModalProps) {
   const supabase = createClient();
@@ -197,45 +198,6 @@ export default function DashboardModal({ isOpen, onClose, user }: DashboardModal
     }
   }, [isDataLoaded, activeBets, getTeamName]);
 
-  // Función para eliminar una apuesta
-  async function handleDeleteBet(betId: string) {
-    if (!confirm('¿Estás seguro que querés eliminar esta apuesta?')) {
-      return;
-    }
-
-    try {
-      const response = await fetch('/api/bets/delete', {
-        method: 'DELETE',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ betId }),
-      });
-
-      if (!response.ok) {
-        throw new Error('Error al eliminar la apuesta');
-      }
-
-      // Actualizar la lista local removiendo la apuesta eliminada
-      setActiveBets(prev => prev.filter(bet => bet.id !== betId));
-      
-      // Si es admin, también actualizar allUsersBets
-      if (isAdmin) {
-        setAllUsersBets(prev => prev.filter(bet => bet.id !== betId));
-      }
-      
-      // Actualizar el balance del usuario (solo si es la apuesta del usuario actual)
-      const deletedBet = activeBets.find(bet => bet.id === betId);
-      if (deletedBet && profile && deletedBet.user_id === user?.id) {
-        setProfile(prev => prev ? { ...prev, balance: prev.balance + (deletedBet.amount || 0) } : null);
-      }
-
-      alert('Apuesta eliminada correctamente');
-    } catch (error) {
-      console.error('Error al eliminar apuesta:', error);
-      alert('Error al eliminar la apuesta. Intentalo de nuevo.');
-    }
-  }
 
   // Función para cerrar sesión
   async function handleLogout() {
@@ -547,17 +509,30 @@ export default function DashboardModal({ isOpen, onClose, user }: DashboardModal
                                   </span>
                                 </td>
                                 
-                                {/* Botón eliminar - Solo para admin */}
+                                {/* Botón eliminar - Para todos los usuarios */}
                                 <td className="px-2 py-2 sm:px-3 sm:py-3 text-center">
-                                  {isAdmin && (
-                                    <button
-                                      onClick={() => handleDeleteBet(bet.id)}
-                                      className="w-6 h-6 sm:w-7 sm:h-7 rounded-full bg-red-100 hover:bg-red-200 text-red-600 hover:text-red-700 transition-colors flex items-center justify-center text-xs sm:text-sm font-bold"
-                                      title="Eliminar apuesta"
-                                    >
-                                      ×
-                                    </button>
-                                  )}
+                                  <DeleteBetButton 
+                                    betId={bet.id}
+                                    userId={bet.user_id}
+                                    variant="icon"
+                                    size="sm"
+                                    onDeleteSuccess={(betId, refundAmount) => {
+                                      // Remove from local state
+                                      setActiveBets(prev => prev.filter(b => b.id !== betId));
+                                      if (isAdmin) {
+                                        setAllUsersBets(prev => prev.filter(b => b.id !== betId));
+                                      }
+                                      
+                                      // Update balance if it's the current user's bet
+                                      const deletedBet = activeBets.find(b => b.id === betId);
+                                      if (deletedBet && profile && deletedBet.user_id === user?.id) {
+                                        setProfile(prev => prev ? { ...prev, balance: prev.balance + refundAmount } : null);
+                                      }
+                                    }}
+                                    onDeleteError={(error) => {
+                                      console.error('Error deleting bet:', error);
+                                    }}
+                                  />
                                 </td>
                               </tr>
                             );

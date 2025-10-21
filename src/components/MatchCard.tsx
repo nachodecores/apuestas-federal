@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import type { User } from "@supabase/supabase-js";
 import { MatchCardProps, BetSelection, UserBet, MatchDisplay } from "@/types";
+import DeleteBetButton from "./DeleteBetButton";
 
 export default function MatchCard({ 
   match, 
@@ -223,7 +224,7 @@ export default function MatchCard({
         <>
           {userBet ? (
             // Mostrar apuesta existente
-            <div className="mb-3 sm:mb-4 p-3 bg-green-50 border border-green-200 rounded-lg">
+            <div className="mb-3 sm:mb-4 p-3 bg-green-50 border border-green-200 rounded-lg relative">
               <div className="text-center">
                 <div className="text-[0.625rem] tablet:text-xs font-medium text-green-800">
                   {userBet.prediction === 'home' && `Apostaste $${userBet.amount} a que gana ${match.team1Name}`}
@@ -233,6 +234,20 @@ export default function MatchCard({
                 <div className="text-[0.625rem] tablet:text-xs text-green-600 mt-1">
                   Ganancia potencial: ${userBet.potential_win?.toFixed(2)}
                 </div>
+              </div>
+              
+              {/* Delete button in top-right */}
+              <div className="absolute top-2 right-2">
+                <DeleteBetButton 
+                  betId={userBet.id.toString()}
+                  variant="icon"
+                  size="sm"
+                  className="!bg-red-50 hover:!bg-red-100"
+                  onDeleteSuccess={(betId, refundAmount) => {
+                    setUserBet(null);
+                    onBetConfirmed(userBalance + refundAmount); // Update balance
+                  }}
+                />
               </div>
             </div>
           ) : (
