@@ -28,10 +28,6 @@ export function LeagueProvider({ children }: { children: ReactNode }) {
   const [error, setError] = useState<string | null>(null);
 
   const fetchLeagueData = useCallback(async () => {
-    if (leagueData) {
-      return; // Ya tenemos datos
-    }
-    
     console.log('🚀 LeagueContext: Cargando datos...');
     setLoading(true);
     setError(null);
@@ -53,7 +49,7 @@ export function LeagueProvider({ children }: { children: ReactNode }) {
     } finally {
       setLoading(false);
     }
-  }, [leagueData]);
+  }, []);
 
   const getTeamName = useCallback((leagueEntryId: number): string => {
     if (!leagueData) return 'Sin equipo';
