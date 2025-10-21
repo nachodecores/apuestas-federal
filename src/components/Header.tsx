@@ -136,9 +136,8 @@ export default function Header() {
             // Verificar si es admin (Ignacio de Cores)
             setIsAdmin(profile.display_name === 'Ignacio de Cores');
             
-            // Obtener nombre del equipo usando el contexto
-            const teamName = getTeamName(profile.league_entry_id);
-            setUserTeamName(teamName);
+            // El nombre del equipo se actualizará cuando los datos de liga estén cargados
+            setUserTeamName('Cargando...');
           } else {
             console.warn('⚠️ No se encontró perfil para el usuario');
           }
@@ -205,6 +204,32 @@ export default function Header() {
       loadParticipants();
     }
   }, [isDataLoaded, getTeamName]);
+
+  // Actualizar nombre del equipo del usuario cuando los datos estén cargados
+  useEffect(() => {
+    if (user && isDataLoaded) {
+      console.log('🔍 Header: Actualizando nombre del equipo del usuario...');
+      const updateUserTeamName = async () => {
+        try {
+          const { data: profile } = await supabase
+            .from('profiles')
+            .select('league_entry_id')
+            .eq('id', user.id)
+            .single();
+          
+          if (profile) {
+            const teamName = getTeamName(profile.league_entry_id);
+            console.log('🔍 Header: Usuario', user.id, '-> Equipo:', teamName);
+            setUserTeamName(teamName);
+          }
+        } catch (error) {
+          console.error('💥 Error actualizando nombre del equipo:', error);
+        }
+      };
+      
+      updateUserTeamName();
+    }
+  }, [user, isDataLoaded, getTeamName, supabase]);
 
   // Cerrar dropdown al hacer click afuera
   useEffect(() => {
