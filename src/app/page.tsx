@@ -1,3 +1,7 @@
+"use client";
+
+import { useEffect } from "react";
+import { useLeague } from "@/contexts/LeagueContext";
 import {
   Header,
   Hero,
@@ -7,6 +11,15 @@ import {
 } from "@/components";
 
 export default function Home() {
+  const { fetchLeagueData, isDataLoaded } = useLeague();
+
+  // Cargar datos al montar la página
+  useEffect(() => {
+    if (!isDataLoaded) {
+      console.log('🚀 Home: Cargando datos de liga...');
+      fetchLeagueData();
+    }
+  }, [isDataLoaded, fetchLeagueData]);
   return (
     <div className="min-h-screen bg-[#0a0a0a]">
       <Header />
