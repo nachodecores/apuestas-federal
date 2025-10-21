@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import Image from "next/image";
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState, useRef, useCallback } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { useRouter, usePathname } from "next/navigation";
 import DashboardModal from "./DashboardModal";
@@ -32,6 +32,67 @@ export default function Header() {
   
   // Usar el contexto de liga
   const { getTeamName, fetchLeagueData, isDataLoaded } = useLeague();
+
+  // Función para cargar participantes (definida fuera del useEffect)
+  const loadParticipants = useCallback(async () => {
+    try {
+      // 1. Primero esperar a que el contexto tenga datos
+      if (!isDataLoaded) {
+        console.log('🔍 Header: Esperando datos de liga...');
+        return; // Salir si no hay datos aún
+      }
+      
+      const response = await fetch('/api/participants');
+      const data = await response.json();
+      
+      if (data.profiles) {
+        // Obtener nombres de equipos usando el contexto
+        const participantsData: Participant[] = data.profiles.map((profile: { display_name: string; league_entry_id: number; team_logo: string | null; fpl_entry_id: number | null }) => {
+          const teamName = getTeamName(profile.league_entry_id);
+          console.log('🔍 Header: Mapeando participante:', profile.display_name, '->', teamName);
+          
+          return {
+            name: profile.display_name,
+            teamName: teamName,
+            league_entry_id: profile.league_entry_id,
+            team_logo: profile.team_logo
+          };
+        });
+        
+        setParticipants(participantsData);
+      } else {
+        console.warn('⚠️ No se encontraron perfiles, usando datos por defecto');
+        // Usar datos por defecto si no hay perfiles
+        setParticipants([
+          { name: 'Chacho Bonino', teamName: 'Quebracho', league_entry_id: 6753, team_logo: null },
+          { name: 'Marcos Arocena', teamName: 'Tranqueras', league_entry_id: 5156, team_logo: null },
+          { name: 'Ignacio de Cores', teamName: 'CA Tambores RF', league_entry_id: 38904, team_logo: null },
+          { name: 'Manuel Domenech', teamName: 'Sportivo Nico Perez', league_entry_id: 44346, team_logo: null },
+          { name: 'Juan Dehl', teamName: 'CA Tres Islas', league_entry_id: 54556, team_logo: null },
+          { name: 'Juan Francisco Sienra', teamName: 'Palmitas City', league_entry_id: 5769, team_logo: null },
+          { name: 'Felipe Migues', teamName: 'Migues', league_entry_id: 5997, team_logo: null },
+          { name: 'Joaquin Sarachaga', teamName: 'Deportivo Sauce', league_entry_id: 6494, team_logo: null },
+          { name: 'Javier Villaamil', teamName: 'Mal Abrigo Town', league_entry_id: 6479, team_logo: null },
+          { name: 'Ángel Cal', teamName: 'Pirarajá United', league_entry_id: 5865, team_logo: null },
+        ]);
+      }
+    } catch (error) {
+      console.error('💥 Error cargando participantes:', error);
+      // Usar datos por defecto si falla
+      setParticipants([
+        { name: 'Chacho Bonino', teamName: 'Quebracho', league_entry_id: 6753, team_logo: null },
+        { name: 'Marcos Arocena', teamName: 'Tranqueras', league_entry_id: 5156, team_logo: null },
+        { name: 'Ignacio de Cores', teamName: 'CA Tambores RF', league_entry_id: 38904, team_logo: null },
+        { name: 'Manuel Domenech', teamName: 'Sportivo Nico Perez', league_entry_id: 44346, team_logo: null },
+        { name: 'Juan Dehl', teamName: 'CA Tres Islas', league_entry_id: 54556, team_logo: null },
+        { name: 'Juan Francisco Sienra', teamName: 'Palmitas City', league_entry_id: 5769, team_logo: null },
+        { name: 'Felipe Migues', teamName: 'Migues', league_entry_id: 5997, team_logo: null },
+        { name: 'Joaquin Sarachaga', teamName: 'Deportivo Sauce', league_entry_id: 6494, team_logo: null },
+        { name: 'Javier Villaamil', teamName: 'Mal Abrigo Town', league_entry_id: 6479, team_logo: null },
+        { name: 'Ángel Cal', teamName: 'Pirarajá United', league_entry_id: 5865, team_logo: null },
+      ]);
+    }
+  }, [isDataLoaded, getTeamName]);
 
   useEffect(() => {
     // Inicializar componente: primero autenticación, luego participantes
@@ -96,66 +157,6 @@ export default function Header() {
       } catch (error) {
         console.error('💥 Error en initializeComponent:', error);
         setLoading(false);
-      }
-    }
-    
-    async function loadParticipants() {
-      try {
-        // 1. Primero esperar a que el contexto tenga datos
-        if (!isDataLoaded) {
-          console.log('🔍 Header: Esperando datos de liga...');
-          return; // Salir si no hay datos aún
-        }
-        
-        const response = await fetch('/api/participants');
-        const data = await response.json();
-        
-        if (data.profiles) {
-          // Obtener nombres de equipos usando el contexto
-          const participantsData: Participant[] = data.profiles.map((profile: { display_name: string; league_entry_id: number; team_logo: string | null; fpl_entry_id: number | null }) => {
-            const teamName = getTeamName(profile.league_entry_id);
-            console.log('🔍 Header: Mapeando participante:', profile.display_name, '->', teamName);
-            
-            return {
-              name: profile.display_name,
-              teamName: teamName,
-              league_entry_id: profile.league_entry_id,
-              team_logo: profile.team_logo
-            };
-          });
-          
-          setParticipants(participantsData);
-        } else {
-          console.warn('⚠️ No se encontraron perfiles, usando datos por defecto');
-          // Usar datos por defecto si no hay perfiles
-          setParticipants([
-            { name: 'Chacho Bonino', teamName: 'Quebracho', league_entry_id: 6753, team_logo: null },
-            { name: 'Marcos Arocena', teamName: 'Tranqueras', league_entry_id: 5156, team_logo: null },
-            { name: 'Ignacio de Cores', teamName: 'CA Tambores RF', league_entry_id: 38904, team_logo: null },
-            { name: 'Manuel Domenech', teamName: 'Sportivo Nico Perez', league_entry_id: 44346, team_logo: null },
-            { name: 'Juan Dehl', teamName: 'CA Tres Islas', league_entry_id: 54556, team_logo: null },
-            { name: 'Juan Francisco Sienra', teamName: 'Palmitas City', league_entry_id: 5769, team_logo: null },
-            { name: 'Felipe Migues', teamName: 'Migues', league_entry_id: 5997, team_logo: null },
-            { name: 'Joaquin Sarachaga', teamName: 'Deportivo Sauce', league_entry_id: 6494, team_logo: null },
-            { name: 'Javier Villaamil', teamName: 'Mal Abrigo Town', league_entry_id: 6479, team_logo: null },
-            { name: 'Ángel Cal', teamName: 'Pirarajá United', league_entry_id: 5865, team_logo: null },
-          ]);
-        }
-      } catch (error) {
-        console.error('💥 Error cargando participantes:', error);
-        // Usar datos por defecto si falla
-        setParticipants([
-          { name: 'Chacho Bonino', teamName: 'Quebracho', league_entry_id: 6753, team_logo: null },
-          { name: 'Marcos Arocena', teamName: 'Tranqueras', league_entry_id: 5156, team_logo: null },
-          { name: 'Ignacio de Cores', teamName: 'CA Tambores RF', league_entry_id: 38904, team_logo: null },
-          { name: 'Manuel Domenech', teamName: 'Sportivo Nico Perez', league_entry_id: 44346, team_logo: null },
-          { name: 'Juan Dehl', teamName: 'CA Tres Islas', league_entry_id: 54556, team_logo: null },
-          { name: 'Juan Francisco Sienra', teamName: 'Palmitas City', league_entry_id: 5769, team_logo: null },
-          { name: 'Felipe Migues', teamName: 'Migues', league_entry_id: 5997, team_logo: null },
-          { name: 'Joaquin Sarachaga', teamName: 'Deportivo Sauce', league_entry_id: 6494, team_logo: null },
-          { name: 'Javier Villaamil', teamName: 'Mal Abrigo Town', league_entry_id: 6479, team_logo: null },
-          { name: 'Ángel Cal', teamName: 'Pirarajá United', league_entry_id: 5865, team_logo: null },
-        ]);
       }
     }
     
