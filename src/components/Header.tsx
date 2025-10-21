@@ -6,6 +6,7 @@ import { useEffect, useState, useRef } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { useRouter, usePathname } from "next/navigation";
 import DashboardModal from "./DashboardModal";
+import { useLeague } from "@/contexts/LeagueContext";
 import type { User } from "@supabase/supabase-js";
 
 // Tipo para participantes con sus datos
@@ -35,11 +36,20 @@ export default function Header() {
   const [showDashboardModal, setShowDashboardModal] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
   const supabase = createClient();
+  
+  // Usar el contexto de liga
+  const { getTeamName, fetchLeagueData, isDataLoaded } = useLeague();
 
   useEffect(() => {
     // Inicializar componente: primero autenticación, luego participantes
     async function initializeComponent() {
       console.log('🚀 Inicializando Header...');
+      
+      // Asegurar que los datos de liga estén disponibles
+      if (!isDataLoaded) {
+        console.log('📡 Cargando datos de liga...');
+        await fetchLeagueData();
+      }
       
       try {
         // 1. Primero verificar autenticación con timeout
@@ -81,20 +91,11 @@ export default function Header() {
             // Verificar si es admin (Ignacio de Cores)
             setIsAdmin(profile.display_name === 'Ignacio de Cores');
             
-            // Obtener nombre del equipo de la API
-            try {
-              console.log('📡 Obteniendo nombre del equipo...');
-              const leagueResponse = await fetch('/api/league');
-              const leagueData = await leagueResponse.json();
-              const entry = leagueData.league_entries?.find(
-                (e: { id: number; entry_name: string }) => e.id === profile.league_entry_id
-              );
-              setUserTeamName(entry?.entry_name || '');
-              console.log('✅ Nombre del equipo obtenido:', entry?.entry_name || 'Sin equipo');
-            } catch (error) {
-              console.warn('⚠️ Error obteniendo nombre del equipo:', error);
-              setUserTeamName('');
-            }
+            // Obtener nombre del equipo usando el contexto
+            console.log('📡 Obteniendo nombre del equipo desde contexto...');
+            const teamName = getTeamName(profile.league_entry_id);
+            setUserTeamName(teamName);
+            console.log('✅ Nombre del equipo obtenido:', teamName);
           } else {
             console.warn('⚠️ No se encontró perfil para el usuario');
           }
@@ -128,37 +129,20 @@ export default function Header() {
         if (data.profiles) {
           console.log('✅ Perfiles obtenidos:', data.profiles.length);
           
-          // Obtener nombres de equipos de la API de FPL (con fallback)
-          try {
-            const leagueResponse = await fetch('/api/league');
-            const leagueData = await leagueResponse.json();
+          // Obtener nombres de equipos usando el contexto
+          const participantsData: Participant[] = data.profiles.map((profile: { display_name: string; league_entry_id: number; team_logo: string | null; fpl_entry_id: number | null }) => {
+            const teamName = getTeamName(profile.league_entry_id);
             
-            const participantsData: Participant[] = data.profiles.map((profile: { display_name: string; league_entry_id: number; team_logo: string | null; fpl_entry_id: number | null }) => {
-              const entry = leagueData.league_entries?.find(
-                (e: { id: number; entry_name: string }) => e.id === profile.league_entry_id
-              );
-              
-              return {
-                name: profile.display_name,
-                teamName: entry?.entry_name || 'Sin equipo',
-                league_entry_id: profile.league_entry_id,
-                team_logo: profile.team_logo
-              };
-            });
-            
-            console.log('✅ Participantes procesados:', participantsData.length);
-            setParticipants(participantsData);
-          } catch (leagueError) {
-            console.warn('⚠️ Error obteniendo datos de liga, usando datos por defecto:', leagueError);
-            // Usar datos por defecto si falla la API de liga
-            const participantsData: Participant[] = data.profiles.map((profile: { display_name: string; league_entry_id: number; team_logo: string | null; fpl_entry_id: number | null }) => ({
+            return {
               name: profile.display_name,
-              teamName: 'Equipo',
+              teamName: teamName,
               league_entry_id: profile.league_entry_id,
               team_logo: profile.team_logo
-            }));
-            setParticipants(participantsData);
-          }
+            };
+          });
+          
+          console.log('✅ Participantes procesados:', participantsData.length);
+          setParticipants(participantsData);
         } else {
           console.warn('⚠️ No se encontraron perfiles, usando datos por defecto');
           // Usar datos por defecto si no hay perfiles
@@ -220,13 +204,9 @@ export default function Header() {
           setUserTeamLogo(profile.team_logo);
           setIsAdmin(profile.display_name === 'Ignacio de Cores');
           
-          // Obtener nombre del equipo de la API
-          const leagueResponse = await fetch('/api/league');
-          const leagueData = await leagueResponse.json();
-          const entry = leagueData.league_entries?.find(
-            (e: { id: number; entry_name: string }) => e.id === profile.league_entry_id
-          );
-          setUserTeamName(entry?.entry_name || '');
+          // Obtener nombre del equipo usando el contexto
+          const teamName = getTeamName(profile.league_entry_id);
+          setUserTeamName(teamName);
         }
       }
     });
@@ -308,7 +288,6 @@ export default function Header() {
   // Determinar el estilo según la página
   const isHome = pathname === '/';
   const isAdminPage = pathname?.startsWith('/admin');
-  const isDashboard = pathname?.startsWith('/dashboard');
   
   const headerBg = isHome 
     ? 'linear-gradient(to right, #953bff, #02efff)' 

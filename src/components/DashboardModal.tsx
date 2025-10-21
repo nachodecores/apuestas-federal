@@ -4,6 +4,7 @@ import { createClient } from "@/lib/supabase/client";
 import Link from "next/link";
 import Image from "next/image";
 import { useEffect, useState } from "react";
+import { useLeague } from "@/contexts/LeagueContext";
 import type { User } from "@supabase/supabase-js";
 
 interface DashboardModalProps {
@@ -14,6 +15,9 @@ interface DashboardModalProps {
 
 export default function DashboardModal({ isOpen, onClose, user }: DashboardModalProps) {
   const supabase = createClient();
+  
+  // Usar el contexto de liga
+  const { getTeamName, fetchLeagueData, isDataLoaded } = useLeague();
   
   // Estados del dashboard
   const [profile, setProfile] = useState(null);
@@ -74,6 +78,12 @@ export default function DashboardModal({ isOpen, onClose, user }: DashboardModal
         return;
       }
 
+      // Asegurar que los datos de liga estén disponibles
+      if (!isDataLoaded) {
+        console.log('📡 Cargando datos de liga en DashboardModal...');
+        await fetchLeagueData();
+      }
+
       setDataLoading(true);
       try {
         // Obtener el perfil del usuario
@@ -88,19 +98,10 @@ export default function DashboardModal({ isOpen, onClose, user }: DashboardModal
         const adminStatus = profileData?.display_name === 'Ignacio de Cores';
         setIsAdmin(adminStatus);
 
-        // Obtener nombre del equipo de la API
+        // Obtener nombre del equipo usando el contexto
         if (profileData?.league_entry_id) {
-          try {
-            const leagueResponse = await fetch('/api/league');
-            const leagueData = await leagueResponse.json();
-            const entry = leagueData.league_entries?.find(
-              (e: { id: number; entry_name: string }) => e.id === profileData.league_entry_id
-            );
-            setUserTeamName(entry?.entry_name || '');
-          } catch (error) {
-            console.warn('⚠️ Error obteniendo nombre del equipo:', error);
-            setUserTeamName('');
-          }
+          const teamName = getTeamName(profileData.league_entry_id);
+          setUserTeamName(teamName);
         }
 
         // Si es admin, cargar TODAS las apuestas de todos los usuarios
@@ -170,36 +171,22 @@ export default function DashboardModal({ isOpen, onClose, user }: DashboardModal
 
         // Obtener nombres de equipos para las apuestas activas
         const teamIds = new Set();
-        active.forEach((bet) => {
+        activeBets.forEach((bet) => {
           teamIds.add(bet.match_league_entry_1);
           teamIds.add(bet.match_league_entry_2);
         });
 
         if (teamIds.size > 0) {
-          // Obtener nombres de equipos desde la API de la liga
-          try {
-            const leagueResponse = await fetch('/api/league');
-            const leagueData = await leagueResponse.json();
-            
-            const newTeamMap = new Map();
-            leagueData.league_entries?.forEach((entry: any) => {
-              if (teamIds.has(entry.id)) {
-                newTeamMap.set(entry.id, { 
-                  name: entry.entry_name, 
-                  logo: null // Por ahora no usamos logos en la tabla
-                });
-              }
+          // Obtener nombres de equipos usando el contexto
+          const newTeamMap = new Map();
+          Array.from(teamIds).forEach(id => {
+            const teamName = getTeamName(id);
+            newTeamMap.set(id, { 
+              name: teamName, 
+              logo: null // Por ahora no usamos logos en la tabla
             });
-            setTeamMap(newTeamMap);
-          } catch (error) {
-            console.warn('⚠️ Error obteniendo nombres de equipos:', error);
-            // Fallback: usar IDs como nombres
-            const fallbackMap = new Map();
-            Array.from(teamIds).forEach(id => {
-              fallbackMap.set(id, { name: `Equipo ${id}`, logo: null });
-            });
-            setTeamMap(fallbackMap);
-          }
+          });
+          setTeamMap(newTeamMap);
         }
       } catch (error) {
         console.error("Error loading dashboard data:", error);

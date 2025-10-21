@@ -66,8 +66,8 @@ export default function LoginPage() {
 
       if (error) throw error;
 
-      // Si el login es exitoso, redirigir al dashboard
-      router.push("/dashboard");
+      // Si el login es exitoso, redirigir a la página principal
+      router.push("/");
       router.refresh();
     } catch {
       setError("Contraseña incorrecta");

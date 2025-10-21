@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useLeague } from "@/contexts/LeagueContext";
 
 // Tipos de datos que vienen de la API de Draft FPL
 interface LeagueEntry {
@@ -72,6 +73,9 @@ function getRecentForm(league_entry_id: number, allMatches: ApiMatch[], count: n
 }
 
 export default function StandingsTable() {
+  // Usar el contexto de liga
+  const { leagueData, loading: contextLoading, error: contextError, fetchLeagueData, isDataLoaded } = useLeague();
+  
   // Estados: guardan los datos y el estado de carga
   const [players, setPlayers] = useState<PlayerDisplay[]>([]);
   const [loading, setLoading] = useState(true);
@@ -79,20 +83,20 @@ export default function StandingsTable() {
   
   // useEffect: se ejecuta cuando el componente se monta (aparece en pantalla)
   useEffect(() => {
-    // Función asíncrona para traer los datos
-    async function fetchLeagueData() {
+    // Función asíncrona para procesar los datos
+    async function processLeagueData() {
       try {
-        // 1. Hacemos la petición a NUESTRA API (que hace de proxy)
-        // Esto evita problemas de CORS porque llamamos a nuestro propio servidor
-        const response = await fetch('/api/league');
-        
-        // 2. Verificamos que la respuesta sea exitosa
-        if (!response.ok) {
-          throw new Error('Error al obtener datos de la liga');
+        // Asegurar que los datos de liga estén disponibles
+        if (!isDataLoaded) {
+          console.log('📡 Cargando datos de liga en StandingsTable...');
+          await fetchLeagueData();
         }
         
-        // 3. Convertimos la respuesta a JSON
-        const data: DraftLeagueData = await response.json();
+        if (!leagueData) {
+          throw new Error('No hay datos de liga disponibles');
+        }
+        
+        const data = leagueData;
         
         // 4. Procesamos los datos: combinamos league_entries con standings
         const processedPlayers: PlayerDisplay[] = data.standings.map((standing) => {
@@ -128,8 +132,8 @@ export default function StandingsTable() {
     }
     
     // Ejecutamos la función
-    fetchLeagueData();
-  }, []); // [] significa: ejecutar solo una vez al montar el componente
+    processLeagueData();
+  }, [leagueData, isDataLoaded, fetchLeagueData]); // Dependencias del contexto
   
   // Mientras está cargando, mostramos un spinner
   if (loading) {

@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
 import MatchCard from "./MatchCard";
+import { useLeague } from "@/contexts/LeagueContext";
 import type { User } from "@supabase/supabase-js";
 
 // Tipos de datos que vienen de la API
@@ -60,6 +61,9 @@ export interface MatchDisplay {
 export default function UpcomingMatches() {
   const supabase = createClient();
   
+  // Usar el contexto de liga
+  const { leagueData, loading: contextLoading, error: contextError, fetchLeagueData, isDataLoaded } = useLeague();
+  
   // Estados de datos
   const [matches, setMatches] = useState<MatchDisplay[]>([]);
   const [loading, setLoading] = useState(true);
@@ -74,6 +78,12 @@ export default function UpcomingMatches() {
   useEffect(() => {
     async function initializeComponent() {
       console.log('🚀 Inicializando UpcomingMatches...');
+      
+      // Asegurar que los datos básicos de liga estén disponibles
+      if (!isDataLoaded) {
+        console.log('📡 Cargando datos básicos de liga...');
+        await fetchLeagueData();
+      }
       
       try {
         // 1. Primero verificar autenticación con timeout
