@@ -88,7 +88,7 @@ export default function StandingsTable() {
       try {
         // Asegurar que los datos de liga estén disponibles
         if (!isDataLoaded) {
-          console.log('📡 Cargando datos de liga en StandingsTable...');
+          console.log('📡 StandingsTable: Esperando datos...');
           await fetchLeagueData();
         }
         

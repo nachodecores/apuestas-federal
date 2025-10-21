@@ -80,7 +80,7 @@ export default function DashboardModal({ isOpen, onClose, user }: DashboardModal
 
       // Asegurar que los datos de liga estén disponibles
       if (!isDataLoaded) {
-        console.log('📡 Cargando datos de liga en DashboardModal...');
+        console.log('📡 DashboardModal: Esperando datos...');
         await fetchLeagueData();
       }
 
@@ -180,7 +180,7 @@ export default function DashboardModal({ isOpen, onClose, user }: DashboardModal
           // Obtener nombres de equipos usando el contexto
           const newTeamMap = new Map();
           Array.from(teamIds).forEach(id => {
-            const teamName = getTeamName(id);
+            const teamName = getTeamName(Number(id));
             newTeamMap.set(id, { 
               name: teamName, 
               logo: null // Por ahora no usamos logos en la tabla

@@ -81,7 +81,7 @@ export default function UpcomingMatches() {
       
       // Asegurar que los datos básicos de liga estén disponibles
       if (!isDataLoaded) {
-        console.log('📡 Cargando datos básicos de liga...');
+        console.log('📡 UpcomingMatches: Esperando datos...');
         await fetchLeagueData();
       }
       

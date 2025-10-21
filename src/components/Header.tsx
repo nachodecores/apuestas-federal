@@ -47,7 +47,7 @@ export default function Header() {
       
       // Asegurar que los datos de liga estén disponibles
       if (!isDataLoaded) {
-        console.log('📡 Cargando datos de liga...');
+        console.log('📡 Header: Esperando datos...');
         await fetchLeagueData();
       }
       
@@ -92,10 +92,8 @@ export default function Header() {
             setIsAdmin(profile.display_name === 'Ignacio de Cores');
             
             // Obtener nombre del equipo usando el contexto
-            console.log('📡 Obteniendo nombre del equipo desde contexto...');
             const teamName = getTeamName(profile.league_entry_id);
             setUserTeamName(teamName);
-            console.log('✅ Nombre del equipo obtenido:', teamName);
           } else {
             console.warn('⚠️ No se encontró perfil para el usuario');
           }
@@ -141,7 +139,6 @@ export default function Header() {
             };
           });
           
-          console.log('✅ Participantes procesados:', participantsData.length);
           setParticipants(participantsData);
         } else {
           console.warn('⚠️ No se encontraron perfiles, usando datos por defecto');

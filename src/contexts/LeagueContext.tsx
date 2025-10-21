@@ -53,11 +53,10 @@ export function LeagueProvider({ children }: { children: ReactNode }) {
 
   const fetchLeagueData = useCallback(async () => {
     if (leagueData) {
-      console.log('📦 LeagueContext: Datos ya cargados, saltando fetch');
       return; // Ya tenemos datos
     }
     
-    console.log('🚀 LeagueContext: Iniciando fetch de datos de liga...');
+    console.log('🚀 LeagueContext: Cargando datos...');
     setLoading(true);
     setError(null);
     
@@ -69,11 +68,11 @@ export function LeagueProvider({ children }: { children: ReactNode }) {
       }
       
       const data = await response.json();
-      console.log('✅ LeagueContext: Datos de liga obtenidos exitosamente');
+      console.log('✅ LeagueContext: Datos cargados');
       setLeagueData(data);
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Error desconocido al obtener datos de la liga';
-      console.error('💥 LeagueContext: Error obteniendo datos:', errorMessage);
+      console.error('💥 LeagueContext Error:', errorMessage);
       setError(errorMessage);
     } finally {
       setLoading(false);
@@ -97,7 +96,7 @@ export function LeagueProvider({ children }: { children: ReactNode }) {
   // Cargar datos automáticamente al montar el contexto
   useEffect(() => {
     if (!leagueData && !loading) {
-      console.log('🚀 LeagueContext: Cargando datos automáticamente...');
+      console.log('🚀 LeagueContext: Auto-cargando...');
       fetchLeagueData();
     }
   }, [leagueData, loading, fetchLeagueData]);
