@@ -8,14 +8,7 @@ import { useRouter, usePathname } from "next/navigation";
 import DashboardModal from "./DashboardModal";
 import { useLeague } from "@/contexts/LeagueContext";
 import type { User } from "@supabase/supabase-js";
-
-// Tipo para participantes con sus datos
-interface Participant {
-  name: string;
-  teamName: string;
-  league_entry_id: number;
-  team_logo: string | null;
-}
+import { Participant } from "@/types";
 
 export default function Header() {
   const router = useRouter();

@@ -2,57 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useLeague } from "@/contexts/LeagueContext";
-
-// Tipos de datos que vienen de la API de Draft FPL
-interface LeagueEntry {
-  entry_id: number;
-  entry_name: string;
-  id: number;
-  player_first_name: string;
-  player_last_name: string;
-  short_name: string;
-  total?: number; // Puntos totales FPL (opcional, puede venir en el objeto)
-}
-
-interface Standing {
-  league_entry: number;
-  rank: number;
-  points_for: number;
-  matches_won: number;
-  matches_drawn: number;
-  matches_lost: number;
-  total: number; // Puntos totales en la tabla H2H
-}
-
-interface ApiMatch {
-  event: number;
-  league_entry_1: number;
-  league_entry_2: number;
-  league_entry_1_points: number;
-  league_entry_2_points: number;
-  finished: boolean;
-}
-
-interface DraftLeagueData {
-  league: {
-    name: string;
-  };
-  league_entries: LeagueEntry[];
-  standings: Standing[];
-  matches: ApiMatch[];
-}
-
-// Tipo para mostrar en la tabla (datos ya procesados)
-interface PlayerDisplay {
-  position: number;
-  name: string;
-  teamName: string;
-  h2hPoints: number; // Puntos de la tabla H2H
-  fplPoints: number; // Puntos totales FPL
-  record: string; // ej: "6-1-0" (ganados-empatados-perdidos)
-  balance: number;
-  recentForm: ('win' | 'draw' | 'loss')[]; // Últimos 5 resultados
-}
+import { LeagueEntry, Standing, ApiMatch, DraftLeagueData, PlayerDisplay } from "@/types";
 
 // Función para calcular racha de los últimos N partidos
 function getRecentForm(league_entry_id: number, allMatches: ApiMatch[], count: number = 5): ('win' | 'draw' | 'loss')[] {

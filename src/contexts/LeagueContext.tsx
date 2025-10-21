@@ -1,36 +1,12 @@
 "use client";
 
 import { createContext, useContext, useState, useEffect, ReactNode, useCallback } from 'react';
-
-interface LeagueEntry {
-  id: number;
-  entry_name: string;
-  player_first_name: string;
-  player_last_name: string;
-}
-
-interface Standing {
-  league_entry: number;
-  rank: number;
-  total: number;
-  points_for: number;
-  matches_won: number;
-  matches_drawn: number;
-  matches_lost: number;
-}
-
-interface Match {
-  league_entry_1: number;
-  league_entry_2: number;
-  event: number;
-  finished: boolean;
-  started: boolean;
-}
+import { LeagueEntry, Standing, ApiMatch } from '@/types';
 
 interface LeagueData {
   league_entries: LeagueEntry[];
   standings: Standing[];
-  matches: Match[];
+  matches: ApiMatch[];
   gameweek?: number;
 }
 

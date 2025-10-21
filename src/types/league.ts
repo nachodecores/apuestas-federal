@@ -1,0 +1,50 @@
+// Tipos relacionados con la liga de FPL
+export interface LeagueEntry {
+  entry_id: number;
+  entry_name: string;
+  id: number;
+  player_first_name: string;
+  player_last_name: string;
+  short_name: string;
+  total?: number; // Puntos totales FPL (opcional, puede venir en el objeto)
+}
+
+export interface Standing {
+  league_entry: number;
+  rank: number;
+  points_for: number;
+  matches_won: number;
+  matches_drawn: number;
+  matches_lost: number;
+  total: number; // Puntos totales en la tabla H2H
+}
+
+export interface ApiMatch {
+  event: number;
+  league_entry_1: number;
+  league_entry_2: number;
+  league_entry_1_points: number;
+  league_entry_2_points: number;
+  finished: boolean;
+}
+
+export interface DraftLeagueData {
+  league: {
+    name: string;
+  };
+  league_entries: LeagueEntry[];
+  standings: Standing[];
+  matches: ApiMatch[];
+}
+
+// Tipo para mostrar en la tabla (datos ya procesados)
+export interface PlayerDisplay {
+  position: number;
+  name: string;
+  teamName: string;
+  h2hPoints: number; // Puntos de la tabla H2H
+  fplPoints: number; // Puntos totales FPL
+  record: string; // ej: "6-1-0" (ganados-empatados-perdidos)
+  balance: number;
+  recentForm: ('win' | 'draw' | 'loss')[]; // Últimos 5 resultados
+}
