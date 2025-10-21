@@ -237,18 +237,20 @@ export default function MatchCard({
               </div>
               
               {/* Delete button in top-right */}
-              <div className="absolute top-2 right-2">
-                <DeleteBetButton 
-                  betId={userBet.id.toString()}
-                  variant="icon"
-                  size="sm"
-                  className="!bg-red-50 hover:!bg-red-100"
-                  onDeleteSuccess={(betId, refundAmount) => {
-                    setUserBet(null);
-                    onBetConfirmed(userBalance + refundAmount); // Update balance
-                  }}
-                />
-              </div>
+              {userBet.id && (
+                <div className="absolute top-2 right-2">
+                  <DeleteBetButton 
+                    betId={userBet.id.toString()}
+                    variant="icon"
+                    size="sm"
+                    className="!bg-red-50 hover:!bg-red-100"
+                    onDeleteSuccess={(betId, refundAmount) => {
+                      setUserBet(null);
+                      onBetConfirmed(userBalance + refundAmount); // Update balance
+                    }}
+                  />
+                </div>
+              )}
             </div>
           ) : (
             // Mostrar botones de apuesta
