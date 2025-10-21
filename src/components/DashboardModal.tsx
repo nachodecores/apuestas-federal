@@ -160,25 +160,8 @@ export default function DashboardModal({ isOpen, onClose, user }: DashboardModal
           lostBets
         });
 
-        // Obtener nombres de equipos para las apuestas activas
-        const teamIds = new Set();
-        activeBets.forEach((bet) => {
-          teamIds.add(bet.match_league_entry_1);
-          teamIds.add(bet.match_league_entry_2);
-        });
-
-        if (teamIds.size > 0) {
-          // Obtener nombres de equipos usando el contexto
-          const newTeamMap = new Map();
-          Array.from(teamIds).forEach(id => {
-            const teamName = getTeamName(Number(id));
-            newTeamMap.set(id, { 
-              name: teamName, 
-              logo: null // Por ahora no usamos logos en la tabla
-            });
-          });
-          setTeamMap(newTeamMap);
-        }
+        // Los nombres de equipos se actualizarán cuando los datos de liga estén cargados
+        // (manejado por el useEffect que escucha isDataLoaded)
       } catch (error) {
         console.error("Error loading dashboard data:", error);
       } finally {
@@ -188,6 +171,31 @@ export default function DashboardModal({ isOpen, onClose, user }: DashboardModal
 
     loadDashboardData();
   }, [user?.id, isOpen]); // Solo depende del ID del usuario y si está abierto
+
+  // Actualizar nombres de equipos cuando los datos de liga estén cargados
+  useEffect(() => {
+    if (isDataLoaded && activeBets.length > 0) {
+      console.log('🔍 DashboardModal: Actualizando nombres de equipos...');
+      const teamIds = new Set();
+      activeBets.forEach((bet) => {
+        teamIds.add(bet.match_league_entry_1);
+        teamIds.add(bet.match_league_entry_2);
+      });
+
+      if (teamIds.size > 0) {
+        const newTeamMap = new Map();
+        Array.from(teamIds).forEach(id => {
+          const teamName = getTeamName(Number(id));
+          console.log('🔍 DashboardModal: Mapeando equipo:', id, '->', teamName);
+          newTeamMap.set(id, { 
+            name: teamName, 
+            logo: null
+          });
+        });
+        setTeamMap(newTeamMap);
+      }
+    }
+  }, [isDataLoaded, activeBets, getTeamName]);
 
   // Función para eliminar una apuesta
   async function handleDeleteBet(betId: string) {
