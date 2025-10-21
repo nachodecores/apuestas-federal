@@ -5,58 +5,7 @@ import { createClient } from "@/lib/supabase/client";
 import MatchCard from "./MatchCard";
 import { useLeague } from "@/contexts/LeagueContext";
 import type { User } from "@supabase/supabase-js";
-
-// Tipos de datos que vienen de la API
-interface LeagueEntry {
-  id: number;
-  entry_name: string;
-  player_first_name: string;
-  player_last_name: string;
-}
-
-interface ApiMatch {
-  event: number;
-  league_entry_1: number;
-  league_entry_2: number;
-  league_entry_1_points: number;
-  league_entry_2_points: number;
-  finished: boolean;
-  started: boolean;
-}
-
-interface Standing {
-  league_entry: number;
-  rank: number;
-  points_for: number;
-  matches_won: number;
-  matches_drawn: number;
-  matches_lost: number;
-  total: number;
-}
-
-interface DraftLeagueData {
-  league_entries: LeagueEntry[];
-  matches: ApiMatch[];
-  standings: Standing[];
-}
-
-// Tipo para mostrar en las cards (exportado para MatchCard)
-export interface MatchDisplay {
-  gameweek: number;
-  team1Name: string;
-  team2Name: string;
-  team1Manager: string;
-  team2Manager: string;
-  team1Logo: string | null;
-  team2Logo: string | null;
-  league_entry_1: number;
-  league_entry_2: number;
-  odds: {
-    home: number;
-    draw: number;
-    away: number;
-  };
-}
+import { MatchDisplay, LeagueEntry, ApiMatch, Standing, DraftLeagueData } from "@/types";
 
 export default function UpcomingMatches() {
   const supabase = createClient();
@@ -312,9 +261,9 @@ export default function UpcomingMatches() {
 
         <div className="flex-1 overflow-y-auto">
           <div className="grid grid-cols-1 gap-4 mobile:gap-5 tablet:gap-6">
-            {matches.map((match, idx) => (
+          {matches.map((match, idx) => (
               <MatchCard
-                key={idx}
+              key={idx}
                 match={match}
                 matchIndex={idx}
                 user={user}
@@ -322,7 +271,7 @@ export default function UpcomingMatches() {
                 onBetConfirmed={handleBetConfirmed}
               />
             ))}
-          </div>
+                    </div>
         </div>
 
       </div>

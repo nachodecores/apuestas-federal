@@ -13,10 +13,10 @@ export interface Bet {
 }
 
 export interface UserBet {
-  id: string;
+  id: number;
+  prediction: 'home' | 'draw' | 'away';
   amount: number;
-  selected_team: number;
-  status: string;
+  potential_win: number;
 }
 
 export interface BetStats {
@@ -26,4 +26,19 @@ export interface BetStats {
   lostBets: number;
   pendingBets: number;
   netGain: number;
+}
+
+// Tipos para selección de apuestas
+export interface BetSelection {
+  prediction: 'home' | 'draw' | 'away' | null;
+  amount: string;
+}
+
+// Tipos para estadísticas del dashboard
+export interface DashboardStats {
+  totalWon: number;
+  totalLost: number;
+  netProfit: number;
+  wonBets: any[];
+  lostBets: any[];
 }

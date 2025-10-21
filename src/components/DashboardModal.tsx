@@ -6,12 +6,7 @@ import Image from "next/image";
 import { useEffect, useState } from "react";
 import { useLeague } from "@/contexts/LeagueContext";
 import type { User } from "@supabase/supabase-js";
-
-interface DashboardModalProps {
-  isOpen: boolean;
-  onClose: () => void;
-  user: User | null;
-}
+import { DashboardModalProps, DashboardStats } from "@/types";
 
 export default function DashboardModal({ isOpen, onClose, user }: DashboardModalProps) {
   const supabase = createClient();
@@ -27,7 +22,7 @@ export default function DashboardModal({ isOpen, onClose, user }: DashboardModal
   const [isAdmin, setIsAdmin] = useState(false);
   const [allUsersBets, setAllUsersBets] = useState([]);
   const [allUsersMap, setAllUsersMap] = useState(new Map());
-  const [stats, setStats] = useState({
+  const [stats, setStats] = useState<DashboardStats>({
     totalWon: 0,
     totalLost: 0,
     netProfit: 0,

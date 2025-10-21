@@ -48,3 +48,36 @@ export interface PlayerDisplay {
   balance: number;
   recentForm: ('win' | 'draw' | 'loss')[]; // Últimos 5 resultados
 }
+
+// Tipo para mostrar en las cards de partidos
+export interface MatchDisplay {
+  gameweek: number;
+  team1Name: string;
+  team2Name: string;
+  team1Manager: string;
+  team2Manager: string;
+  team1Logo: string | null;
+  team2Logo: string | null;
+  league_entry_1: number;
+  league_entry_2: number;
+  odds: {
+    home: number;
+    draw: number;
+    away: number;
+  };
+}
+
+// Tipos para props de componentes
+export interface MatchCardProps {
+  match: MatchDisplay;
+  matchIndex: number;
+  user: any; // User de Supabase
+  userBalance: number;
+  onBetConfirmed: (newBalance: number) => void;
+}
+
+export interface DashboardModalProps {
+  isOpen: boolean;
+  onClose: () => void;
+  user: any; // User de Supabase
+}

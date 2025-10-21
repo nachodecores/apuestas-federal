@@ -2,29 +2,7 @@
 
 import { useState, useEffect } from "react";
 import type { User } from "@supabase/supabase-js";
-import type { MatchDisplay } from "./UpcomingMatches";
-
-// Tipo para la apuesta de cada partido
-interface BetSelection {
-  prediction: 'home' | 'draw' | 'away' | null;
-  amount: string;
-}
-
-// Tipo para la apuesta existente del usuario
-interface UserBet {
-  id: number;
-  prediction: 'home' | 'draw' | 'away';
-  amount: number;
-  potential_win: number;
-}
-
-interface MatchCardProps {
-  match: MatchDisplay;
-  matchIndex: number;
-  user: User | null;
-  userBalance: number;
-  onBetConfirmed: (newBalance: number) => void;
-}
+import { MatchCardProps, BetSelection, UserBet, MatchDisplay } from "@/types";
 
 export default function MatchCard({ 
   match, 
