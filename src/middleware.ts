@@ -38,13 +38,6 @@ export async function middleware(request: NextRequest) {
     data: { user },
   } = await supabase.auth.getUser();
 
-  // Si el usuario ESTÁ autenticado y está en login
-  if (user && request.nextUrl.pathname === '/login') {
-    // Redirigir a la página principal
-    const url = request.nextUrl.clone();
-    url.pathname = '/';
-    return NextResponse.redirect(url);
-  }
 
   return supabaseResponse;
 }
