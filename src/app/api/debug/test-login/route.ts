@@ -11,7 +11,6 @@ export async function POST(request: Request) {
       process.env.SUPABASE_SERVICE_ROLE_KEY!
     );
 
-    console.log(`Probando login para: ${email}`);
 
     // 1. Verificar que el usuario existe
     const { data: profile, error: profileError } = await supabase

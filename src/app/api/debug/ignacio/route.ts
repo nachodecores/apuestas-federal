@@ -10,7 +10,6 @@ export async function GET() {
     );
     const email = '38904@bolichefederal.com';
     
-    console.log('🔍 Diagnosticando cuenta de Ignacio de Cores...');
     
     // 1. Verificar perfil en profiles (esto nos dará info del usuario)
     const { data: profile, error: profileError } = await supabase
@@ -28,14 +27,12 @@ export async function GET() {
     }
 
     if (!profile) {
-      console.log('❌ Perfil no encontrado');
       return NextResponse.json({ 
         error: 'Perfil no encontrado',
         email: email
       }, { status: 404 });
     }
 
-    console.log('✅ Perfil encontrado:', {
       id: profile.id,
       display_name: profile.display_name,
       email: profile.email,
@@ -56,14 +53,12 @@ export async function GET() {
     }
 
     if (!authUser.user) {
-      console.log('❌ Usuario no encontrado en auth.users');
       return NextResponse.json({ 
         error: 'Usuario no encontrado en auth.users',
         profileId: profile.id
       }, { status: 404 });
     }
 
-    console.log('✅ Usuario encontrado en auth.users:', {
       id: authUser.user.id,
       email: authUser.user.email,
       email_confirmed_at: authUser.user.email_confirmed_at,
@@ -74,12 +69,8 @@ export async function GET() {
 
     // 3. Verificar si los IDs coinciden
     const idsMatch = authUser.user.id === profile.id;
-    console.log('🔍 IDs coinciden:', idsMatch);
     
     if (!idsMatch) {
-      console.log('❌ PROBLEMA: Los IDs no coinciden!');
-      console.log('Auth user ID:', authUser.user.id);
-      console.log('Profile ID:', profile.id);
     }
 
     // 4. Verificar apuestas del usuario
@@ -92,7 +83,6 @@ export async function GET() {
     if (betsError) {
       console.error('❌ Error al buscar apuestas:', betsError);
     } else {
-      console.log('✅ Apuestas encontradas:', bets?.length || 0);
     }
 
     return NextResponse.json({

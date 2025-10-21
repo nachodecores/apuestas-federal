@@ -28,7 +28,6 @@ export async function POST() {
 
     for (const email of participantEmails) {
       try {
-        console.log(`Reseteando contraseña para: ${email}`);
         
         // Buscar el usuario por email
         const { data: users, error: searchError } = await supabase

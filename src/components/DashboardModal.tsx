@@ -261,7 +261,6 @@ export default function DashboardModal({ isOpen, onClose, user }: DashboardModal
         return;
       }
 
-      console.log('Intentando cambiar contraseña para usuario:', user?.email);
 
       // Cambiar contraseña en Supabase
       const { data, error } = await supabase.auth.updateUser({
@@ -278,7 +277,6 @@ export default function DashboardModal({ isOpen, onClose, user }: DashboardModal
         throw new Error('Error: No se pudo actualizar el usuario');
       }
 
-      console.log('Contraseña cambiada exitosamente para:', data.user.email);
 
       // Éxito
       alert('¡Contraseña cambiada exitosamente!');

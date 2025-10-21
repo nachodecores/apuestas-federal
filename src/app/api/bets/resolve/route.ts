@@ -32,7 +32,6 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Gameweek es requerido' }, { status: 400 });
     }
 
-    console.log(`🎲 Resolviendo apuestas del Gameweek ${gameweek}...`);
 
     // 1. Obtener resultados reales de la API de FPL
     const apiResponse = await fetch('https://draft.premierleague.com/api/league/1651/details');
@@ -54,7 +53,6 @@ export async function POST(request: Request) {
       }, { status: 400 });
     }
 
-    console.log(`✅ Encontrados ${finishedMatches.length} partidos finalizados`);
 
     // 2. Obtener todas las apuestas pendientes de ese gameweek
     const { data: pendingBets, error: betsError } = await supabase
@@ -74,7 +72,6 @@ export async function POST(request: Request) {
       });
     }
 
-    console.log(`📊 Procesando ${pendingBets.length} apuestas pendientes...`);
 
     // 3. Crear mapa de resultados reales
     const resultsMap = new Map<string, 'home' | 'draw' | 'away'>();
@@ -92,7 +89,6 @@ export async function POST(request: Request) {
       }
       
       resultsMap.set(key, result);
-      console.log(`  Partido: ${match.league_entry_1} vs ${match.league_entry_2} → ${result} (${match.league_entry_1_points}-${match.league_entry_2_points})`);
     });
 
     // 4. Procesar cada apuesta
@@ -105,7 +101,6 @@ export async function POST(request: Request) {
       const actualResult = resultsMap.get(matchKey);
 
       if (!actualResult) {
-        console.log(`  ⚠️ No se encontró resultado para apuesta ${bet.id}`);
         continue;
       }
 
@@ -138,10 +133,8 @@ export async function POST(request: Request) {
           related_bet_id: bet.id
         });
 
-        console.log(`  ✓ Usuario ${bet.user_id} ganó $${bet.potential_win}`);
       } else {
         lostCount++;
-        console.log(`  ✗ Usuario ${bet.user_id} perdió $${bet.amount}`);
       }
     }
 
@@ -168,11 +161,9 @@ export async function POST(request: Request) {
       if (updateBalanceError) {
         console.error(`Error al actualizar balance de usuario ${userId}:`, updateBalanceError);
       } else {
-        console.log(`  💰 Balance de usuario ${userId} actualizado: $${newBalance.toFixed(2)}`);
       }
     }
 
-    console.log(`🎉 Resolución completada: ${wonCount} ganadas, ${lostCount} perdidas`);
 
     return NextResponse.json({
       success: true,

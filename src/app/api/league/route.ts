@@ -25,7 +25,6 @@ export async function GET(request: Request) {
     
     // 4. OPTIMIZACIÓN: Si se solicitan solo próximos partidos
     if (upcoming === 'true') {
-      console.log('🎯 Optimizando para próximos partidos...');
       
       // Filtrar solo partidos próximos
       const upcomingMatches = data.matches.filter((match: any) => !match.finished);
@@ -67,7 +66,6 @@ export async function GET(request: Request) {
         gameweek_odds: gameweekOdds
       };
       
-      console.log(`✅ Datos optimizados: ${nextGWMatches.length} partidos, ${relevantEntries.length} equipos`);
       return NextResponse.json(optimizedData);
     }
     

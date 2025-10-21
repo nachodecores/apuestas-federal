@@ -143,9 +143,7 @@ export async function POST(request: Request) {
     // 8. Calcular odds para el próximo gameweek
     let nextGameweekOdds = null;
     try {
-      console.log(`🎯 Calculando odds para el próximo gameweek (GW${gameweek + 1})...`);
       nextGameweekOdds = await calculateAndSaveGameweekOdds(gameweek + 1);
-      console.log(`✅ Odds calculadas para GW${gameweek + 1}: ${nextGameweekOdds.length} partidos`);
     } catch (oddsError) {
       console.error(`⚠️ Error calculando odds para GW${gameweek + 1}:`, oddsError);
       // No fallar la resolución por error en odds

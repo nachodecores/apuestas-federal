@@ -26,13 +26,11 @@ export default function UpcomingMatches() {
   // useEffect: Inicializar componente - primero autenticación, luego partidos
   useEffect(() => {
     async function initializeComponent() {
-      console.log('🚀 Inicializando UpcomingMatches...');
       
       // Los datos de liga se cargarán automáticamente por el contexto
       
       try {
         // 1. Primero verificar autenticación con timeout
-        console.log('📡 Verificando autenticación...');
         
         // Crear una promesa con timeout para evitar que se cuelgue
         const authPromise = supabase.auth.getUser();
@@ -44,7 +42,6 @@ export default function UpcomingMatches() {
         try {
           const { data: { user: authUser } } = await Promise.race([authPromise, timeoutPromise]) as any;
           user = authUser;
-          console.log('✅ Usuario verificado:', user ? 'Logueado' : 'No logueado');
         } catch (error) {
           console.warn('⚠️ Error o timeout en autenticación, continuando sin usuario:', error);
           user = null;
@@ -55,7 +52,6 @@ export default function UpcomingMatches() {
       if (user) {
         // Obtener balance del usuario
           try {
-            console.log('📡 Obteniendo balance del usuario...');
         const { data: profile } = await supabase
           .from('profiles')
           .select('balance')
@@ -64,7 +60,6 @@ export default function UpcomingMatches() {
         
         if (profile) {
           setUserBalance(profile.balance);
-              console.log('✅ Balance obtenido:', profile.balance);
             } else {
               console.warn('⚠️ No se encontró perfil para el usuario');
               setUserBalance(0);
@@ -74,15 +69,12 @@ export default function UpcomingMatches() {
             setUserBalance(0);
           }
         } else {
-          console.log('👤 Usuario no logueado, balance = 0');
           setUserBalance(0);
         }
         
         // 2. DESPUÉS cargar partidos (independiente de autenticación)
-        console.log('📡 Iniciando carga de partidos...');
         await fetchMatches();
         
-        console.log('✅ UpcomingMatches inicializado completamente');
       } catch (error) {
         console.error('💥 Error en initializeComponent:', error);
         setLoading(false);
@@ -91,10 +83,8 @@ export default function UpcomingMatches() {
     
     async function fetchMatches() {
       try {
-        console.log('🚀 Iniciando fetchMatches...');
         
         // 1. Una sola llamada optimizada que trae solo los datos necesarios
-        console.log('📡 Obteniendo datos optimizados...');
         const response = await fetch('/api/league?upcoming=true');
         
         if (!response.ok) {
@@ -102,20 +92,16 @@ export default function UpcomingMatches() {
         }
         
         const data = await response.json();
-        console.log('✅ Datos optimizados recibidos:', data);
         
         // 2. Los datos ya vienen filtrados y optimizados
         const nextGW = data.gameweek;
         const nextGWMatches = data.matches;
         
         setNextGameweek(nextGW);
-        console.log('✅ Próxima gameweek:', nextGW);
-        console.log('✅ Partidos de GW', nextGW, ':', nextGWMatches.length);
         
         // 3. Obtener logos de los equipos desde Supabase (con fallback)
         let teamLogos = new Map();
         try {
-          console.log('📡 Obteniendo logos de equipos...');
         const { data: profiles } = await supabase
           .from('profiles')
           .select('league_entry_id, team_logo');
@@ -123,22 +109,18 @@ export default function UpcomingMatches() {
           teamLogos = new Map(
           profiles?.map(p => [p.league_entry_id, p.team_logo]) || []
         );
-          console.log('✅ Logos obtenidos:', teamLogos.size);
         } catch (logoError) {
           console.warn('⚠️ Error obteniendo logos, continuando sin logos:', logoError);
           // Continuamos sin logos, no es crítico
         }
         
         // 4. Mapeamos los IDs de equipos a nombres Y usamos odds pre-calculadas
-        console.log('📡 Procesando partidos...');
         const processedMatches: MatchDisplay[] = nextGWMatches.map((match, index) => {
-          console.log(`📡 Procesando partido ${index + 1}/${nextGWMatches.length}...`);
           
           // Buscamos los equipos por su league_entry ID
           const team1 = data.league_entries.find(e => e.id === match.league_entry_1);
           const team2 = data.league_entries.find(e => e.id === match.league_entry_2);
           
-          console.log(`📡 Equipos encontrados: ${team1?.entry_name} vs ${team2?.entry_name}`);
           
           // Buscar odds pre-calculadas para este partido
           let odds = { home: 2.0, draw: 3.0, away: 2.0 }; // Fallback por defecto
@@ -156,7 +138,6 @@ export default function UpcomingMatches() {
                 draw: matchOdds.draw_odds,
                 away: matchOdds.away_odds
               };
-              console.log('✅ Odds pre-calculadas encontradas:', odds);
             } else {
               console.warn('⚠️ No se encontraron odds pre-calculadas, usando fallback');
             }
@@ -178,12 +159,8 @@ export default function UpcomingMatches() {
           };
         });
         
-        console.log('✅ Partidos procesados:', processedMatches.length);
-        console.log('📡 Estableciendo estado de partidos...');
         setMatches(processedMatches);
-        console.log('📡 Estableciendo loading = false...');
         setLoading(false);
-        console.log('✅ UpcomingMatches inicializado completamente');
         
       } catch (err) {
         console.error('💥 Error en fetchMatches:', err);

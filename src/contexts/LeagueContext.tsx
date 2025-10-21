@@ -28,26 +28,37 @@ export function LeagueProvider({ children }: { children: ReactNode }) {
   const [error, setError] = useState<string | null>(null);
 
   const fetchLeagueData = useCallback(async () => {
-    console.log('🚀 LeagueContext: Cargando datos...');
+    console.log('🔍 DEBUG: fetchLeagueData iniciado');
+    console.log('🔍 DEBUG: Estado actual - loading:', loading, 'error:', error, 'leagueData:', !!leagueData);
+    
     setLoading(true);
     setError(null);
     
     try {
+      console.log('🔍 DEBUG: Haciendo fetch a /api/league');
       const response = await fetch('/api/league');
+      
+      console.log('🔍 DEBUG: Respuesta recibida - status:', response.status, 'ok:', response.ok);
       
       if (!response.ok) {
         throw new Error(`Error ${response.status}: ${response.statusText}`);
       }
       
       const data = await response.json();
-      console.log('✅ LeagueContext: Datos cargados');
+      console.log('🔍 DEBUG: Datos parseados - keys:', Object.keys(data));
+      console.log('🔍 DEBUG: league_entries length:', data.league_entries?.length);
+      console.log('🔍 DEBUG: matches length:', data.matches?.length);
+      console.log('🔍 DEBUG: standings length:', data.standings?.length);
+      
       setLeagueData(data);
+      console.log('🔍 DEBUG: leagueData establecido en el estado');
     } catch (err) {
+      console.log('🔍 DEBUG: Error capturado:', err);
       const errorMessage = err instanceof Error ? err.message : 'Error desconocido al obtener datos de la liga';
-      console.error('💥 LeagueContext Error:', errorMessage);
       setError(errorMessage);
     } finally {
       setLoading(false);
+      console.log('🔍 DEBUG: fetchLeagueData completado - loading: false');
     }
   }, []);
 

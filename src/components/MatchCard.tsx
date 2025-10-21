@@ -48,7 +48,6 @@ export default function MatchCard({
     function handleBetDeleted(event: CustomEvent) {
       const { gameweek, match_league_entry_1, match_league_entry_2 } = event.detail;
       
-      console.log('📡 Evento betDeleted recibido:', {
         eventGameweek: gameweek,
         eventMatch1: match_league_entry_1,
         eventMatch2: match_league_entry_2,
@@ -62,10 +61,8 @@ export default function MatchCard({
       if (Number(gameweek) === Number(match.gameweek) && 
           Number(match_league_entry_1) === Number(match.league_entry_1) && 
           Number(match_league_entry_2) === Number(match.league_entry_2)) {
-        console.log('🔄 Apuesta eliminada detectada, verificando nuevamente...');
         checkExistingBet();
       } else {
-        console.log('❌ No es el mismo partido, ignorando evento');
       }
     }
     
@@ -75,7 +72,6 @@ export default function MatchCard({
 
   async function checkExistingBet() {
     try {
-      console.log('🔍 Verificando apuesta existente para:', {
         gameweek: match.gameweek,
         match_league_entry_1: match.league_entry_1,
         match_league_entry_2: match.league_entry_2
@@ -84,13 +80,10 @@ export default function MatchCard({
       const response = await fetch(`/api/bets/user-bet?gameweek=${match.gameweek}&match_league_entry_1=${match.league_entry_1}&match_league_entry_2=${match.league_entry_2}`);
       const data = await response.json();
       
-      console.log('📊 Respuesta de checkExistingBet:', data);
       
       if (data.bet) {
-        console.log('✅ Apuesta encontrada, mostrando mensaje verde');
         setUserBet(data.bet);
       } else {
-        console.log('❌ No hay apuesta, mostrando botones');
         setUserBet(null);
       }
     } catch (error) {

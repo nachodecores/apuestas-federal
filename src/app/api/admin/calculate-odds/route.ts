@@ -41,7 +41,6 @@ export async function POST(request: Request) {
       );
     }
     
-    console.log(`🎯 Iniciando cálculo de odds para GW${gameweek}...`);
     
     // Calcular y guardar las odds
     const odds = await calculateAndSaveGameweekOdds(gameweek);

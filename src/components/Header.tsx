@@ -36,13 +36,11 @@ export default function Header() {
   useEffect(() => {
     // Inicializar componente: primero autenticación, luego participantes
     async function initializeComponent() {
-      console.log('🚀 Inicializando Header...');
       
       // Los datos de liga se cargarán automáticamente por el contexto
       
       try {
         // 1. Primero verificar autenticación con timeout
-        console.log('📡 Verificando autenticación...');
         
         // Crear una promesa con timeout para evitar que se cuelgue
         const authPromise = supabase.auth.getUser();
@@ -54,7 +52,6 @@ export default function Header() {
         try {
           const { data: { user: authUser } } = await Promise.race([authPromise, timeoutPromise]) as any;
           user = authUser;
-          console.log('✅ Usuario verificado:', user ? 'Logueado' : 'No logueado');
         } catch (error) {
           console.warn('⚠️ Error o timeout en autenticación, continuando sin usuario:', error);
           user = null;
@@ -64,7 +61,6 @@ export default function Header() {
       
         if (user) {
           // Obtener datos completos del perfil (incluyendo balance)
-          console.log('📡 Obteniendo perfil del usuario...');
           const { data: profile } = await supabase
             .from('profiles')
             .select('display_name, league_entry_id, team_logo, balance')
@@ -72,7 +68,6 @@ export default function Header() {
             .single();
           
           if (profile) {
-            console.log('✅ Perfil obtenido:', profile.display_name);
             setUserName(profile.display_name);
             setUserTeamLogo(profile.team_logo);
             setUserBalance(profile.balance || 0);
@@ -87,7 +82,6 @@ export default function Header() {
             console.warn('⚠️ No se encontró perfil para el usuario');
           }
         } else {
-          console.log('👤 Usuario no logueado, configurando valores por defecto');
           setUserName('');
           setUserTeamName('');
           setUserTeamLogo(null);
@@ -96,10 +90,8 @@ export default function Header() {
         }
         
         // 2. DESPUÉS cargar participantes (independiente de autenticación)
-        console.log('📡 Iniciando carga de participantes...');
         await loadParticipants();
         
-        console.log('✅ Header inicializado completamente');
         setLoading(false);
       } catch (error) {
         console.error('💥 Error en initializeComponent:', error);
@@ -109,12 +101,10 @@ export default function Header() {
     
     async function loadParticipants() {
       try {
-        console.log('🚀 Cargando participantes...');
         const response = await fetch('/api/participants');
         const data = await response.json();
         
         if (data.profiles) {
-          console.log('✅ Perfiles obtenidos:', data.profiles.length);
           
           // Obtener nombres de equipos usando el contexto
           const participantsData: Participant[] = data.profiles.map((profile: { display_name: string; league_entry_id: number; team_logo: string | null; fpl_entry_id: number | null }) => {
@@ -377,7 +367,6 @@ export default function Header() {
             <div className="relative z-[100]" ref={dropdownRef}>
               <button
                 onClick={() => {
-                  console.log('Dropdown clicked, current state:', showDropdown);
                   setShowDropdown(!showDropdown);
                 }}
                 disabled={loggingIn}
@@ -397,7 +386,6 @@ export default function Header() {
                   style={{ display: 'block' }}
                   ref={(el) => {
                     if (el) {
-                      console.log('Dropdown rendered:', el);
                     }
                   }}
                 >

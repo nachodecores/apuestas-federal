@@ -15,7 +15,6 @@ export async function POST(request: Request) {
       process.env.SUPABASE_SERVICE_ROLE_KEY!
     );
 
-    console.log(`🔧 Reseteando contraseña para: ${email}`);
 
     // 1. Buscar el usuario por email en profiles
     const { data: profile, error: profileError } = await supabase
@@ -32,7 +31,6 @@ export async function POST(request: Request) {
       }, { status: 404 });
     }
 
-    console.log('✅ Perfil encontrado:', profile);
 
     // 2. Actualizar la contraseña usando admin
     const { data: authData, error: authError } = await supabase.auth.admin.updateUserById(
@@ -57,7 +55,6 @@ export async function POST(request: Request) {
       }, { status: 500 });
     }
 
-    console.log('✅ Contraseña actualizada exitosamente para:', authData.user.email);
 
     return NextResponse.json({
       success: true,

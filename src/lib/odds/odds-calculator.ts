@@ -57,7 +57,6 @@ export async function calculateAndSaveGameweekOdds(gameweek: number): Promise<Ga
   const supabase = await createClient();
   
   try {
-    console.log(`🎯 Calculando odds para GW${gameweek}...`);
     
     // 1. Obtener datos de la liga
     const response = await fetch(`${process.env.NEXT_PUBLIC_SITE_URL}/api/league`);
@@ -74,7 +73,6 @@ export async function calculateAndSaveGameweekOdds(gameweek: number): Promise<Ga
       throw new Error(`No se encontraron partidos para GW${gameweek}`);
     }
     
-    console.log(`📊 Procesando ${gameweekMatches.length} partidos...`);
     
     // 3. Desactivar odds anteriores para este gameweek
     await supabase
@@ -114,7 +112,6 @@ export async function calculateAndSaveGameweekOdds(gameweek: number): Promise<Ga
       throw new Error(`Error insertando odds: ${error.message}`);
     }
     
-    console.log(`✅ Odds calculadas y guardadas para GW${gameweek}: ${insertedOdds?.length} partidos`);
     
     return insertedOdds || [];
     

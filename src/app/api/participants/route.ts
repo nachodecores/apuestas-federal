@@ -26,7 +26,6 @@ export async function GET() {
     }
 
     if (!profiles || profiles.length === 0) {
-      console.log('No profiles found, returning default data');
       // Datos por defecto si no hay perfiles
       const defaultProfiles = [
         { display_name: 'Chacho Bonino', league_entry_id: 6753, team_logo: null, fpl_entry_id: null },
