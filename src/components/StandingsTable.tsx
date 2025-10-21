@@ -83,8 +83,9 @@ export default function StandingsTable() {
         // 5. Guardamos los datos procesados en el estado
         console.log('🔍 StandingsTable: Datos procesados:', processedPlayers.length, 'jugadores');
         setPlayers(processedPlayers);
+        setError(null); // Limpiar cualquier error previo
         setLoading(false);
-        console.log('🔍 StandingsTable: Estado actualizado - loading: false');
+        console.log('🔍 StandingsTable: Estado actualizado - loading: false, error: null');
         
       } catch (err) {
         // Si hay error, lo mostramos
@@ -123,6 +124,7 @@ export default function StandingsTable() {
   
   // Renderizamos la tabla con los datos reales
   console.log('🔍 StandingsTable: Renderizando tabla con datos:', players.length, 'jugadores');
+  console.log('🔍 StandingsTable: Estado final - loading:', loading, 'error:', error, 'players:', players.length);
   return (
     <section className="bg-[#ebe5eb] h-full pb-4 mobile:pb-6 tablet:pb-8">
       <div className="h-full flex flex-col px-2 mobile:px-3 tablet:px-4">
