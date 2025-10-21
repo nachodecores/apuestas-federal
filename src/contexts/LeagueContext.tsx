@@ -51,14 +51,6 @@ export function LeagueProvider({ children }: { children: ReactNode }) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  // Cargar datos automáticamente al montar el contexto
-  useEffect(() => {
-    if (!leagueData && !loading) {
-      console.log('🚀 LeagueContext: Cargando datos automáticamente...');
-      fetchLeagueData();
-    }
-  }, []); // Solo se ejecuta una vez al montar
-
   const fetchLeagueData = useCallback(async () => {
     if (leagueData) {
       console.log('📦 LeagueContext: Datos ya cargados, saltando fetch');
@@ -101,6 +93,14 @@ export function LeagueProvider({ children }: { children: ReactNode }) {
   }, [leagueData]);
 
   const isDataLoaded = !!leagueData;
+
+  // Cargar datos automáticamente al montar el contexto
+  useEffect(() => {
+    if (!leagueData && !loading) {
+      console.log('🚀 LeagueContext: Cargando datos automáticamente...');
+      fetchLeagueData();
+    }
+  }, [leagueData, loading, fetchLeagueData]);
 
   return (
     <LeagueContext.Provider value={{
