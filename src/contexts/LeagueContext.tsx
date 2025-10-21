@@ -93,13 +93,7 @@ export function LeagueProvider({ children }: { children: ReactNode }) {
 
   const isDataLoaded = !!leagueData;
 
-  // Cargar datos automáticamente al montar el contexto
-  useEffect(() => {
-    if (!leagueData && !loading) {
-      console.log('🚀 LeagueContext: Auto-cargando...');
-      fetchLeagueData();
-    }
-  }, [leagueData, loading, fetchLeagueData]);
+  // NO auto-cargar - los componentes lo harán cuando lo necesiten
 
   return (
     <LeagueContext.Provider value={{

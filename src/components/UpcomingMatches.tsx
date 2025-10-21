@@ -79,11 +79,7 @@ export default function UpcomingMatches() {
     async function initializeComponent() {
       console.log('🚀 Inicializando UpcomingMatches...');
       
-      // Asegurar que los datos básicos de liga estén disponibles
-      if (!isDataLoaded) {
-        console.log('📡 UpcomingMatches: Esperando datos...');
-        await fetchLeagueData();
-      }
+      // Los datos de liga se cargarán automáticamente por el contexto
       
       try {
         // 1. Primero verificar autenticación con timeout

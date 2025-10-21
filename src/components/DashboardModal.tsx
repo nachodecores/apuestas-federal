@@ -78,11 +78,7 @@ export default function DashboardModal({ isOpen, onClose, user }: DashboardModal
         return;
       }
 
-      // Asegurar que los datos de liga estén disponibles
-      if (!isDataLoaded) {
-        console.log('📡 DashboardModal: Esperando datos...');
-        await fetchLeagueData();
-      }
+      // Los datos de liga se cargarán automáticamente por el contexto
 
       setDataLoading(true);
       try {
