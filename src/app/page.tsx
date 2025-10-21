@@ -15,15 +15,8 @@ export default function Home() {
 
   // Cargar datos al montar la página
   useEffect(() => {
-    console.log('🔍 DEBUG: Home useEffect ejecutándose');
-    console.log('🔍 DEBUG: isDataLoaded:', isDataLoaded);
-    console.log('🔍 DEBUG: fetchLeagueData disponible:', !!fetchLeagueData);
-    
     if (!isDataLoaded) {
-      console.log('🔍 DEBUG: Llamando fetchLeagueData desde Home');
       fetchLeagueData();
-    } else {
-      console.log('🔍 DEBUG: Datos ya cargados, no se llama fetchLeagueData');
     }
   }, [isDataLoaded, fetchLeagueData]);
   return (
