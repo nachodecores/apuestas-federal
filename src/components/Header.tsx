@@ -374,18 +374,9 @@ export default function Header() {
                 </button>
               )}
 
-              {/* Botón Admin (en dashboard) - SOLO si es Ignacio de Cores */}
-              {isDashboard && isAdmin && (
-                <Link
-                  href="/admin"
-                  className="px-3 py-1.5 rounded-md bg-[#ff2882]/10 border border-[#ff2882]/50 text-[#ff2882] hover:bg-[#ff2882]/20 transition-colors text-xs font-semibold"
-                >
-                  Admin
-                </Link>
-              )}
 
-              {/* Botón Cerrar sesión (en dashboard y admin) */}
-              {(isDashboard || isAdminPage) && (
+              {/* Botón Cerrar sesión (en admin) */}
+              {isAdminPage && (
                 <button
                   onClick={handleLogout}
                   className="px-3 py-1.5 rounded-md bg-white/5 border border-white/10 text-white hover:bg-white/10 transition-colors text-xs font-semibold"
