@@ -101,14 +101,20 @@ export default function Header() {
     
     async function loadParticipants() {
       try {
+        // 1. Primero esperar a que el contexto tenga datos
+        if (!isDataLoaded) {
+          console.log('🔍 Header: Esperando datos de liga...');
+          return; // Salir si no hay datos aún
+        }
+        
         const response = await fetch('/api/participants');
         const data = await response.json();
         
         if (data.profiles) {
-          
           // Obtener nombres de equipos usando el contexto
           const participantsData: Participant[] = data.profiles.map((profile: { display_name: string; league_entry_id: number; team_logo: string | null; fpl_entry_id: number | null }) => {
             const teamName = getTeamName(profile.league_entry_id);
+            console.log('🔍 Header: Mapeando participante:', profile.display_name, '->', teamName);
             
             return {
               name: profile.display_name,
@@ -190,6 +196,14 @@ export default function Header() {
     return () => subscription.unsubscribe();
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  // Recargar participantes cuando los datos de liga estén disponibles
+  useEffect(() => {
+    if (isDataLoaded) {
+      console.log('🔍 Header: Datos de liga cargados, recargando participantes...');
+      loadParticipants();
+    }
+  }, [isDataLoaded, getTeamName]);
 
   // Cerrar dropdown al hacer click afuera
   useEffect(() => {
