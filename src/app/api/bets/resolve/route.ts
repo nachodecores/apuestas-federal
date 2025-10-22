@@ -129,7 +129,6 @@ export async function POST(request: Request) {
           user_id: bet.user_id,
           type: 'win',
           amount: bet.potential_win,
-          description: `Ganaste apuesta del GW${gameweek}: ${bet.prediction}`,
           related_bet_id: bet.id
         });
 
