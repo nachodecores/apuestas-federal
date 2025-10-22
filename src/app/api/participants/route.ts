@@ -14,7 +14,7 @@ export async function GET() {
     // Obtener todos los participantes con timeout
     const { data: profiles, error } = await supabase
       .from('profiles')
-      .select('display_name, league_entry_id, team_logo, fpl_entry_id')
+      .select('display_name, league_entry_id, team_logo')
       .order('display_name');
 
     if (error) {
@@ -28,16 +28,16 @@ export async function GET() {
     if (!profiles || profiles.length === 0) {
       // Datos por defecto si no hay perfiles
       const defaultProfiles = [
-        { display_name: 'Chacho Bonino', league_entry_id: 6753, team_logo: null, fpl_entry_id: null },
-        { display_name: 'Marcos Arocena', league_entry_id: 5156, team_logo: null, fpl_entry_id: null },
-        { display_name: 'Ignacio de Cores', league_entry_id: 38904, team_logo: null, fpl_entry_id: null },
-        { display_name: 'Manuel Domenech', league_entry_id: 44346, team_logo: null, fpl_entry_id: null },
-        { display_name: 'Juan Dehl', league_entry_id: 54556, team_logo: null, fpl_entry_id: null },
-        { display_name: 'Juan Francisco Sienra', league_entry_id: 5769, team_logo: null, fpl_entry_id: null },
-        { display_name: 'Felipe Migues', league_entry_id: 5997, team_logo: null, fpl_entry_id: null },
-        { display_name: 'Joaquin Sarachaga', league_entry_id: 6494, team_logo: null, fpl_entry_id: null },
-        { display_name: 'Javier Villaamil', league_entry_id: 6479, team_logo: null, fpl_entry_id: null },
-        { display_name: 'Ángel Cal', league_entry_id: 5865, team_logo: null, fpl_entry_id: null },
+        { display_name: 'Chacho Bonino', league_entry_id: 6753, team_logo: null },
+        { display_name: 'Marcos Arocena', league_entry_id: 5156, team_logo: null },
+        { display_name: 'Ignacio de Cores', league_entry_id: 38904, team_logo: null },
+        { display_name: 'Manuel Domenech', league_entry_id: 44346, team_logo: null },
+        { display_name: 'Juan Dehl', league_entry_id: 54556, team_logo: null },
+        { display_name: 'Juan Francisco Sienra', league_entry_id: 5769, team_logo: null },
+        { display_name: 'Felipe Migues', league_entry_id: 5997, team_logo: null },
+        { display_name: 'Joaquin Sarachaga', league_entry_id: 6494, team_logo: null },
+        { display_name: 'Javier Villaamil', league_entry_id: 6479, team_logo: null },
+        { display_name: 'Ángel Cal', league_entry_id: 5865, team_logo: null },
       ];
       return NextResponse.json({ profiles: defaultProfiles });
     }

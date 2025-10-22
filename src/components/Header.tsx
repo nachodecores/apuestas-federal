@@ -47,7 +47,7 @@ export default function Header() {
       
       if (data.profiles) {
         // Obtener nombres de equipos usando el contexto
-        const participantsData: Participant[] = data.profiles.map((profile: { display_name: string; league_entry_id: number; team_logo: string | null; fpl_entry_id: number | null }) => {
+        const participantsData: Participant[] = data.profiles.map((profile: { display_name: string; league_entry_id: number; team_logo: string | null }) => {
           const teamName = getTeamName(profile.league_entry_id);
           console.log('🔍 Header: Mapeando participante:', profile.display_name, '->', teamName);
           
