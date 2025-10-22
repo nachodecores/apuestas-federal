@@ -8,6 +8,7 @@ import { useLeague } from "@/contexts/LeagueContext";
 import type { User } from "@supabase/supabase-js";
 import { DashboardModalProps, DashboardStats } from "@/types";
 import DeleteBetButton from "./DeleteBetButton";
+import { ROLES, isAdmin } from "@/constants/roles";
 
 export default function DashboardModal({ isOpen, onClose, user }: DashboardModalProps) {
   const supabase = createClient();
@@ -86,8 +87,8 @@ export default function DashboardModal({ isOpen, onClose, user }: DashboardModal
           .single();
         setProfile(profileData);
 
-        // Detectar si es admin
-        const adminStatus = profileData?.display_name === 'Ignacio de Cores';
+        // Detectar si es admin usando role_id
+        const adminStatus = profileData?.role_id === ROLES.ADMIN;
         setIsAdmin(adminStatus);
 
         // Obtener nombre del equipo usando el contexto

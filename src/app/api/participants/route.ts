@@ -14,7 +14,7 @@ export async function GET() {
     // Obtener todos los participantes con timeout
     const { data: profiles, error } = await supabase
       .from('profiles')
-      .select('display_name, fpl_entry_id, team_logo')
+      .select('display_name, fpl_entry_id, team_logo, role_id')
       .order('display_name');
 
     if (error) {
@@ -28,16 +28,16 @@ export async function GET() {
     if (!profiles || profiles.length === 0) {
       // Datos por defecto si no hay perfiles
       const defaultProfiles = [
-        { display_name: 'Chacho Bonino', fpl_entry_id: 6753, team_logo: null },
-        { display_name: 'Marcos Arocena', fpl_entry_id: 5156, team_logo: null },
-        { display_name: 'Ignacio de Cores', fpl_entry_id: 38904, team_logo: null },
-        { display_name: 'Manuel Domenech', fpl_entry_id: 44346, team_logo: null },
-        { display_name: 'Juan Dehl', fpl_entry_id: 54556, team_logo: null },
-        { display_name: 'Juan Francisco Sienra', fpl_entry_id: 5769, team_logo: null },
-        { display_name: 'Felipe Migues', fpl_entry_id: 5997, team_logo: null },
-        { display_name: 'Joaquin Sarachaga', fpl_entry_id: 6494, team_logo: null },
-        { display_name: 'Javier Villaamil', fpl_entry_id: 6479, team_logo: null },
-        { display_name: 'Ángel Cal', fpl_entry_id: 5865, team_logo: null },
+        { display_name: 'Chacho Bonino', fpl_entry_id: 6753, team_logo: null, role_id: 1 },
+        { display_name: 'Marcos Arocena', fpl_entry_id: 5156, team_logo: null, role_id: 1 },
+        { display_name: 'Ignacio de Cores', fpl_entry_id: 38904, team_logo: null, role_id: 2 },
+        { display_name: 'Manuel Domenech', fpl_entry_id: 44346, team_logo: null, role_id: 1 },
+        { display_name: 'Juan Dehl', fpl_entry_id: 54556, team_logo: null, role_id: 1 },
+        { display_name: 'Juan Francisco Sienra', fpl_entry_id: 5769, team_logo: null, role_id: 1 },
+        { display_name: 'Felipe Migues', fpl_entry_id: 5997, team_logo: null, role_id: 1 },
+        { display_name: 'Joaquin Sarachaga', fpl_entry_id: 6494, team_logo: null, role_id: 1 },
+        { display_name: 'Javier Villaamil', fpl_entry_id: 6479, team_logo: null, role_id: 1 },
+        { display_name: 'Ángel Cal', fpl_entry_id: 5865, team_logo: null, role_id: 1 },
       ];
       return NextResponse.json({ profiles: defaultProfiles });
     }

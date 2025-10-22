@@ -7,6 +7,7 @@ export interface Profile {
   fpl_entry_id: number;
   balance?: number;
   team_logo?: string | null;
+  role_id: number;
 }
 
 export interface Participant {
@@ -23,4 +24,5 @@ export interface User {
   fpl_entry_id: number;
   balance: number;
   team_logo?: string | null;
+  role_id: number;
 }

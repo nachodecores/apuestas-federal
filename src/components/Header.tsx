@@ -9,6 +9,7 @@ import DashboardModal from "./DashboardModal";
 import { useLeague } from "@/contexts/LeagueContext";
 import type { User } from "@supabase/supabase-js";
 import { Participant } from "@/types";
+import { ROLES, isAdmin } from "@/constants/roles";
 
 export default function Header() {
   const router = useRouter();
@@ -124,7 +125,7 @@ export default function Header() {
           // Obtener datos completos del perfil (incluyendo balance)
           const { data: profile } = await supabase
             .from('profiles')
-            .select('display_name, fpl_entry_id, team_logo, balance')
+            .select('display_name, fpl_entry_id, team_logo, balance, role_id')
             .eq('id', user.id)
             .single();
           
@@ -133,8 +134,8 @@ export default function Header() {
             setUserTeamLogo(profile.team_logo);
             setUserBalance(profile.balance || 0);
             
-            // Verificar si es admin (Ignacio de Cores)
-            setIsAdmin(profile.display_name === 'Ignacio de Cores');
+            // Verificar si es admin usando role_id
+            setIsAdmin(profile.role_id === ROLES.ADMIN);
             
             // El nombre del equipo se actualizará cuando los datos de liga estén cargados
             setUserTeamName('Cargando...');
@@ -176,7 +177,7 @@ export default function Header() {
         // Actualizar todos los datos del usuario cuando se loguea o cambia sesión
         const { data: profile } = await supabase
           .from('profiles')
-          .select('balance, display_name, fpl_entry_id, team_logo')
+          .select('balance, display_name, fpl_entry_id, team_logo, role_id')
           .eq('id', session.user.id)
           .single();
         
@@ -184,7 +185,7 @@ export default function Header() {
           setUserBalance(profile.balance || 0);
           setUserName(profile.display_name);
           setUserTeamLogo(profile.team_logo);
-          setIsAdmin(profile.display_name === 'Ignacio de Cores');
+          setIsAdmin(profile.role_id === ROLES.ADMIN);
           
           // Obtener nombre del equipo usando el contexto
           const teamName = getTeamName(profile.fpl_entry_id);
