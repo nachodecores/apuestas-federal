@@ -5,14 +5,14 @@ import { useLeague } from "@/contexts/LeagueContext";
 import { LeagueEntry, Standing, ApiMatch, DraftLeagueData, PlayerDisplay } from "@/types";
 
 // Función para calcular racha de los últimos N partidos
-function getRecentForm(league_entry_id: number, allMatches: ApiMatch[], count: number = 5): ('win' | 'draw' | 'loss')[] {
+function getRecentForm(fpl_entry_id: number, allMatches: ApiMatch[], count: number = 5): ('win' | 'draw' | 'loss')[] {
   const teamMatches = allMatches
-    .filter(m => m.finished && (m.league_entry_1 === league_entry_id || m.league_entry_2 === league_entry_id))
+    .filter(m => m.finished && (m.league_entry_1 === fpl_entry_id || m.league_entry_2 === fpl_entry_id))
     .sort((a, b) => b.event - a.event) // Más recientes primero
     .slice(0, count);
   
   return teamMatches.map(match => {
-    const isTeam1 = match.league_entry_1 === league_entry_id;
+    const isTeam1 = match.league_entry_1 === fpl_entry_id;
     const teamPoints = isTeam1 ? match.league_entry_1_points : match.league_entry_2_points;
     const oppPoints = isTeam1 ? match.league_entry_2_points : match.league_entry_1_points;
     

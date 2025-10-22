@@ -47,14 +47,14 @@ export default function Header() {
       
       if (data.profiles) {
         // Obtener nombres de equipos usando el contexto
-        const participantsData: Participant[] = data.profiles.map((profile: { display_name: string; league_entry_id: number; team_logo: string | null }) => {
-          const teamName = getTeamName(profile.league_entry_id);
+        const participantsData: Participant[] = data.profiles.map((profile: { display_name: string; fpl_entry_id: number; team_logo: string | null }) => {
+          const teamName = getTeamName(profile.fpl_entry_id);
           console.log('🔍 Header: Mapeando participante:', profile.display_name, '->', teamName);
           
           return {
             name: profile.display_name,
             teamName: teamName,
-            league_entry_id: profile.league_entry_id,
+            fpl_entry_id: profile.fpl_entry_id,
             team_logo: profile.team_logo
           };
         });
@@ -64,32 +64,32 @@ export default function Header() {
         console.warn('⚠️ No se encontraron perfiles, usando datos por defecto');
         // Usar datos por defecto si no hay perfiles
         setParticipants([
-          { name: 'Chacho Bonino', teamName: 'Quebracho', league_entry_id: 6753, team_logo: null },
-          { name: 'Marcos Arocena', teamName: 'Tranqueras', league_entry_id: 5156, team_logo: null },
-          { name: 'Ignacio de Cores', teamName: 'CA Tambores RF', league_entry_id: 38904, team_logo: null },
-          { name: 'Manuel Domenech', teamName: 'Sportivo Nico Perez', league_entry_id: 44346, team_logo: null },
-          { name: 'Juan Dehl', teamName: 'CA Tres Islas', league_entry_id: 54556, team_logo: null },
-          { name: 'Juan Francisco Sienra', teamName: 'Palmitas City', league_entry_id: 5769, team_logo: null },
-          { name: 'Felipe Migues', teamName: 'Migues', league_entry_id: 5997, team_logo: null },
-          { name: 'Joaquin Sarachaga', teamName: 'Deportivo Sauce', league_entry_id: 6494, team_logo: null },
-          { name: 'Javier Villaamil', teamName: 'Mal Abrigo Town', league_entry_id: 6479, team_logo: null },
-          { name: 'Ángel Cal', teamName: 'Pirarajá United', league_entry_id: 5865, team_logo: null },
+          { name: 'Chacho Bonino', teamName: 'Quebracho', fpl_entry_id: 6753, team_logo: null },
+          { name: 'Marcos Arocena', teamName: 'Tranqueras', fpl_entry_id: 5156, team_logo: null },
+          { name: 'Ignacio de Cores', teamName: 'CA Tambores RF', fpl_entry_id: 38904, team_logo: null },
+          { name: 'Manuel Domenech', teamName: 'Sportivo Nico Perez', fpl_entry_id: 44346, team_logo: null },
+          { name: 'Juan Dehl', teamName: 'CA Tres Islas', fpl_entry_id: 54556, team_logo: null },
+          { name: 'Juan Francisco Sienra', teamName: 'Palmitas City', fpl_entry_id: 5769, team_logo: null },
+          { name: 'Felipe Migues', teamName: 'Migues', fpl_entry_id: 5997, team_logo: null },
+          { name: 'Joaquin Sarachaga', teamName: 'Deportivo Sauce', fpl_entry_id: 6494, team_logo: null },
+          { name: 'Javier Villaamil', teamName: 'Mal Abrigo Town', fpl_entry_id: 6479, team_logo: null },
+          { name: 'Ángel Cal', teamName: 'Pirarajá United', fpl_entry_id: 5865, team_logo: null },
         ]);
       }
     } catch (error) {
       console.error('💥 Error cargando participantes:', error);
       // Usar datos por defecto si falla
       setParticipants([
-        { name: 'Chacho Bonino', teamName: 'Quebracho', league_entry_id: 6753, team_logo: null },
-        { name: 'Marcos Arocena', teamName: 'Tranqueras', league_entry_id: 5156, team_logo: null },
-        { name: 'Ignacio de Cores', teamName: 'CA Tambores RF', league_entry_id: 38904, team_logo: null },
-        { name: 'Manuel Domenech', teamName: 'Sportivo Nico Perez', league_entry_id: 44346, team_logo: null },
-        { name: 'Juan Dehl', teamName: 'CA Tres Islas', league_entry_id: 54556, team_logo: null },
-        { name: 'Juan Francisco Sienra', teamName: 'Palmitas City', league_entry_id: 5769, team_logo: null },
-        { name: 'Felipe Migues', teamName: 'Migues', league_entry_id: 5997, team_logo: null },
-        { name: 'Joaquin Sarachaga', teamName: 'Deportivo Sauce', league_entry_id: 6494, team_logo: null },
-        { name: 'Javier Villaamil', teamName: 'Mal Abrigo Town', league_entry_id: 6479, team_logo: null },
-        { name: 'Ángel Cal', teamName: 'Pirarajá United', league_entry_id: 5865, team_logo: null },
+        { name: 'Chacho Bonino', teamName: 'Quebracho', fpl_entry_id: 6753, team_logo: null },
+        { name: 'Marcos Arocena', teamName: 'Tranqueras', fpl_entry_id: 5156, team_logo: null },
+        { name: 'Ignacio de Cores', teamName: 'CA Tambores RF', fpl_entry_id: 38904, team_logo: null },
+        { name: 'Manuel Domenech', teamName: 'Sportivo Nico Perez', fpl_entry_id: 44346, team_logo: null },
+        { name: 'Juan Dehl', teamName: 'CA Tres Islas', fpl_entry_id: 54556, team_logo: null },
+        { name: 'Juan Francisco Sienra', teamName: 'Palmitas City', fpl_entry_id: 5769, team_logo: null },
+        { name: 'Felipe Migues', teamName: 'Migues', fpl_entry_id: 5997, team_logo: null },
+        { name: 'Joaquin Sarachaga', teamName: 'Deportivo Sauce', fpl_entry_id: 6494, team_logo: null },
+        { name: 'Javier Villaamil', teamName: 'Mal Abrigo Town', fpl_entry_id: 6479, team_logo: null },
+        { name: 'Ángel Cal', teamName: 'Pirarajá United', fpl_entry_id: 5865, team_logo: null },
       ]);
     }
   }, [isDataLoaded, getTeamName]);
@@ -124,7 +124,7 @@ export default function Header() {
           // Obtener datos completos del perfil (incluyendo balance)
           const { data: profile } = await supabase
             .from('profiles')
-            .select('display_name, league_entry_id, team_logo, balance')
+            .select('display_name, fpl_entry_id, team_logo, balance')
             .eq('id', user.id)
             .single();
           
@@ -176,7 +176,7 @@ export default function Header() {
         // Actualizar todos los datos del usuario cuando se loguea o cambia sesión
         const { data: profile } = await supabase
           .from('profiles')
-          .select('balance, display_name, league_entry_id, team_logo')
+          .select('balance, display_name, fpl_entry_id, team_logo')
           .eq('id', session.user.id)
           .single();
         
@@ -187,7 +187,7 @@ export default function Header() {
           setIsAdmin(profile.display_name === 'Ignacio de Cores');
           
           // Obtener nombre del equipo usando el contexto
-          const teamName = getTeamName(profile.league_entry_id);
+          const teamName = getTeamName(profile.fpl_entry_id);
           setUserTeamName(teamName);
         }
       }
@@ -213,12 +213,12 @@ export default function Header() {
         try {
           const { data: profile } = await supabase
             .from('profiles')
-            .select('league_entry_id')
+            .select('fpl_entry_id')
             .eq('id', user.id)
             .single();
           
           if (profile) {
-            const teamName = getTeamName(profile.league_entry_id);
+            const teamName = getTeamName(profile.fpl_entry_id);
             console.log('🔍 Header: Usuario', user.id, '-> Equipo:', teamName);
             setUserTeamName(teamName);
           }
@@ -265,7 +265,7 @@ export default function Header() {
     setLoggingIn(true);
     
     try {
-      const email = `${selectedParticipant.league_entry_id}@bolichefederal.com`;
+      const email = `${selectedParticipant.fpl_entry_id}@bolichefederal.com`;
       
       const { error } = await supabase.auth.signInWithPassword({
         email,
@@ -432,7 +432,7 @@ export default function Header() {
                   
                   <div className="max-h-[70vh] overflow-y-auto">
                     {participants.map((participant, index) => (
-                      <div key={participant.league_entry_id}>
+                      <div key={participant.fpl_entry_id}>
                         <button
                           onClick={() => handleSelectUser(participant)}
                           disabled={loggingIn}

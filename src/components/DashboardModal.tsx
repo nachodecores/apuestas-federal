@@ -91,8 +91,8 @@ export default function DashboardModal({ isOpen, onClose, user }: DashboardModal
         setIsAdmin(adminStatus);
 
         // Obtener nombre del equipo usando el contexto
-        if (profileData?.league_entry_id) {
-          const teamName = getTeamName(profileData.league_entry_id);
+        if (profileData?.fpl_entry_id) {
+          const teamName = getTeamName(profileData.fpl_entry_id);
           setUserTeamName(teamName);
         }
 
@@ -105,7 +105,7 @@ export default function DashboardModal({ isOpen, onClose, user }: DashboardModal
               *,
               profiles!bets_user_id_fkey (
                 display_name,
-                league_entry_id
+                fpl_entry_id
               )
             `)
             .order("created_at", { ascending: false });

@@ -4,7 +4,7 @@ export interface Profile {
   display_name: string;
   email: string;
   is_claimed: boolean;
-  league_entry_id: number;
+  fpl_entry_id: number;
   balance?: number;
   team_logo?: string | null;
 }
@@ -12,7 +12,7 @@ export interface Profile {
 export interface Participant {
   name: string;
   teamName: string;
-  league_entry_id: number;
+  fpl_entry_id: number;
   team_logo: string | null;
 }
 
@@ -20,7 +20,7 @@ export interface User {
   id: string;
   email: string;
   display_name: string;
-  league_entry_id: number;
+  fpl_entry_id: number;
   balance: number;
   team_logo?: string | null;
 }

@@ -110,10 +110,10 @@ export default function UpcomingMatches() {
         try {
         const { data: profiles } = await supabase
           .from('profiles')
-          .select('league_entry_id, team_logo');
+          .select('fpl_entry_id, team_logo');
         
           teamLogos = new Map(
-          profiles?.map(p => [p.league_entry_id, p.team_logo]) || []
+          profiles?.map(p => [p.fpl_entry_id, p.team_logo]) || []
         );
         } catch (logoError) {
           console.warn('⚠️ Error obteniendo logos, continuando sin logos:', logoError);

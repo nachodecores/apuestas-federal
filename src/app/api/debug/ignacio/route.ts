@@ -36,7 +36,7 @@ export async function GET() {
       id: profile.id,
       display_name: profile.display_name,
       email: profile.email,
-      league_entry_id: profile.league_entry_id,
+      fpl_entry_id: profile.fpl_entry_id,
       balance: profile.balance,
       is_claimed: profile.is_claimed
     });

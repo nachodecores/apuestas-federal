@@ -12,7 +12,7 @@ export async function GET() {
     // Obtener todos los participantes
     const { data: participants, error } = await supabase
       .from('profiles')
-      .select('id, email, display_name, league_entry_id')
+      .select('id, email, display_name, fpl_entry_id')
       .order('display_name');
 
     if (error) {
