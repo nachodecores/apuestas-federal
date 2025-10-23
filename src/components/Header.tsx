@@ -312,7 +312,19 @@ export default function Header() {
 
   return (
     <nav className="border-b border-white/10 sticky top-0 z-50 overflow-visible" style={{ background: headerBg }}>
-      <div className="max-w-7xl mx-auto px-3 sm:px-4 md:px-6 lg:px-8">
+      {/* Pattern overlay - alineado arriba y a la derecha */}
+      {isHome && (
+        <div 
+          className="absolute right-0 top-0 h-1/2 w-1/3"
+          style={{
+            backgroundImage: 'url(/assets/pattern-2.png)',
+            backgroundPosition: 'right top',
+            backgroundRepeat: 'no-repeat',
+            backgroundSize: 'cover'
+          }}
+        />
+      )}
+      <div className="max-w-7xl mx-auto px-3 sm:px-4 md:px-6 lg:px-8 relative z-10">
         <div className="flex justify-between items-center h-14 relative">
           {/* Logo y título */}
           <Link href="/" className="flex items-center gap-2 sm:gap-3 hover:opacity-80 transition-opacity">
@@ -325,7 +337,7 @@ export default function Header() {
             />
             {isHome ? (
               <h1 className="text-lg text-white">
-                <span className="font-black">Bet</span>
+                <span className="font-bold">Bet</span>
                 <span className="font-normal">Federal</span>
               </h1>
             ) : (
@@ -358,7 +370,7 @@ export default function Header() {
                     className="px-2 py-1.5 rounded-md hover:opacity-90 transition-opacity flex items-center gap-1.5"
                     style={{ 
                       backgroundColor: 'rgba(255, 255, 255, 1)', 
-                      color: 'rgb(55, 0, 60)' 
+                      color: '#37003c' 
                     }}
                   >
                     {/* Texto a la izquierda, alineado a la derecha */}

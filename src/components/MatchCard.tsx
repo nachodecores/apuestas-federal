@@ -129,7 +129,7 @@ export default function MatchCard({
     const betAmount = parseFloat(bet.amount);
     
     if (betAmount > userBalance) {
-      alert(`No tenés suficiente saldo. Necesitás: $${betAmount.toFixed(2)}, Disponible: $${userBalance}`);
+      alert(`No tenés suficiente saldo. Necesitás: ₣${betAmount.toFixed(2)}, Disponible: ₣${userBalance}`);
       return;
     }
     
@@ -172,7 +172,7 @@ export default function MatchCard({
       });
       
       // Mostrar mensaje de éxito
-      alert(`🎉 ¡Apuesta confirmada!\n\nMonto: $${betAmount.toFixed(2)}\nGanancia potencial: $${(betAmount * match.odds[bet.prediction]).toFixed(2)}\nNuevo balance: $${result.new_balance.toFixed(2)}`);
+      alert(`🎉 ¡Apuesta confirmada!\n\nMonto: ₣${betAmount.toFixed(2)}\nGanancia potencial: ₣${(betAmount * match.odds[bet.prediction]).toFixed(2)}\nNuevo balance: ₣${result.new_balance.toFixed(2)}`);
       
       // Limpiar la apuesta
       setBet({
@@ -224,15 +224,12 @@ export default function MatchCard({
         <>
           {userBet ? (
             // Mostrar apuesta existente
-            <div className="mb-3 sm:mb-4 p-3 bg-green-50 border border-green-200 rounded-lg relative">
+            <div className="mb-3 sm:mb-4 p-3 rounded-lg relative" style={{ background: 'linear-gradient(to right, #02efff, #00ff87)' }}>
               <div className="text-center">
-                <div className="text-[0.625rem] tablet:text-xs font-medium text-green-800">
-                  {userBet.prediction === 'home' && `Apostaste $${userBet.amount} a que gana ${match.team1Name}`}
-                  {userBet.prediction === 'away' && `Apostaste $${userBet.amount} a que gana ${match.team2Name}`}
-                  {userBet.prediction === 'draw' && `Apostaste $${userBet.amount} a un empate`}
-                </div>
-                <div className="text-[0.625rem] tablet:text-xs text-green-600 mt-1">
-                  Ganancia potencial: ${userBet.potential_win?.toFixed(2)}
+                <div className="text-[0.625rem] tablet:text-xs font-medium text-[#37003c]">
+                  {userBet.prediction === 'home' && `Apostaste ₣${userBet.amount} a que gana ${match.team1Name}`}
+                  {userBet.prediction === 'away' && `Apostaste ₣${userBet.amount} a que gana ${match.team2Name}`}
+                  {userBet.prediction === 'draw' && `Apostaste ₣${userBet.amount} a un empate`}
                 </div>
               </div>
               
@@ -241,9 +238,10 @@ export default function MatchCard({
                 <div className="absolute top-2 right-2">
                   <DeleteBetButton 
                     betId={userBet.id.toString()}
+                    userId={user?.id}
                     variant="icon"
                     size="sm"
-                    className="!bg-red-50 hover:!bg-red-100"
+                    className="!bg-transparent !text-white !border-0 !shadow-none hover:!opacity-80 !transition-opacity"
                     onDeleteSuccess={(betId, refundAmount) => {
                       setUserBet(null);
                       onBetConfirmed(userBalance + refundAmount); // Update balance
@@ -268,8 +266,8 @@ export default function MatchCard({
                         : 'hover:opacity-80'
                     }`}
                     style={bet.prediction === 'home' 
-                      ? { background: 'linear-gradient(to right, rgb(2, 239, 255), rgb(0, 255, 135))' }
-                      : { backgroundColor: 'rgb(239, 239, 239)' }
+                      ? { background: 'linear-gradient(to right, #02efff, #00ff87)' }
+                      : { backgroundColor: '#efefef' }
                     }
                   >
                     <div className={`font-semibold text-xs sm:text-sm ${
@@ -294,8 +292,8 @@ export default function MatchCard({
                         : 'hover:opacity-80'
                     }`}
                     style={bet.prediction === 'draw' 
-                      ? { background: 'linear-gradient(to right, rgb(2, 239, 255), rgb(0, 255, 135))' }
-                      : { backgroundColor: 'rgb(239, 239, 239)' }
+                      ? { background: 'linear-gradient(to right, #02efff, #00ff87)' }
+                      : { backgroundColor: '#efefef' }
                     }
                   >
                     <div className={`font-semibold text-xs sm:text-sm ${
@@ -320,8 +318,8 @@ export default function MatchCard({
                         : 'hover:opacity-80'
                     }`}
                     style={bet.prediction === 'away' 
-                      ? { background: 'linear-gradient(to right, rgb(2, 239, 255), rgb(0, 255, 135))' }
-                      : { backgroundColor: 'rgb(239, 239, 239)' }
+                      ? { background: 'linear-gradient(to right, #02efff, #00ff87)' }
+                      : { backgroundColor: '#efefef' }
                     }
                   >
                     <div className={`font-semibold text-xs sm:text-sm ${
@@ -346,12 +344,12 @@ export default function MatchCard({
                     type="button"
                     onClick={handleDecrementAmount}
                     className="w-[30%] py-2 sm:py-2.5 md:py-3 rounded-md sm:rounded-lg text-gray-700 font-bold text-xl sm:text-2xl md:text-3xl hover:opacity-80 transition-opacity flex items-center justify-center"
-                    style={{ backgroundColor: 'rgb(239, 239, 239)' }}
-                    onMouseDown={(e) => e.currentTarget.style.background = 'linear-gradient(to right, rgb(2, 239, 255), rgb(0, 255, 135))'}
-                    onMouseUp={(e) => e.currentTarget.style.background = 'rgb(239, 239, 239)'}
-                    onMouseLeave={(e) => e.currentTarget.style.background = 'rgb(239, 239, 239)'}
-                    onTouchStart={(e) => e.currentTarget.style.background = 'linear-gradient(to right, rgb(2, 239, 255), rgb(0, 255, 135))'}
-                    onTouchEnd={(e) => e.currentTarget.style.background = 'rgb(239, 239, 239)'}
+                    style={{ backgroundColor: '#efefef' }}
+                    onMouseDown={(e) => e.currentTarget.style.background = 'linear-gradient(to right, #02efff, #00ff87)'}
+                    onMouseUp={(e) => e.currentTarget.style.background = '#efefef'}
+                    onMouseLeave={(e) => e.currentTarget.style.background = '#efefef'}
+                    onTouchStart={(e) => e.currentTarget.style.background = 'linear-gradient(to right, #02efff, #00ff87)'}
+                    onTouchEnd={(e) => e.currentTarget.style.background = '#efefef'}
                   >
                     −
                   </button>
@@ -362,14 +360,14 @@ export default function MatchCard({
                       parseFloat(bet.amount || '0') > 0 ? '' : 'bg-white'
                     }`}
                     style={parseFloat(bet.amount || '0') > 0 
-                      ? { background: 'linear-gradient(to right, rgb(2, 239, 255), rgb(0, 255, 135))' }
+                      ? { background: 'linear-gradient(to right, #02efff, #00ff87)' }
                       : {}
                     }
                   >
                     <div className={`text-sm sm:text-base font-bold ${
                       parseFloat(bet.amount || '0') > 0 ? 'text-[#37003c]' : 'text-gray-900'
                     }`}>
-                      ${parseFloat(bet.amount || '0').toFixed(0)}
+                      ₣{parseFloat(bet.amount || '0').toFixed(0)}
                     </div>
                   </div>
                   
@@ -378,12 +376,12 @@ export default function MatchCard({
                     type="button"
                     onClick={handleIncrementAmount}
                     className="w-[30%] py-2 sm:py-2.5 md:py-3 rounded-md sm:rounded-lg text-gray-700 font-bold text-xl sm:text-2xl md:text-3xl hover:opacity-80 transition-opacity flex items-center justify-center"
-                    style={{ backgroundColor: 'rgb(239, 239, 239)' }}
-                    onMouseDown={(e) => e.currentTarget.style.background = 'linear-gradient(to right, rgb(2, 239, 255), rgb(0, 255, 135))'}
-                    onMouseUp={(e) => e.currentTarget.style.background = 'rgb(239, 239, 239)'}
-                    onMouseLeave={(e) => e.currentTarget.style.background = 'rgb(239, 239, 239)'}
-                    onTouchStart={(e) => e.currentTarget.style.background = 'linear-gradient(to right, rgb(2, 239, 255), rgb(0, 255, 135))'}
-                    onTouchEnd={(e) => e.currentTarget.style.background = 'rgb(239, 239, 239)'}
+                    style={{ backgroundColor: '#efefef' }}
+                    onMouseDown={(e) => e.currentTarget.style.background = 'linear-gradient(to right, #02efff, #00ff87)'}
+                    onMouseUp={(e) => e.currentTarget.style.background = '#efefef'}
+                    onMouseLeave={(e) => e.currentTarget.style.background = '#efefef'}
+                    onTouchStart={(e) => e.currentTarget.style.background = 'linear-gradient(to right, #02efff, #00ff87)'}
+                    onTouchEnd={(e) => e.currentTarget.style.background = '#efefef'}
                   >
                     +
                   </button>
@@ -400,7 +398,7 @@ export default function MatchCard({
                   }`}
                   style={!bet.prediction || !bet.amount || parseFloat(bet.amount) <= 0 
                     ? {} 
-                    : { backgroundColor: 'rgb(150, 60, 255)', color: 'white' }
+                    : { backgroundColor: '#963cff', color: 'white' }
                   }
                 >
                   Confirmar Apuesta

@@ -217,7 +217,7 @@ export default function UpcomingMatches() {
   if (loading) {
     console.log('🔍 UpcomingMatches: Renderizando estado de carga');
     return (
-      <section className="bg-[#ebe5eb] h-full pb-4 mobile:pb-6 tablet:pb-8">
+      <section className="bg-[#37003c] h-full pb-4 mobile:pb-6 tablet:pb-8">
         <div className="h-full flex items-center justify-center px-3 min-[480px]:px-4 min-[768px]:px-6">
           <div className="text-[#37003c] text-base min-[480px]:text-lg min-[768px]:text-xl">Cargando próximos partidos...</div>
         </div>
@@ -229,7 +229,7 @@ export default function UpcomingMatches() {
   if (error) {
     console.log('🔍 UpcomingMatches: Renderizando estado de error:', error);
     return (
-      <section className="bg-[#ebe5eb] h-full pb-4 mobile:pb-6 tablet:pb-8">
+      <section className="bg-[#37003c] h-full pb-4 mobile:pb-6 tablet:pb-8">
         <div className="h-full flex items-center justify-center px-3 min-[480px]:px-4 min-[768px]:px-6">
           <div className="text-red-500 text-base min-[480px]:text-lg min-[768px]:text-xl">Error: {error}</div>
         </div>
@@ -239,9 +239,9 @@ export default function UpcomingMatches() {
 
   console.log('🔍 UpcomingMatches: Renderizando partidos con datos:', matches.length, 'partidos');
   return (
-    <section className="bg-[#ebe5eb] h-full pb-4 mobile:pb-6 tablet:pb-8">
+    <section className="bg-[#37003c] h-full pb-4 mobile:pb-6 tablet:pb-8">
       <div className="h-full flex flex-col px-3 min-[480px]:px-4 min-[768px]:px-6">
-        <h3 className="text-lg mobile:text-xl tablet:text-2xl font-black text-[#37003c] mb-6">
+        <h3 className="text-lg mobile:text-xl tablet:text-2xl font-black text-white mb-6">
           Próximos Partidos
         </h3>
 

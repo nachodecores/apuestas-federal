@@ -39,12 +39,33 @@ export default function Hero() {
   return (
     <section className="relative overflow-hidden w-full bg-[#ebe5eb] py-8 sm:py-12 md:py-16 lg:py-20">
       
-      <div className="relative w-full overflow-hidden" style={{ backgroundColor: 'rgb(55, 0, 60)' }}>
+      <div className="relative w-full overflow-hidden" style={{ backgroundColor: '#37003c' }}>
+        {/* Pattern overlay - alineado a la izquierda */}
+        <div 
+          className="absolute left-0 bottom-0 h-1/2 w-1/3 overflow-hidden"
+          style={{
+            backgroundImage: 'url(/assets/pattern-1.png)',
+            backgroundPosition: 'left bottom',
+            backgroundRepeat: 'no-repeat',
+            backgroundSize: 'cover',
+            backgroundAttachment: 'local'
+          }}
+        >
+          <div 
+            className="w-full h-[200%]"
+            style={{
+              backgroundImage: 'url(/assets/pattern-1.png)',
+              backgroundPosition: 'left bottom',
+              backgroundRepeat: 'no-repeat',
+              backgroundSize: 'cover'
+            }}
+          />
+        </div>
         <div className="relative flex justify-center">
           {/* Gameweek Actual - Título con gradiente en la parte superior */}
           <div 
             className="w-[80%] px-4 sm:px-6 md:px-8 py-2 sm:py-3 md:py-4 rounded-b-xl sm:rounded-b-2xl md:rounded-b-3xl text-center"
-            style={{ background: 'linear-gradient(to right, rgb(0, 255, 135), rgb(2, 239, 255))' }}
+            style={{ background: 'linear-gradient(to right, #00ff87, #02efff)' }}
           >
             <h2 className="text-base sm:text-lg md:text-xl lg:text-2xl font-normal mb-0" style={{ color: '#37003c' }}>
               {loading ? (
@@ -69,7 +90,7 @@ export default function Hero() {
               <div 
                 className="text-2xl sm:text-3xl md:text-4xl font-bold mb-0"
                 style={{ 
-                  background: 'linear-gradient(to right, rgb(0, 255, 135), rgb(2, 239, 255))',
+                  background: 'linear-gradient(to right, #00ff87, #02efff)',
                   WebkitBackgroundClip: 'text',
                   WebkitTextFillColor: 'transparent',
                   backgroundClip: 'text'
@@ -87,7 +108,7 @@ export default function Hero() {
               <div 
                 className="text-2xl sm:text-3xl md:text-4xl font-bold mb-0"
                 style={{ 
-                  background: 'linear-gradient(to right, rgb(0, 255, 135), rgb(2, 239, 255))',
+                  background: 'linear-gradient(to right, #00ff87, #02efff)',
                   WebkitBackgroundClip: 'text',
                   WebkitTextFillColor: 'transparent',
                   backgroundClip: 'text'
@@ -113,7 +134,7 @@ export default function Hero() {
               <div 
                 className="text-2xl sm:text-3xl md:text-4xl font-bold mb-0"
                 style={{ 
-                  background: 'linear-gradient(to right, rgb(255, 40, 130), rgb(55, 0, 60))',
+                  background: 'linear-gradient(to right, #ff2882, rgb(55, 0, 60))',
                   WebkitBackgroundClip: 'text',
                   WebkitTextFillColor: 'transparent',
                   backgroundClip: 'text'
@@ -131,7 +152,7 @@ export default function Hero() {
               <div 
                 className="text-2xl sm:text-3xl md:text-4xl font-bold mb-0"
                 style={{ 
-                  background: 'linear-gradient(to left, rgb(255, 40, 130), rgb(55, 0, 60))',
+                  background: 'linear-gradient(to left, #ff2882, rgb(55, 0, 60))',
                   WebkitBackgroundClip: 'text',
                   WebkitTextFillColor: 'transparent',
                   backgroundClip: 'text'
@@ -149,7 +170,7 @@ export default function Hero() {
               <div 
                 className="text-2xl sm:text-3xl md:text-4xl font-bold mb-0"
                 style={{ 
-                  background: 'linear-gradient(to right, rgb(255, 40, 130), rgb(55, 0, 60))',
+                  background: 'linear-gradient(to right, #ff2882, rgb(55, 0, 60))',
                   WebkitBackgroundClip: 'text',
                   WebkitTextFillColor: 'transparent',
                   backgroundClip: 'text'

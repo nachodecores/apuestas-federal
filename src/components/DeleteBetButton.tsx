@@ -67,14 +67,14 @@ export default function DeleteBetButton({
 
   // Size classes
   const sizeClasses = {
-    sm: 'w-5 h-5 text-xs',
-    md: 'w-6 h-6 text-sm',
-    lg: 'w-8 h-8 text-base'
+    sm: 'w-6 h-6 text-base',
+    md: 'w-8 h-8 text-lg',
+    lg: 'w-10 h-10 text-xl'
   };
 
   // Variant styles
   const variantStyles = {
-    icon: 'rounded-full bg-red-100 hover:bg-red-200 text-red-600 hover:text-red-700 transition-colors flex items-center justify-center font-bold',
+    icon: 'rounded-lg hover:opacity-80 transition-opacity flex items-center justify-center font-bold',
     button: 'px-3 py-1.5 rounded-md bg-red-100 hover:bg-red-200 text-red-600 hover:text-red-700 transition-colors text-sm font-medium'
   };
 
@@ -88,7 +88,7 @@ export default function DeleteBetButton({
         }`}
         title="Eliminar apuesta"
       >
-        {isDeleting ? '...' : '×'}
+        <span style={{ color: 'rgb(55, 0, 60)' }}>{isDeleting ? '...' : '×'}</span>
       </button>
     );
   }
