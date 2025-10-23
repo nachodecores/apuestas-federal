@@ -750,8 +750,28 @@ export default function DashboardModal({ isOpen, onClose, user }: DashboardModal
 
 
 
-        {/* Contenido del modal */}
+        {/* Acciones admin (poblar GW con odds) */}
+        {isAdmin && (
+          <div className="px-4 sm:px-6 pt-4">
+            <button
+              onClick={async () => {
+                try {
+                  const res = await fetch('/api/admin/populate-gw', { method: 'POST' });
+                  const data = await res.json();
+                  if (!res.ok) throw new Error(data.error || 'Error al poblar GW');
+                  console.log('Populate GW:', data);
+                } catch (e) {
+                  console.error(e);
+                }
+              }}
+              className="px-4 py-2 rounded-lg text-white font-medium bg-gradient-to-r from-[#02efff] to-[#00ff87] hover:opacity-90 transition-opacity"
+            >
+              Poblar próxima GW con odds
+            </button>
+          </div>
+        )}
 
+        {/* Contenido del modal */}
         <div className="flex-1 overflow-y-auto p-4 sm:p-6">
 
           {dataLoading ? (
