@@ -15,10 +15,6 @@ export default function DeleteBetButton({
   const [isDeleting, setIsDeleting] = useState(false);
 
   const handleDelete = async () => {
-    if (!confirm('¿Estás seguro que querés eliminar esta apuesta?')) {
-      return;
-    }
-
     setIsDeleting(true);
 
     try {
@@ -48,8 +44,7 @@ export default function DeleteBetButton({
       // Call success callback
       onDeleteSuccess?.(betId, result.refundAmount);
 
-      // Show success message
-      alert('Apuesta eliminada correctamente');
+      // Apuesta eliminada exitosamente
 
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Error desconocido';
@@ -58,8 +53,7 @@ export default function DeleteBetButton({
       // Call error callback
       onDeleteError?.(errorMessage);
       
-      // Show error message
-      alert(`Error al eliminar la apuesta: ${errorMessage}`);
+      // Error eliminado - solo se loguea en consola
     } finally {
       setIsDeleting(false);
     }

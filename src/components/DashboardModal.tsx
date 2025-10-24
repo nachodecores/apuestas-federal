@@ -1076,7 +1076,7 @@ export default function DashboardModal({ isOpen, onClose, user }: DashboardModal
 
                                       if (deletedBet && profile && deletedBet.user_id === user?.id) {
 
-                                        setProfile(prev => prev ? { ...prev, balance: prev.balance + refundAmount } : null);
+                                        setProfile(prev => prev ? { ...prev, federal_balance: prev.federal_balance + refundAmount } : null);
 
                                       }
 

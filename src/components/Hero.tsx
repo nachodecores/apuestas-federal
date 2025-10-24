@@ -8,7 +8,7 @@ export default function Hero() {
   const [gwAmount, setGwAmount] = useState<number>(0);
   const [totalPool, setTotalPool] = useState<number>(0);
   const [federalPool, setFederalPool] = useState<number>(0);
-  const [realPool] = useState<number>(10000);
+  const [realPool, setRealPool] = useState<number>(10000);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -26,6 +26,7 @@ export default function Hero() {
         setGwAmount(data.gwAmount);
         setTotalPool(data.totalPool);
         setFederalPool(data.federalPool || 0);
+        setRealPool(data.realPool || 10000);
         setLoading(false);
       } catch (error) {
         console.error('Error fetching stats:', error);

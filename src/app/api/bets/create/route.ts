@@ -44,7 +44,7 @@ export async function POST(request: Request) {
     // 4. Obtener el perfil del usuario para verificar balance
     const { data: profile, error: profileError } = await supabase
       .from('profiles')
-      .select('balance')
+      .select('federal_balance')
       .eq('id', user.id)
       .single();
 
@@ -56,9 +56,9 @@ export async function POST(request: Request) {
     }
 
     // 5. Verificar que tenga suficiente saldo
-    if (profile.balance < totalAmount) {
+    if (profile.federal_balance < totalAmount) {
       return NextResponse.json(
-        { error: `Saldo insuficiente. Disponible: $${profile.balance}, Necesario: $${totalAmount}` },
+        { error: `Saldo insuficiente. Disponible: ₣${profile.federal_balance}, Necesario: ₣${totalAmount}` },
         { status: 400 }
       );
     }
@@ -90,11 +90,11 @@ export async function POST(request: Request) {
     }
 
     // 7. Actualizar el balance del usuario (restar el total apostado)
-    const newBalance = profile.balance - totalAmount;
+    const newBalance = profile.federal_balance - totalAmount;
     
     const { error: updateError } = await supabase
       .from('profiles')
-      .update({ balance: newBalance })
+      .update({ federal_balance: newBalance })
       .eq('id', user.id);
 
     if (updateError) {

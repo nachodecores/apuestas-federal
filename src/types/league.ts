@@ -45,7 +45,7 @@ export interface PlayerDisplay {
   h2hPoints: number; // Puntos de la tabla H2H
   fplPoints: number; // Puntos totales FPL
   record: string; // ej: "6-1-0" (ganados-empatados-perdidos)
-  balance: number;
+  federal_balance: number;
   recentForm: ('win' | 'draw' | 'loss')[]; // Últimos 5 resultados
 }
 

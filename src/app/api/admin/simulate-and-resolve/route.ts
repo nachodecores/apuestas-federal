@@ -108,7 +108,7 @@ export async function POST(request: Request) {
     for (const [userId, balanceChange] of balanceUpdates) {
       const { data: profile, error: profileError } = await supabase
         .from('profiles')
-        .select('balance')
+        .select('federal_balance')
         .eq('id', userId)
         .single();
 
@@ -117,11 +117,11 @@ export async function POST(request: Request) {
         continue;
       }
 
-      const newBalance = profile.balance + balanceChange;
+      const newBalance = profile.federal_balance + balanceChange;
       
       const { error: updateError } = await supabase
         .from('profiles')
-        .update({ balance: newBalance })
+        .update({ federal_balance: newBalance })
         .eq('id', userId);
 
       if (updateError) {

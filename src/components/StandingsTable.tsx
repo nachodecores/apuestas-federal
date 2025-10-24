@@ -75,7 +75,7 @@ export default function StandingsTable() {
             h2hPoints: standing.total, // Puntos de la tabla H2H
             fplPoints: standing.points_for, // Puntos totales FPL
             record: `${standing.matches_won}-${standing.matches_drawn}-${standing.matches_lost}`,
-            balance: 10000, // Por ahora mock, después lo calcularemos según apuestas
+            federal_balance: 10000, // Por ahora mock, después lo calcularemos según apuestas
             recentForm
           };
         });

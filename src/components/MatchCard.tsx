@@ -117,19 +117,16 @@ export default function MatchCard({
   async function handleConfirmBet() {
     // Validaciones
     if (!user) {
-      alert('Necesitás iniciar sesión para apostar');
       return;
     }
     
     if (!bet.prediction || !bet.amount || parseFloat(bet.amount) <= 0) {
-      alert('Seleccioná una predicción y monto válido');
       return;
     }
     
     const betAmount = parseFloat(bet.amount);
     
     if (betAmount > userBalance) {
-      alert(`No tenés suficiente saldo. Necesitás: ₣${betAmount.toFixed(2)}, Disponible: ₣${userBalance}`);
       return;
     }
     
@@ -171,8 +168,7 @@ export default function MatchCard({
         potential_win: betAmount * match.odds[bet.prediction]
       });
       
-      // Mostrar mensaje de éxito
-      alert(`🎉 ¡Apuesta confirmada!\n\nMonto: ₣${betAmount.toFixed(2)}\nGanancia potencial: ₣${(betAmount * match.odds[bet.prediction]).toFixed(2)}\nNuevo balance: ₣${result.new_balance.toFixed(2)}`);
+      // Apuesta confirmada exitosamente
       
       // Limpiar la apuesta
       setBet({
@@ -181,8 +177,6 @@ export default function MatchCard({
       });
       
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : 'Error desconocido';
-      alert(`Error: ${errorMessage}`);
       console.error('Error al confirmar apuesta:', error);
     }
   }

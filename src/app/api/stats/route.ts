@@ -10,7 +10,8 @@ export async function GET() {
         currentGameweek: 8,
         activeBets: 0,
         gwAmount: 0,
-        federalPool: 0
+        federalPool: 0,
+        realPool: 10000
       });
     }
 
@@ -26,7 +27,8 @@ export async function GET() {
         currentGameweek: 8,
         activeBets: 0,
         gwAmount: 0,
-        federalPool: 0
+        federalPool: 0,
+        realPool: 10000
       });
     }
     
@@ -62,23 +64,37 @@ export async function GET() {
       console.error('Error calculating GW amount:', error);
     }
 
-    // 4. Sumar todos los balances (pozo federal) - con fallback
+    // 4. Sumar todos los federal_balance (pozo federal) - con fallback
     let federalPool = 0;
     try {
       const { data: profiles } = await supabase
         .from('profiles')
-        .select('balance');
+        .select('federal_balance');
       
-      federalPool = profiles?.reduce((sum, profile) => sum + profile.balance, 0) || 0;
+      federalPool = profiles?.reduce((sum, profile) => sum + (profile.federal_balance || 0), 0) || 0;
     } catch (error) {
       console.error('Error calculating federal pool:', error);
+    }
+
+    // 5. Sumar todos los real_balance (pozo real) - con fallback
+    let realPool = 0;
+    try {
+      const { data: profiles } = await supabase
+        .from('profiles')
+        .select('real_balance');
+      
+      realPool = profiles?.reduce((sum, profile) => sum + (profile.real_balance || 0), 0) || 0;
+    } catch (error) {
+      console.error('Error calculating real pool:', error);
+      realPool = 10000; // Fallback al valor hardcodeado anterior
     }
 
     return NextResponse.json({
       currentGameweek,
       activeBets: activeBetsCount,
       gwAmount,
-      federalPool
+      federalPool,
+      realPool
     });
   } catch (error) {
     console.error('Error in stats API:', error);
@@ -87,7 +103,8 @@ export async function GET() {
       currentGameweek: 8,
       activeBets: 0,
       gwAmount: 0,
-      federalPool: 0
+      federalPool: 0,
+      realPool: 10000
     });
   }
 }

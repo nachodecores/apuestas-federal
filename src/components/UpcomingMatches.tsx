@@ -11,7 +11,7 @@ export default function UpcomingMatches() {
   const supabase = createClient();
   
   // Usar el contexto de liga
-  const { leagueData, loading: contextLoading, error: contextError, fetchLeagueData, isDataLoaded } = useLeague();
+  const { leagueData, loading: contextLoading, error: contextError, fetchLeagueData, isDataLoaded, getTeamName, getPlayerName } = useLeague();
   
   console.log('🔍 UpcomingMatches: Renderizando componente');
   console.log('🔍 UpcomingMatches: leagueData:', !!leagueData);
@@ -60,12 +60,12 @@ export default function UpcomingMatches() {
           try {
         const { data: profile } = await supabase
           .from('profiles')
-          .select('balance')
+          .select('federal_balance')
           .eq('id', user.id)
           .single();
         
         if (profile) {
-          setUserBalance(profile.balance);
+          setUserBalance(profile.federal_balance);
             } else {
               console.warn('⚠️ No se encontró perfil para el usuario');
               setUserBalance(0);
@@ -78,8 +78,13 @@ export default function UpcomingMatches() {
         setUserBalance(0);
       }
         
-        // 2. DESPUÉS cargar partidos (independiente de autenticación)
-        await fetchMatches();
+        // 2. Asegurar datos de liga para nombres/logos
+        if (!isDataLoaded) {
+          try { await fetchLeagueData(); } catch (e) { console.warn('⚠️ Error fetchLeagueData:', e); }
+        }
+        
+        // 3. DESPUÉS cargar partidos desde DB
+        await fetchMatchesFromDb();
         
       } catch (error) {
         console.error('💥 Error en initializeComponent:', error);
@@ -87,23 +92,26 @@ export default function UpcomingMatches() {
       }
     }
     
-    async function fetchMatches() {
+    async function fetchMatchesFromDb() {
       try {
+        // 1. Leer partidos activos desde Supabase (ordenados por GW descendente)
+        const { data: dbMatches, error: mErr } = await supabase
+          .from('gameweek_matches')
+          .select('*')
+          .eq('is_active', true)
+          .order('gameweek', { ascending: false });
+        if (mErr) throw mErr;
         
-        // 1. Una sola llamada optimizada que trae solo los datos necesarios
-        const response = await fetch('/api/league?upcoming=true');
-        
-        if (!response.ok) {
-          throw new Error(`Error ${response.status}: ${response.statusText}`);
+        if (!dbMatches || dbMatches.length === 0) {
+          setError('No hay partidos activos.');
+          setMatches([]);
+          setLoading(false);
+          return;
         }
         
-        const data = await response.json();
-        
-        // 2. Los datos ya vienen filtrados y optimizados
-        const nextGW = data.gameweek;
-        const nextGWMatches = data.matches;
-        
-        setNextGameweek(nextGW);
+        // 2. Determinar GW (la más reciente activa)
+        const gw = dbMatches[0].gameweek;
+        setNextGameweek(gw);
         
         // 3. Obtener logos de los equipos desde Supabase (con fallback)
         let teamLogos = new Map();
@@ -120,48 +128,28 @@ export default function UpcomingMatches() {
           // Continuamos sin logos, no es crítico
         }
         
-        // 4. Mapeamos los IDs de equipos a nombres Y usamos odds pre-calculadas
-        const processedMatches: MatchDisplay[] = nextGWMatches.map((match, index) => {
-          
-          // Buscamos los equipos por su league_entry ID
-          const team1 = data.league_entries.find(e => e.id === match.league_entry_1);
-          const team2 = data.league_entries.find(e => e.id === match.league_entry_2);
-          
-          
-          // Buscar odds pre-calculadas para este partido
-          let odds = { home: 2.0, draw: 3.0, away: 2.0 }; // Fallback por defecto
-          
-          if (data.gameweek_odds) {
-            const matchOdds = data.gameweek_odds.find(
-              (odd: any) => 
-                odd.league_entry_1 === match.league_entry_1 && 
-                odd.league_entry_2 === match.league_entry_2
-            );
-            
-            if (matchOdds) {
-              odds = {
-                home: matchOdds.home_odds,
-                draw: matchOdds.draw_odds,
-                away: matchOdds.away_odds
-              };
-            } else {
-              console.warn('⚠️ No se encontraron odds pre-calculadas, usando fallback');
-            }
-          } else {
-            console.warn('⚠️ No hay odds pre-calculadas disponibles, usando fallback');
-          }
-          
+        // 4. Mapear a MatchDisplay con odds desde DB
+        const processedMatches: MatchDisplay[] = dbMatches.map((row) => {
+          const t1Name = getTeamName ? getTeamName(row.league_entry_1) : 'Equipo 1';
+          const t2Name = getTeamName ? getTeamName(row.league_entry_2) : 'Equipo 2';
+          const t1Manager = getPlayerName ? getPlayerName(row.league_entry_1) : 'Manager 1';
+          const t2Manager = getPlayerName ? getPlayerName(row.league_entry_2) : 'Manager 2';
+
           return {
-            gameweek: match.event,
-            team1Name: team1?.entry_name || 'Equipo 1',
-            team2Name: team2?.entry_name || 'Equipo 2',
-            team1Manager: team1 ? team1.player_first_name : 'Manager 1',
-            team2Manager: team2 ? team2.player_first_name : 'Manager 2',
-            team1Logo: (teamLogos.get(match.league_entry_1) as string) || null,
-            team2Logo: (teamLogos.get(match.league_entry_2) as string) || null,
-            league_entry_1: match.league_entry_1,
-            league_entry_2: match.league_entry_2,
-            odds
+            gameweek: row.gameweek,
+            team1Name: t1Name,
+            team2Name: t2Name,
+            team1Manager: t1Manager,
+            team2Manager: t2Manager,
+            team1Logo: (teamLogos.get(row.league_entry_1) as string) || null,
+            team2Logo: (teamLogos.get(row.league_entry_2) as string) || null,
+            league_entry_1: row.league_entry_1,
+            league_entry_2: row.league_entry_2,
+            odds: {
+              home: Number(row.home_odds ?? 2.0),
+              draw: Number(row.draw_odds ?? 3.0),
+              away: Number(row.away_odds ?? 2.0)
+            }
           };
         });
         
@@ -169,7 +157,7 @@ export default function UpcomingMatches() {
         setLoading(false);
         
       } catch (err) {
-        console.error('💥 Error en fetchMatches:', err);
+        console.error('💥 Error en fetchMatchesFromDb:', err);
         setError(err instanceof Error ? err.message : 'Error desconocido');
         setLoading(false);
       }
@@ -188,12 +176,12 @@ export default function UpcomingMatches() {
         try {
           const { data: profile } = await supabase
             .from('profiles')
-            .select('balance')
+            .select('federal_balance')
             .eq('id', session.user.id)
             .single();
           
           if (profile) {
-            setUserBalance(profile.balance);
+            setUserBalance(profile.federal_balance);
           }
     } catch (error) {
           console.warn('⚠️ Error actualizando balance:', error);

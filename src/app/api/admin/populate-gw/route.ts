@@ -61,10 +61,10 @@ export async function POST(request: Request) {
       };
     });
 
+    // Desactivar TODAS las gameweeks existentes (mantener historial)
     const { error: deactivateErr } = await supabase
       .from('gameweek_matches')
-      .update({ is_active: false })
-      .eq('gameweek', targetGw);
+      .update({ is_active: false });
     if (deactivateErr) throw deactivateErr;
 
     const { error: upsertErr } = await supabase

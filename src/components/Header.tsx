@@ -125,14 +125,14 @@ export default function Header() {
           // Obtener datos completos del perfil (incluyendo balance)
           const { data: profile } = await supabase
             .from('profiles')
-            .select('display_name, fpl_entry_id, team_logo, balance, role_id')
+            .select('display_name, fpl_entry_id, team_logo, federal_balance, role_id')
             .eq('id', user.id)
             .single();
           
           if (profile) {
             setUserName(profile.display_name);
             setUserTeamLogo(profile.team_logo);
-            setUserBalance(profile.balance || 0);
+            setUserBalance(profile.federal_balance || 0);
             
             // Verificar si es admin usando role_id
             setIsAdmin(profile.role_id === ROLES.ADMIN);
@@ -177,12 +177,12 @@ export default function Header() {
         // Actualizar todos los datos del usuario cuando se loguea o cambia sesión
         const { data: profile } = await supabase
           .from('profiles')
-          .select('balance, display_name, fpl_entry_id, team_logo, role_id')
+          .select('federal_balance, display_name, fpl_entry_id, team_logo, role_id')
           .eq('id', session.user.id)
           .single();
         
         if (profile) {
-          setUserBalance(profile.balance || 0);
+          setUserBalance(profile.federal_balance || 0);
           setUserName(profile.display_name);
           setUserTeamLogo(profile.team_logo);
           setIsAdmin(profile.role_id === ROLES.ADMIN);

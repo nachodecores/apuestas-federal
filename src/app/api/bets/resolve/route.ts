@@ -141,7 +141,7 @@ export async function POST(request: Request) {
     for (const [userId, amountToAdd] of usersToUpdate.entries()) {
       const { data: profile, error: profileError } = await supabase
         .from('profiles')
-        .select('balance')
+        .select('federal_balance')
         .eq('id', userId)
         .single();
 
@@ -150,11 +150,11 @@ export async function POST(request: Request) {
         continue;
       }
 
-      const newBalance = profile.balance + amountToAdd;
+      const newBalance = profile.federal_balance + amountToAdd;
 
       const { error: updateBalanceError } = await supabase
         .from('profiles')
-        .update({ balance: newBalance })
+        .update({ federal_balance: newBalance })
         .eq('id', userId);
 
       if (updateBalanceError) {

@@ -5,7 +5,7 @@ export interface Profile {
   email: string;
   is_claimed: boolean;
   fpl_entry_id: number;
-  balance?: number;
+  federal_balance?: number;
   team_logo?: string | null;
   role_id: number;
 }
@@ -22,7 +22,7 @@ export interface User {
   email: string;
   display_name: string;
   fpl_entry_id: number;
-  balance: number;
+  federal_balance: number;
   team_logo?: string | null;
   role_id: number;
 }
