@@ -25,7 +25,7 @@
  * const { profile, activeBets, isAdmin, dataLoading } = useDashboardData(user, isOpen);
  */
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { createClient } from '@/lib/supabase/client';
 import { ROLES } from '@/constants/roles';
 import type { User } from '@supabase/supabase-js';
@@ -52,7 +52,7 @@ export function useDashboardData(user: User | null, isOpen: boolean): DashboardD
   const [allUsersMap, setAllUsersMap] = useState(new Map());
   const [dataLoading, setDataLoading] = useState(true);
 
-  async function loadDashboardData() {
+  const loadDashboardData = useCallback(async () => {
     if (!user || !isOpen) return;
     
     // Si ya tenemos datos, no recargar
@@ -130,12 +130,23 @@ export function useDashboardData(user: User | null, isOpen: boolean): DashboardD
     } finally {
       setDataLoading(false);
     }
-  }
+  }, [user, isOpen, supabase]);
 
   // Cargar datos cuando se abre el modal
   useEffect(() => {
+    if (!user || !isOpen) {
+      setDataLoading(false);
+      // Limpiar datos cuando no hay usuario
+      setProfile(null);
+      setAllBets([]);
+      setActiveBets([]);
+      setAllUsersBets([]);
+      setAllUsersMap(new Map());
+      return;
+    }
+    
     loadDashboardData();
-  }, [user?.id, isOpen]);
+  }, [user?.id, isOpen, loadDashboardData]);
 
   return {
     profile,

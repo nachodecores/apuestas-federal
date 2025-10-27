@@ -104,11 +104,27 @@ export async function DELETE(request: Request) {
 
     // 1. Eliminar transacciones relacionadas primero
     console.log('🔍 DELETE: Eliminando transacciones para betId:', betId);
-    const { data: deletedTransactions, error: transDeleteError } = await supabase
-      .from('transactions')
-      .delete()
-      .eq('related_bet_id', betId)
-      .select(); // Agregar .select() para ver qué se eliminó
+    
+    let transDeleteQuery;
+    if (isAdmin) {
+      // Para admin, usar Service Role Key para bypass RLS
+      const { createServiceClient } = await import('@/lib/supabase/server');
+      const serviceSupabase = createServiceClient();
+      transDeleteQuery = serviceSupabase
+        .from('transactions')
+        .delete()
+        .eq('related_bet_id', betId)
+        .select();
+    } else {
+      // Para usuario normal, usar cliente normal (con RLS)
+      transDeleteQuery = supabase
+        .from('transactions')
+        .delete()
+        .eq('related_bet_id', betId)
+        .select();
+    }
+
+    const { data: deletedTransactions, error: transDeleteError } = await transDeleteQuery;
 
     if (transDeleteError) {
       console.error('❌ Error al eliminar transacciones:', transDeleteError);
