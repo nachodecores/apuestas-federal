@@ -32,7 +32,7 @@ export function LeagueProvider({ children }: { children: ReactNode }) {
     setError(null);
     
     try {
-      const response = await fetch('/api/league');
+      const response = await fetch('/api/league?upcoming=true');
       
       if (!response.ok) {
         throw new Error(`Error ${response.status}: ${response.statusText}`);

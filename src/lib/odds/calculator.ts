@@ -1,5 +1,25 @@
-// Sistema de cálculo de odds (cuotas) para apuestas
-// Basado en: posición, puntos totales, racha reciente
+/**
+ * CALCULADORA DE ODDS (CUOTAS) - LÓGICA PURA
+ * 
+ * Este archivo contiene la lógica matemática para calcular las cuotas de apuestas.
+ * NO interactúa con la base de datos, solo realiza cálculos puros.
+ * 
+ * CÓMO FUNCIONA:
+ * Analiza 4 factores para determinar la probabilidad de victoria de cada equipo:
+ * 1. Posición en tabla (30% peso) - Equipos mejor posicionados tienen ventaja
+ * 2. Puntos totales (25% peso) - Total de puntos acumulados en la temporada
+ * 3. Racha reciente (30% peso) - Rendimiento en últimos 5 partidos
+ * 4. Récord general (15% peso) - Ratio de victorias/derrotas
+ * 
+ * Luego convierte estas probabilidades en odds (cuotas) con un margen de casa del 5%.
+ * 
+ * EJEMPLO:
+ * Si un equipo tiene 70% probabilidad de ganar, su odd será: 1 / 0.70 * 1.05 = 1.50
+ * Esto significa que por cada ₣1 apostado, ganarías ₣1.50 si ese equipo gana.
+ * 
+ * USO:
+ * Este archivo es usado por src/lib/odds/gameweek-odds.ts que maneja la persistencia.
+ */
 
 interface Standing {
   league_entry: number;

@@ -1,0 +1,88 @@
+# Cursor Rules for Apuestas Federal Project
+
+## Project Overview
+This is a Next.js 15 betting application for a fantasy football league with Supabase backend.
+
+## Tech Stack
+- **Framework**: Next.js 15 with App Router
+- **Database**: Supabase (PostgreSQL)
+- **Authentication**: Supabase Auth
+- **Styling**: Tailwind CSS with custom gradients
+- **Language**: TypeScript
+- **State Management**: React Context (LeagueContext)
+
+## Key Patterns & Conventions
+
+### Database & Authentication
+- Use `createClient` from `@/lib/supabase/server` for API routes
+- Use `createClient` from `@/lib/supabase/client` for client-side
+- Always handle authentication with `supabase.auth.getUser()`
+- Use RLS (Row Level Security) policies for data access control
+
+### User Roles System
+- **Role IDs**: 1 = USER, 2 = ADMIN (defined in `src/constants/roles.ts`)
+- **Column**: Use `role_id` (not `role`) in profiles table
+- **Constants**: Always use `ROLES.ADMIN` and `ROLES.USER` from constants
+- **Admin checks**: `profile?.role_id === ROLES.ADMIN`
+
+### Database Schema
+- **User funds**: Use `federal_balance` (not `balance`)
+- **Bets table**: Has `user_id`, `amount`, `status`, `gameweek`
+- **Transactions table**: Related to bets via `related_bet_id`
+- **Foreign keys**: Always delete transactions before bets
+
+### API Routes Structure
+- All API routes in `src/app/api/`
+- Use proper HTTP methods (GET, POST, DELETE)
+- Always return `NextResponse.json()`
+- Handle errors with try-catch and proper status codes
+- Log important operations for debugging
+
+### Component Patterns
+- Use `LeagueContext` for league data (matches, teams, standings)
+- Components should fetch data from context, not directly from API
+- Use proper TypeScript interfaces from `src/types/`
+- Handle loading and error states consistently
+
+### Styling & UI
+- Use custom gradients defined in `tailwind.config.js`:
+  - `gradient-primary`: Main brand gradient
+  - `gradient-success`: Green-cyan gradient
+  - `gradient-danger`: Red gradient
+- Use `federal` color palette for brand colors
+- Responsive design with Tailwind breakpoints
+- Custom background patterns: `pattern-1.png`, `pattern-2.png`
+
+### Error Handling
+- No `alert()` calls - use proper UI feedback
+- Log errors to console for debugging
+- Handle RLS permission errors gracefully
+- Provide meaningful error messages to users
+
+### Security
+- Always verify user permissions before operations
+- Use RLS policies instead of bypassing with service keys
+- Validate user ownership of resources
+- Admin operations should check `role_id === ROLES.ADMIN`
+
+## Code Style
+- Use TypeScript interfaces for all data structures
+- Prefer async/await over promises
+- Use descriptive variable names
+- Add console logs for debugging API operations
+- Use proper error boundaries and loading states
+- Follow React best practices for hooks and state management
+
+## Common Operations
+- **Delete bets**: Always delete transactions first, then bets
+- **Admin operations**: Check `role_id === ROLES.ADMIN`
+- **User data**: Use `federal_balance` for user funds
+- **League data**: Fetch from `LeagueContext`, not direct API calls
+- **Styling**: Use custom gradients and federal color palette
+
+## Admin Operations
+- **Admin UI**: All admin operations are accessible from `DashboardModal.tsx` for users with `role_id === ROLES.ADMIN`
+- **Populate Gameweeks**: Use `/api/admin/populate-gw` endpoint (called from DashboardModal)
+- **Resolve Bets**: Use `/api/bets/resolve` endpoint
+- **No CLI Scripts**: Don't create CLI scripts when API endpoints exist - use the API endpoints instead
+- **Admin Pages**: Admin functionality is integrated into the main app, not separate pages

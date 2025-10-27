@@ -1,11 +1,29 @@
-// API Route: Este archivo corre en el SERVIDOR (Node.js), no en el navegador
-// Por eso puede hacer requests a cualquier API sin problemas de CORS
+/**
+ * ENDPOINT: GET /api/league
+ * 
+ * PROPÓSITO:
+ * Endpoint principal para obtener datos de la liga de FPL (Fantasy Premier League).
+ * Actúa como proxy entre el frontend y la API externa de Draft FPL.
+ * 
+ * PARÁMETROS DE QUERY:
+ * - upcoming (opcional): Si es 'true', devuelve solo próximos partidos + partidos terminados para rachas
+ * - gameweek (opcional): Número de gameweek para obtener odds específicas
+ * 
+ * RESPUESTAS:
+ * - 200: Datos de la liga (partidos, equipos, standings, odds)
+ * - 404: No hay partidos próximos (cuando upcoming=true)
+ * - 500: Error al obtener datos
+ * 
+ * USADO POR:
+ * - LeagueContext.tsx (con upcoming=true)
+ * - stats/route.ts
+ * 
+ * NOTA: Este endpoint corre en el SERVIDOR, por eso puede hacer requests
+ * a la API de FPL sin problemas de CORS.
+ */
 
 import { NextResponse } from 'next/server';
-import { getGameweekOdds } from '@/lib/odds/odds-calculator';
-
-// GET /api/league
-// Esta función se ejecuta cuando alguien hace un request a /api/league
+import { getGameweekOdds } from '@/lib/odds/gameweek-odds';
 export async function GET(request: Request) {
   try {
     const { searchParams } = new URL(request.url);
@@ -38,16 +56,8 @@ export async function GET(request: Request) {
       const nextGW = upcomingMatches[0].event;
       const nextGWMatches = upcomingMatches.filter((match: any) => match.event === nextGW);
       
-      // Obtener solo los equipos que participan en los próximos partidos
-      const participatingTeamIds = new Set();
-      nextGWMatches.forEach((match: any) => {
-        participatingTeamIds.add(match.league_entry_1);
-        participatingTeamIds.add(match.league_entry_2);
-      });
-      
-      const relevantEntries = data.league_entries.filter((entry: any) => 
-        participatingTeamIds.has(entry.id)
-      );
+      // Incluir todos los equipos para StandingsTable
+      const relevantEntries = data.league_entries;
       
       // Obtener odds pre-calculadas
       let gameweekOdds = null;
@@ -57,11 +67,16 @@ export async function GET(request: Request) {
         console.warn('⚠️ Error obteniendo odds:', oddsError);
       }
       
-      // Devolver solo los datos necesarios (reducción de ~95% en payload)
+      // NUEVO: Incluir partidos terminados de GWs anteriores para rachas
+      const finishedMatches = data.matches.filter((match: any) => 
+        match.finished && match.event < nextGW
+      );
+      
+      // Devolver próximos + terminados + todos los equipos
       const optimizedData = {
         gameweek: nextGW,
-        matches: nextGWMatches, // Solo 5 partidos en lugar de 190
-        league_entries: relevantEntries, // Solo equipos relevantes
+        matches: [...nextGWMatches, ...finishedMatches], // Próximos + terminados para rachas
+        league_entries: relevantEntries, // Todos los equipos
         standings: data.standings, // Mantener standings para compatibilidad
         gameweek_odds: gameweekOdds
       };

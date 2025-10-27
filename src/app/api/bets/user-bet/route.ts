@@ -1,3 +1,25 @@
+/**
+ * ENDPOINT: GET /api/bets/user-bet
+ * 
+ * PROPÓSITO:
+ * Verifica si el usuario ya tiene una apuesta en un partido específico.
+ * Previene apuestas duplicadas en el mismo partido.
+ * 
+ * QUERY PARAMS:
+ * - gameweek: number
+ * - match_league_entry_1: number
+ * - match_league_entry_2: number
+ * 
+ * RESPUESTAS:
+ * - 200: { bet: Bet | null } - Devuelve la apuesta si existe, null si no
+ * - 400: Parámetros faltantes
+ * - 401: Usuario no autenticado
+ * - 500: Error al buscar apuesta
+ * 
+ * USADO POR:
+ * - MatchCard.tsx (para verificar si ya apostó)
+ */
+
 import { createClient } from '@/lib/supabase/server';
 import { NextResponse } from 'next/server';
 

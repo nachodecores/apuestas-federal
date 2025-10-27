@@ -1,3 +1,23 @@
+/**
+ * ENDPOINT: GET /api/stats
+ * 
+ * PROPÓSITO:
+ * Obtiene estadísticas generales para mostrar en el componente Hero.
+ * 
+ * RESPUESTAS:
+ * - 200: Objeto con estadísticas:
+ *   - currentGameweek: Número de gameweek actual
+ *   - activeBets: Cantidad de apuestas pendientes
+ *   - gwAmount: Monto total apostado en la gameweek actual
+ *   - federalPool: Suma de todos los federal_balance
+ *   - realPool: Suma de todos los real_balance
+ * 
+ * USADO POR:
+ * - Hero.tsx
+ * 
+ * NOTA: Incluye fallbacks para todos los valores en caso de error.
+ */
+
 import { createClient } from '@/lib/supabase/server';
 import { NextResponse } from 'next/server';
 

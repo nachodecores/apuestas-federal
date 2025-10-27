@@ -1,3 +1,35 @@
+/**
+ * ENDPOINT: POST /api/bets/resolve
+ * 
+ * PROPÓSITO:
+ * Resuelve todas las apuestas de una gameweek usando resultados reales de FPL.
+ * 
+ * BODY:
+ * {
+ *   gameweek: number
+ * }
+ * 
+ * RESPUESTAS:
+ * - 200: Apuestas resueltas exitosamente con resumen de resultados
+ * - 400: Gameweek inválido o no hay partidos finalizados
+ * - 401: Usuario no autenticado
+ * - 500: Error al resolver apuestas
+ * 
+ * USADO POR:
+ * - Endpoint de admin (futuro) para resolver gameweeks
+ * 
+ * LÓGICA:
+ * 1. Obtiene resultados reales de FPL API
+ * 2. Filtra partidos finalizados del gameweek
+ * 3. Busca apuestas pendientes del gameweek
+ * 4. Compara predicciones con resultados
+ * 5. Calcula ganadores y perdedores
+ * 6. Actualiza balances de usuarios
+ * 7. Marca apuestas como resueltas
+ * 
+ * TODO: Agregar verificación de admin
+ */
+
 import { createClient } from '@/lib/supabase/server';
 import { NextResponse } from 'next/server';
 

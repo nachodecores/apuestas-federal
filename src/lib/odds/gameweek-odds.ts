@@ -1,5 +1,29 @@
+/**
+ * GESTIÓN DE ODDS DE GAMEWEEKS - PERSISTENCIA EN BASE DE DATOS
+ * 
+ * Este archivo maneja la lectura y escritura de odds en Supabase.
+ * Es un wrapper (envoltorio) de src/lib/odds-calculator.ts que agrega persistencia.
+ * 
+ * FUNCIONES:
+ * 
+ * 1. getGameweekOdds(gameweek)
+ *    - Lee las odds guardadas de una gameweek específica desde Supabase
+ *    - Usado por: src/app/api/league/route.ts para mostrar odds en la UI
+ * 
+ * 2. calculateAndSaveGameweekOdds(gameweek)
+ *    - Obtiene datos de FPL API
+ *    - Calcula odds usando la lógica de odds-calculator.ts
+ *    - Guarda los resultados en la tabla gameweek_matches
+ *    - Desactiva odds anteriores de esa gameweek (is_active = false)
+ *    - Usado por: endpoints de admin para poblar nuevas gameweeks
+ * 
+ * FLUJO:
+ * Admin → API populate-gw → calculateAndSaveGameweekOdds() → Supabase
+ * Usuario → API league → getGameweekOdds() → UI
+ */
+
 import { createClient } from '@/lib/supabase/server';
-import { calculateOdds } from '@/lib/odds-calculator';
+import { calculateOdds } from './calculator';
 
 interface FplStanding {
   league_entry: number;

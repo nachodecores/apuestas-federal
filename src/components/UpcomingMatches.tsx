@@ -29,15 +29,73 @@ export default function UpcomingMatches() {
   const [user, setUser] = useState<User | null>(null);
   const [userBalance, setUserBalance] = useState<number>(0);
   
-  // useEffect: Inicializar componente - primero autenticación, luego partidos
+  // useEffect: Procesar partidos cuando el contexto esté cargado
   useEffect(() => {
-    async function initializeComponent() {
-      
-      // Los datos de liga se cargarán automáticamente por el contexto
-      
+    async function processMatches() {
+      if (!isDataLoaded || !leagueData) {
+        setLoading(true);
+        return;
+      }
+
       try {
-        // 1. Primero verificar autenticación con timeout
+        // 1. Obtener partidos activos del contexto
+        const upcomingMatches = leagueData.matches.filter(m => !m.finished);
+        if (!upcomingMatches.length) {
+          setError('No hay partidos próximos');
+          setLoading(false);
+          return;
+        }
         
+        const currentGW = upcomingMatches[0].event;
+        setNextGameweek(currentGW);
+
+        // 2. Obtener odds desde gameweek_matches
+        const { data: oddsData } = await supabase
+          .from('gameweek_matches')
+          .select('*')
+          .eq('is_active', true)
+          .eq('gameweek', currentGW);
+
+        // 3. Mapear partidos con odds
+        const processedMatches = upcomingMatches.map(match => {
+          const matchOdds = oddsData?.find(o => 
+            o.league_entry_1 === match.league_entry_1 && 
+            o.league_entry_2 === match.league_entry_2
+          );
+
+          return {
+            gameweek: match.event,
+            team1Name: getTeamName(match.league_entry_1),
+            team2Name: getTeamName(match.league_entry_2),
+            team1Manager: getPlayerName(match.league_entry_1),
+            team2Manager: getPlayerName(match.league_entry_2),
+            team1Logo: null, // TODO: Implementar logos de equipos
+            team2Logo: null, // TODO: Implementar logos de equipos
+            league_entry_1: match.league_entry_1,
+            league_entry_2: match.league_entry_2,
+            odds: {
+              home: matchOdds?.home_odds ?? 2.0,
+              draw: matchOdds?.draw_odds ?? 3.0,
+              away: matchOdds?.away_odds ?? 2.0
+            }
+          };
+        });
+
+        setMatches(processedMatches);
+        setLoading(false);
+      } catch (err) {
+        setError(err instanceof Error ? err.message : 'Error');
+        setLoading(false);
+      }
+    }
+
+    processMatches();
+  }, [isDataLoaded, leagueData, getTeamName, getPlayerName, supabase]);
+
+  // useEffect: Inicializar autenticación
+  useEffect(() => {
+    async function initializeAuth() {
+      try {
         // Crear una promesa con timeout para evitar que se cuelgue
         const authPromise = supabase.auth.getUser();
         const timeoutPromise = new Promise((_, reject) => 
@@ -53,19 +111,19 @@ export default function UpcomingMatches() {
           user = null;
         }
         
-      setUser(user);
-      
-      if (user) {
-        // Obtener balance del usuario
-          try {
-        const { data: profile } = await supabase
-          .from('profiles')
-          .select('federal_balance')
-          .eq('id', user.id)
-          .single();
+        setUser(user);
         
-        if (profile) {
-          setUserBalance(profile.federal_balance);
+        if (user) {
+          // Obtener balance del usuario
+          try {
+            const { data: profile } = await supabase
+              .from('profiles')
+              .select('federal_balance')
+              .eq('id', user.id)
+              .single();
+            
+            if (profile) {
+              setUserBalance(profile.federal_balance);
             } else {
               console.warn('⚠️ No se encontró perfil para el usuario');
               setUserBalance(0);
@@ -73,97 +131,16 @@ export default function UpcomingMatches() {
           } catch (error) {
             console.warn('⚠️ Error obteniendo balance:', error);
             setUserBalance(0);
+          }
+        } else {
+          setUserBalance(0);
         }
-      } else {
-        setUserBalance(0);
-      }
-        
-        // 2. Asegurar datos de liga para nombres/logos
-        if (!isDataLoaded) {
-          try { await fetchLeagueData(); } catch (e) { console.warn('⚠️ Error fetchLeagueData:', e); }
-        }
-        
-        // 3. DESPUÉS cargar partidos desde DB
-        await fetchMatchesFromDb();
-        
       } catch (error) {
-        console.error('💥 Error en initializeComponent:', error);
-        setLoading(false);
+        console.error('💥 Error en initializeAuth:', error);
       }
     }
     
-    async function fetchMatchesFromDb() {
-      try {
-        // 1. Leer partidos activos desde Supabase (ordenados por GW descendente)
-        const { data: dbMatches, error: mErr } = await supabase
-          .from('gameweek_matches')
-          .select('*')
-          .eq('is_active', true)
-          .order('gameweek', { ascending: false });
-        if (mErr) throw mErr;
-        
-        if (!dbMatches || dbMatches.length === 0) {
-          setError('No hay partidos activos.');
-          setMatches([]);
-          setLoading(false);
-          return;
-        }
-        
-        // 2. Determinar GW (la más reciente activa)
-        const gw = dbMatches[0].gameweek;
-        setNextGameweek(gw);
-        
-        // 3. Obtener logos de los equipos desde Supabase (con fallback)
-        let teamLogos = new Map();
-        try {
-        const { data: profiles } = await supabase
-          .from('profiles')
-          .select('fpl_entry_id, team_logo');
-        
-          teamLogos = new Map(
-          profiles?.map(p => [p.fpl_entry_id, p.team_logo]) || []
-        );
-        } catch (logoError) {
-          console.warn('⚠️ Error obteniendo logos, continuando sin logos:', logoError);
-          // Continuamos sin logos, no es crítico
-        }
-        
-        // 4. Mapear a MatchDisplay con odds desde DB
-        const processedMatches: MatchDisplay[] = dbMatches.map((row) => {
-          const t1Name = getTeamName ? getTeamName(row.league_entry_1) : 'Equipo 1';
-          const t2Name = getTeamName ? getTeamName(row.league_entry_2) : 'Equipo 2';
-          const t1Manager = getPlayerName ? getPlayerName(row.league_entry_1) : 'Manager 1';
-          const t2Manager = getPlayerName ? getPlayerName(row.league_entry_2) : 'Manager 2';
-
-          return {
-            gameweek: row.gameweek,
-            team1Name: t1Name,
-            team2Name: t2Name,
-            team1Manager: t1Manager,
-            team2Manager: t2Manager,
-            team1Logo: (teamLogos.get(row.league_entry_1) as string) || null,
-            team2Logo: (teamLogos.get(row.league_entry_2) as string) || null,
-            league_entry_1: row.league_entry_1,
-            league_entry_2: row.league_entry_2,
-            odds: {
-              home: Number(row.home_odds ?? 2.0),
-              draw: Number(row.draw_odds ?? 3.0),
-              away: Number(row.away_odds ?? 2.0)
-            }
-          };
-        });
-        
-        setMatches(processedMatches);
-        setLoading(false);
-        
-      } catch (err) {
-        console.error('💥 Error en fetchMatchesFromDb:', err);
-        setError(err instanceof Error ? err.message : 'Error desconocido');
-        setLoading(false);
-      }
-    }
-    
-    initializeComponent();
+    initializeAuth();
     
     // Escuchar cambios de autenticación en TIEMPO REAL
     const {
@@ -183,7 +160,7 @@ export default function UpcomingMatches() {
           if (profile) {
             setUserBalance(profile.federal_balance);
           }
-    } catch (error) {
+        } catch (error) {
           console.warn('⚠️ Error actualizando balance:', error);
           setUserBalance(0);
         }
@@ -207,7 +184,7 @@ export default function UpcomingMatches() {
     return (
       <section className="bg-[#37003c] h-full pb-4 mobile:pb-6 tablet:pb-8">
         <div className="h-full flex items-center justify-center px-3 min-[480px]:px-4 min-[768px]:px-6">
-          <div className="text-[#37003c] text-base min-[480px]:text-lg min-[768px]:text-xl">Cargando próximos partidos...</div>
+          <div className="text-white text-base min-[480px]:text-lg min-[768px]:text-xl">Cargando próximos partidos...</div>
         </div>
       </section>
     );
@@ -252,6 +229,3 @@ export default function UpcomingMatches() {
     </section>
   );
 }
-
-
-

@@ -1,5 +1,41 @@
+/**
+ * ENDPOINT: DELETE /api/bets/delete
+ * 
+ * PROPÓSITO:
+ * Elimina una apuesta pendiente y devuelve el monto al usuario.
+ * 
+ * BODY:
+ * {
+ *   betId: string
+ * }
+ * 
+ * RESPUESTAS:
+ * - 200: Apuesta eliminada exitosamente, devuelve refundAmount
+ * - 400: Apuesta no está pendiente o betId inválido
+ * - 401: Usuario no autenticado
+ * - 404: Apuesta no encontrada
+ * - 500: Error al eliminar apuesta
+ * 
+ * USADO POR:
+ * - DeleteBetButton.tsx
+ * 
+ * PERMISOS:
+ * - Usuarios normales: Solo pueden eliminar sus propias apuestas
+ * - Admins: Pueden eliminar cualquier apuesta
+ * 
+ * LÓGICA:
+ * 1. Verifica autenticación
+ * 2. Verifica si es admin
+ * 3. Busca la apuesta (con restricción de usuario si no es admin)
+ * 4. Verifica que esté pendiente
+ * 5. Elimina transacciones asociadas
+ * 6. Elimina la apuesta
+ * 7. Devuelve monto apostado
+ */
+
 import { createClient } from '@/lib/supabase/server';
 import { NextResponse } from 'next/server';
+import { ROLES } from '@/constants/roles';
 
 export async function DELETE(request: Request) {
   try {
@@ -23,13 +59,29 @@ export async function DELETE(request: Request) {
       return NextResponse.json({ error: 'betId es requerido' }, { status: 400 });
     }
 
-    // Verificar que la apuesta pertenece al usuario actual
-    const { data: bet, error: betError } = await supabase
+    // Verificar si el usuario es admin
+    const { data: profile } = await supabase
+      .from('profiles')
+      .select('role_id')
+      .eq('id', user.id)
+      .single();
+
+    const isAdmin = profile?.role_id === ROLES.ADMIN;
+    console.log('🔍 DELETE: Usuario es admin:', isAdmin);
+    console.log('🔍 DELETE: Role ID del usuario:', profile?.role_id);
+
+    // Verificar que la apuesta existe
+    let query = supabase
       .from('bets')
       .select('*')
-      .eq('id', betId)
-      .eq('user_id', user.id)
-      .single();
+      .eq('id', betId);
+
+    // Solo agregar restricción de usuario si NO es admin
+    if (!isAdmin) {
+      query = query.eq('user_id', user.id);
+    }
+
+    const { data: bet, error: betError } = await query.single();
 
     if (betError || !bet) {
       console.error('❌ Apuesta no encontrada:', betError);
@@ -62,20 +114,36 @@ export async function DELETE(request: Request) {
       console.error('❌ Error al eliminar transacciones:', transDeleteError);
       return NextResponse.json({ error: 'Error al eliminar transacciones' }, { status: 500 });
     }
+    
+    // Verificar si realmente se eliminó algo
+    if (deletedTransactions.length === 0) {
+      console.warn('⚠️ No se eliminaron transacciones - posible problema de permisos');
+    }
     console.log('✅ Transacciones eliminadas exitosamente:', deletedTransactions);
 
     // 2. Eliminar la apuesta
     console.log('🔍 DELETE: Eliminando apuesta:', betId);
-    const { data: deletedData, error: deleteError } = await supabase
+    let deleteQuery = supabase
       .from('bets')
       .delete()
-      .eq('id', betId)
-      .eq('user_id', user.id)
-      .select(); // Agregar .select() para ver qué se eliminó
+      .eq('id', betId);
+
+    // Solo agregar restricción de usuario si NO es admin
+    if (!isAdmin) {
+      deleteQuery = deleteQuery.eq('user_id', user.id);
+    }
+
+    const { data: deletedData, error: deleteError } = await deleteQuery.select();
 
     if (deleteError) {
       console.error('❌ Error al eliminar apuesta:', deleteError);
       return NextResponse.json({ error: 'Error al eliminar la apuesta' }, { status: 500 });
+    }
+    
+    // Verificar si realmente se eliminó algo
+    if (deletedData.length === 0) {
+      console.warn('⚠️ No se eliminó la apuesta - posible problema de permisos');
+      return NextResponse.json({ error: 'No se pudo eliminar la apuesta' }, { status: 500 });
     }
     console.log('✅ Apuesta eliminada exitosamente:', deletedData);
 

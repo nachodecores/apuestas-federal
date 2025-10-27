@@ -1,5 +1,38 @@
-// API Route para crear apuestas
-// POST /api/bets/create
+/**
+ * ENDPOINT: POST /api/bets/create
+ * 
+ * PROPÓSITO:
+ * Crea una o múltiples apuestas para el usuario autenticado.
+ * 
+ * BODY:
+ * {
+ *   bets: Array<{
+ *     gameweek: number,
+ *     match_league_entry_1: number,
+ *     match_league_entry_2: number,
+ *     prediction: 'home' | 'draw' | 'away',
+ *     amount: number,
+ *     odds: number,
+ *     potential_win: number
+ *   }>
+ * }
+ * 
+ * RESPUESTAS:
+ * - 200: Apuestas creadas exitosamente
+ * - 400: Datos inválidos o balance insuficiente
+ * - 401: Usuario no autenticado
+ * - 500: Error al crear apuestas
+ * 
+ * USADO POR:
+ * - MatchCard.tsx
+ * 
+ * LÓGICA:
+ * 1. Verifica autenticación
+ * 2. Valida balance del usuario
+ * 3. Descuenta monto del federal_balance
+ * 4. Crea apuestas en DB
+ * 5. Crea transacciones asociadas
+ */
 
 import { createClient } from '@/lib/supabase/server';
 import { NextResponse } from 'next/server';

@@ -1,3 +1,23 @@
+/**
+ * ENDPOINT: GET /api/participants
+ * 
+ * PROPÓSITO:
+ * Obtiene la lista de participantes de la liga desde Supabase.
+ * 
+ * RESPUESTAS:
+ * - 200: Array de participantes con:
+ *   - display_name: Nombre del participante
+ *   - fpl_entry_id: ID de entrada en FPL
+ *   - team_logo: Logo del equipo (opcional)
+ *   - role_id: Rol del usuario (1=USER, 2=ADMIN)
+ * - 500: Error al obtener participantes
+ * 
+ * USADO POR:
+ * - Header.tsx
+ * 
+ * NOTA: Incluye datos hardcodeados como fallback si falla la consulta.
+ */
+
 import { createClient } from '@/lib/supabase/server';
 import { NextResponse } from 'next/server';
 

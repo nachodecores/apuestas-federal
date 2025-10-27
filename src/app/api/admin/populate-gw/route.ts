@@ -1,6 +1,36 @@
+/**
+ * ENDPOINT: POST /api/admin/populate-gw
+ * 
+ * PROPÓSITO:
+ * Pobla la tabla gameweek_matches con datos de una nueva gameweek.
+ * Obtiene datos de FPL API, calcula odds y guarda en Supabase.
+ * 
+ * BODY (opcional):
+ * {
+ *   gameweek?: number  // Si no se provee, usa el próximo gameweek
+ * }
+ * 
+ * RESPUESTAS:
+ * - 200: Gameweek poblada exitosamente con cantidad de partidos
+ * - 400: No hay partidos para la gameweek solicitada
+ * - 500: Error al poblar gameweek
+ * 
+ * USADO POR:
+ * - DashboardModal.tsx (botón de admin)
+ * 
+ * LÓGICA:
+ * 1. Obtiene datos de FPL API (standings, matches)
+ * 2. Determina gameweek objetivo (provisto o próximo)
+ * 3. Calcula odds para cada partido usando standings y rachas
+ * 4. Desactiva TODAS las gameweeks anteriores (is_active = false)
+ * 5. Inserta/actualiza nueva gameweek con is_active = true
+ * 
+ * NOTA: Mantiene historial de todas las gameweeks en la DB
+ */
+
 import { NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
-import { calculateOdds } from '@/lib/odds-calculator';
+import { calculateOdds } from '@/lib/odds/calculator';
 
 interface FplStanding {
   league_entry: number;
