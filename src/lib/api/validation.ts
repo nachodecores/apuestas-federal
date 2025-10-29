@@ -22,7 +22,7 @@ export function validateBetAmount(amount: number, minAmount: number = 1): string
   }
   
   if (amount < minAmount) {
-    return `El monto mínimo es ₣${minAmount}`;
+    return `El monto mínimo es F$${minAmount}`;
   }
   
   if (amount <= 0) {
@@ -74,7 +74,7 @@ export function validatePrediction(prediction: any): string | null {
  */
 export function validateSufficientBalance(userBalance: number, requiredAmount: number): string | null {
   if (userBalance < requiredAmount) {
-    return `Balance insuficiente. Tienes ₣${userBalance} y necesitas ₣${requiredAmount}`;
+    return `Balance insuficiente. Tienes F$${userBalance} y necesitas F$${requiredAmount}`;
   }
   
   return null;

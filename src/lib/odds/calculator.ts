@@ -15,7 +15,7 @@
  * 
  * EJEMPLO:
  * Si un equipo tiene 70% probabilidad de ganar, su odd será: 1 / 0.70 * 1.05 = 1.50
- * Esto significa que por cada ₣1 apostado, ganarías ₣1.50 si ese equipo gana.
+ * Esto significa que por cada F$1 apostado, ganarías F$1.50 si ese equipo gana.
  * 
  * USO:
  * Este archivo es usado por src/lib/odds/gameweek-odds.ts que maneja la persistencia.

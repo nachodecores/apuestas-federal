@@ -49,7 +49,8 @@ export default function Hero() {
             backgroundPosition: 'left bottom',
             backgroundRepeat: 'no-repeat',
             backgroundSize: 'cover',
-            backgroundAttachment: 'local'
+            backgroundAttachment: 'local',
+            marginLeft: '-30px'
           }}
         >
           <div 
@@ -58,7 +59,8 @@ export default function Hero() {
               backgroundImage: 'url(/assets/pattern-1.png)',
               backgroundPosition: 'left bottom',
               backgroundRepeat: 'no-repeat',
-              backgroundSize: 'cover'
+              backgroundSize: 'cover',
+              marginLeft: '-30px'
             }}
           />
         </div>
@@ -115,7 +117,7 @@ export default function Hero() {
                   backgroundClip: 'text'
                 }}
               >
-                {loading ? '...' : `₣${gwAmount.toLocaleString()}`}
+                {loading ? '...' : `F$${gwAmount.toLocaleString()}`}
               </div>
             </div>
             </div>
@@ -159,7 +161,7 @@ export default function Hero() {
                   backgroundClip: 'text'
                 }}
               >
-                {loading ? '...' : `₣${federalPool.toLocaleString()}`}
+                {loading ? '...' : `F$${federalPool.toLocaleString()}`}
               </div>
             </div>
 

@@ -55,26 +55,32 @@ export function useDashboardData(user: User | null, isOpen: boolean): DashboardD
   const loadDashboardData = useCallback(async () => {
     if (!user || !isOpen) return;
     
-    // Si ya tenemos datos, no recargar
-    if (profile && allBets.length > 0) {
-      setDataLoading(false);
-      return;
-    }
-
+    // 🔍 DEBUG: Logs para debuggear el problema del profile
+    console.log('🔍 useDashboardData - loadDashboardData iniciado');
+    console.log('🔍 useDashboardData - user:', user);
+    console.log('🔍 useDashboardData - isOpen:', isOpen);
+    
     setDataLoading(true);
     
     try {
       // 1. Obtener perfil del usuario
-      const { data: profileData } = await supabase
+      console.log('🔍 useDashboardData - Obteniendo perfil para user.id:', user.id);
+      const { data: profileData, error: profileError } = await supabase
         .from('profiles')
         .select('*')
         .eq('id', user.id)
         .single();
       
+      console.log('🔍 useDashboardData - profileData:', profileData);
+      console.log('🔍 useDashboardData - profileError:', profileError);
+      
       setProfile(profileData);
 
       // 2. Detectar si es admin
       const adminStatus = profileData?.role_id === ROLES.ADMIN;
+      console.log('🔍 useDashboardData - adminStatus:', adminStatus);
+      console.log('🔍 useDashboardData - profileData.role_id:', profileData?.role_id);
+      console.log('🔍 useDashboardData - ROLES.ADMIN:', ROLES.ADMIN);
       setIsAdmin(adminStatus);
 
       // 3. Cargar apuestas según el rol

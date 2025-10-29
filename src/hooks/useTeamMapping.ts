@@ -37,7 +37,6 @@ export function useTeamMapping(
     // Solo actualizar si hay datos de liga y apuestas activas
     if (!isDataLoaded || activeBets.length === 0) return;
 
-    console.log('🔍 useTeamMapping: Actualizando nombres de equipos...');
     
     // Obtener IDs únicos de equipos
     const teamIds = new Set<number>();
@@ -51,7 +50,6 @@ export function useTeamMapping(
       const newTeamMap = new Map<number, TeamInfo>();
       Array.from(teamIds).forEach(id => {
         const teamName = getTeamName(id);
-        console.log('🔍 useTeamMapping: Mapeando equipo:', id, '->', teamName);
         newTeamMap.set(id, { 
           name: teamName, 
           logo: null // TODO: Implementar logos de equipos

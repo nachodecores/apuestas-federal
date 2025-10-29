@@ -91,7 +91,7 @@ export async function POST(request: Request) {
     // 5. Verificar que tenga suficiente saldo
     if (profile.federal_balance < totalAmount) {
       return NextResponse.json(
-        { error: `Saldo insuficiente. Disponible: ₣${profile.federal_balance}, Necesario: ₣${totalAmount}` },
+        { error: `Saldo insuficiente. Disponible: F$${profile.federal_balance}, Necesario: F$${totalAmount}` },
         { status: 400 }
       );
     }

@@ -47,7 +47,7 @@ export default function DashboardStats({
 
       <div className="relative z-10 flex-1 text-center">
         <div className="text-xs text-gray-600 mb-1">Total apostado</div>
-        <div className="text-lg text-gray-900">₣{totalBet.toFixed(0)}</div>
+        <div className="text-lg text-gray-900">F${totalBet.toFixed(0)}</div>
       </div>
 
       <div
@@ -57,7 +57,7 @@ export default function DashboardStats({
 
       <div className="relative z-10 flex-1 text-center">
         <div className="text-xs text-gray-600 mb-1">Ganancia potencial</div>
-        <div className="text-lg text-gray-900">₣{netProfit.toFixed(2)}</div>
+        <div className="text-lg text-gray-900">F${netProfit.toFixed(2)}</div>
       </div>
 
       <div className="absolute inset-0 opacity-5 bg-gradient-to-br from-[#953bff] to-[#02efff]"></div>

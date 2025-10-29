@@ -29,6 +29,12 @@ export default function DashboardHeader({
   user,
   onClose,
 }: DashboardHeaderProps) {
+  // 🔍 DEBUG: Logs para debuggear el problema del profile
+  console.log('🔍 DashboardHeader - profile:', profile);
+  console.log('🔍 DashboardHeader - user:', user);
+  console.log('🔍 DashboardHeader - display_name:', profile?.display_name);
+  console.log('🔍 DashboardHeader - user.email:', user?.email);
+  
   return (
     <div className="flex items-center p-4 sm:p-6 border-b border-gray-200">
       <div className="flex items-center gap-4">

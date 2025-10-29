@@ -10,7 +10,8 @@ export default function MatchCard({
   matchIndex, 
   user, 
   userBalance, 
-  onBetConfirmed 
+  onBetConfirmed,
+  userBet: propUserBet
 }: MatchCardProps) {
   // Estado para la apuesta de este partido específico
   const [bet, setBet] = useState<BetSelection>({
@@ -18,65 +19,37 @@ export default function MatchCard({
     amount: ''
   });
 
-  // Estado para la apuesta existente del usuario
-  const [userBet, setUserBet] = useState<UserBet | null>(null);
+  // Usar la prop userBet directamente (optimización)
+  const userBet = propUserBet;
 
   // Limpiar el estado cuando cambia el usuario
   useEffect(() => {
-    setUserBet(null);
     setBet({
       prediction: null,
       amount: ''
     });
   }, [user?.id]); // Se ejecuta cuando cambia el ID del usuario
 
-  // Verificar si el usuario ya apostó en este partido
-  useEffect(() => {
-    if (user && match) {
-      checkExistingBet();
-    } else {
-      // Si no hay usuario, limpiar el estado
-      setUserBet(null);
-      setBet({
-        prediction: null,
-        amount: ''
-      });
-    }
-  }, [user, match]);
-
   // Escuchar eventos de apuesta eliminada
   useEffect(() => {
     function handleBetDeleted(event: CustomEvent) {
       const { gameweek, match_league_entry_1, match_league_entry_2 } = event.detail;
       
-      // Si es el mismo partido, verificar nuevamente las apuestas
+      // Si es el mismo partido, limpiar el estado local
       // Convertir a números para comparación segura
       if (Number(gameweek) === Number(match.gameweek) && 
           Number(match_league_entry_1) === Number(match.league_entry_1) && 
           Number(match_league_entry_2) === Number(match.league_entry_2)) {
-        checkExistingBet();
-      } else {
+        setBet({
+          prediction: null,
+          amount: ''
+        });
       }
     }
     
     window.addEventListener('betDeleted', handleBetDeleted as EventListener);
     return () => window.removeEventListener('betDeleted', handleBetDeleted as EventListener);
   }, [match]);
-
-  async function checkExistingBet() {
-    try {
-      const response = await fetch(`/api/bets/user-bet?gameweek=${match.gameweek}&match_league_entry_1=${match.league_entry_1}&match_league_entry_2=${match.league_entry_2}`);
-      const data = await response.json();
-      
-      if (data.bet) {
-        setUserBet(data.bet);
-      } else {
-        setUserBet(null);
-      }
-    } catch (error) {
-      console.error('Error checking existing bet:', error);
-    }
-  }
 
   // Función para actualizar la predicción (toggle: clicar de nuevo des-selecciona)
   function handlePredictionChange(prediction: 'home' | 'draw' | 'away') {
@@ -160,16 +133,6 @@ export default function MatchCard({
       // Éxito! Actualizar el balance local
       onBetConfirmed(result.new_balance);
       
-      // Actualizar el estado local con la apuesta confirmada
-      setUserBet({
-        id: result.bet_id,
-        prediction: bet.prediction,
-        amount: betAmount,
-        potential_win: betAmount * match.odds[bet.prediction]
-      });
-      
-      // Apuesta confirmada exitosamente
-      
       // Limpiar la apuesta
       setBet({
         prediction: null,
@@ -221,9 +184,9 @@ export default function MatchCard({
             <div className="mb-3 sm:mb-4 p-3 rounded-lg relative" style={{ background: 'linear-gradient(to right, #02efff, #00ff87)' }}>
               <div className="text-center">
                 <div className="text-[0.625rem] tablet:text-xs font-medium text-[#37003c]">
-                  {userBet.prediction === 'home' && `Apostaste ₣${userBet.amount} a que gana ${match.team1Name}`}
-                  {userBet.prediction === 'away' && `Apostaste ₣${userBet.amount} a que gana ${match.team2Name}`}
-                  {userBet.prediction === 'draw' && `Apostaste ₣${userBet.amount} a un empate`}
+                  {userBet.prediction === 'home' && `Apostaste F$${userBet.amount} a que gana ${match.team1Name}`}
+                  {userBet.prediction === 'away' && `Apostaste F$${userBet.amount} a que gana ${match.team2Name}`}
+                  {userBet.prediction === 'draw' && `Apostaste F$${userBet.amount} a un empate`}
                 </div>
               </div>
               
@@ -237,7 +200,6 @@ export default function MatchCard({
                     size="sm"
                     className="!bg-transparent !text-white !border-0 !shadow-none hover:!opacity-80 !transition-opacity"
                     onDeleteSuccess={(betId, refundAmount) => {
-                      setUserBet(null);
                       onBetConfirmed(userBalance + refundAmount); // Update balance
                     }}
                   />
@@ -361,7 +323,7 @@ export default function MatchCard({
                     <div className={`text-sm sm:text-base font-bold ${
                       parseFloat(bet.amount || '0') > 0 ? 'text-[#37003c]' : 'text-gray-900'
                     }`}>
-                      ₣{parseFloat(bet.amount || '0').toFixed(0)}
+                      F${parseFloat(bet.amount || '0').toFixed(0)}
                     </div>
                   </div>
                   

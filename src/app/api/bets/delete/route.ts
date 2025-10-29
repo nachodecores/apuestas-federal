@@ -51,9 +51,6 @@ export async function DELETE(request: Request) {
     // Obtener el betId del body
     const { betId } = await request.json();
     
-    console.log('🔍 DELETE: Intentando eliminar apuesta:', betId);
-    console.log('🔍 DELETE: Usuario:', user.id);
-    console.log('🔍 DELETE: Email del usuario:', user.email);
     
     if (!betId) {
       return NextResponse.json({ error: 'betId es requerido' }, { status: 400 });
@@ -67,8 +64,6 @@ export async function DELETE(request: Request) {
       .single();
 
     const isAdmin = profile?.role_id === ROLES.ADMIN;
-    console.log('🔍 DELETE: Usuario es admin:', isAdmin);
-    console.log('🔍 DELETE: Role ID del usuario:', profile?.role_id);
 
     // Verificar que la apuesta existe
     let query = supabase
@@ -84,26 +79,16 @@ export async function DELETE(request: Request) {
     const { data: bet, error: betError } = await query.single();
 
     if (betError || !bet) {
-      console.error('❌ Apuesta no encontrada:', betError);
       return NextResponse.json({ error: 'Apuesta no encontrada' }, { status: 404 });
     }
 
-    console.log('✅ Apuesta encontrada:', {
-      id: bet.id,
-      user_id: bet.user_id,
-      status: bet.status,
-      amount: bet.amount,
-      gameweek: bet.gameweek
-    });
 
     // Verificar que la apuesta esté pendiente (no se pueden eliminar apuestas resueltas)
     if (bet.status !== 'pending') {
-      console.error('❌ Apuesta no está pendiente:', bet.status);
       return NextResponse.json({ error: 'No se pueden eliminar apuestas resueltas' }, { status: 400 });
     }
 
     // 1. Eliminar transacciones relacionadas primero
-    console.log('🔍 DELETE: Eliminando transacciones para betId:', betId);
     
     let transDeleteQuery;
     if (isAdmin) {
@@ -127,18 +112,14 @@ export async function DELETE(request: Request) {
     const { data: deletedTransactions, error: transDeleteError } = await transDeleteQuery;
 
     if (transDeleteError) {
-      console.error('❌ Error al eliminar transacciones:', transDeleteError);
       return NextResponse.json({ error: 'Error al eliminar transacciones' }, { status: 500 });
     }
     
     // Verificar si realmente se eliminó algo
     if (deletedTransactions.length === 0) {
-      console.warn('⚠️ No se eliminaron transacciones - posible problema de permisos');
     }
-    console.log('✅ Transacciones eliminadas exitosamente:', deletedTransactions);
 
     // 2. Eliminar la apuesta
-    console.log('🔍 DELETE: Eliminando apuesta:', betId);
     let deleteQuery = supabase
       .from('bets')
       .delete()
@@ -152,16 +133,13 @@ export async function DELETE(request: Request) {
     const { data: deletedData, error: deleteError } = await deleteQuery.select();
 
     if (deleteError) {
-      console.error('❌ Error al eliminar apuesta:', deleteError);
       return NextResponse.json({ error: 'Error al eliminar la apuesta' }, { status: 500 });
     }
     
     // Verificar si realmente se eliminó algo
     if (deletedData.length === 0) {
-      console.warn('⚠️ No se eliminó la apuesta - posible problema de permisos');
       return NextResponse.json({ error: 'No se pudo eliminar la apuesta' }, { status: 500 });
     }
-    console.log('✅ Apuesta eliminada exitosamente:', deletedData);
 
     // Devolver el monto para actualizar el balance
     return NextResponse.json({ 
@@ -170,7 +148,6 @@ export async function DELETE(request: Request) {
     });
 
   } catch (error) {
-    console.error('Error en delete bet API:', error);
     return NextResponse.json({
       error: 'Error interno del servidor',
       details: error instanceof Error ? error.message : 'Unknown error'

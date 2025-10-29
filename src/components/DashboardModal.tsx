@@ -47,6 +47,10 @@ export default function DashboardModal({
   // Usar el contexto de liga para obtener nombres de equipos
   const { getTeamName, isDataLoaded } = useLeague();
 
+  // 🔍 DEBUG: Logs para debuggear el problema del profile
+  console.log('🔍 DashboardModal - user:', user);
+  console.log('🔍 DashboardModal - isOpen:', isOpen);
+  
   // HOOK 1: Cargar datos del dashboard (perfil, apuestas, admin status)
   const {
     profile,
@@ -58,6 +62,10 @@ export default function DashboardModal({
     dataLoading,
     refreshData,
   } = useDashboardData(user, isOpen);
+  
+  // 🔍 DEBUG: Logs después de usar el hook
+  console.log('🔍 DashboardModal - profile después del hook:', profile);
+  console.log('🔍 DashboardModal - dataLoading:', dataLoading);
 
   // HOOK 2: Calcular estadísticas de apuestas
   const stats = useUserStats(allBets);
@@ -97,7 +105,6 @@ export default function DashboardModal({
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Error al poblar GW");
-      console.log("Populate GW:", data);
       // Opcional: mostrar mensaje de éxito
     } catch (e) {
       console.error(e);

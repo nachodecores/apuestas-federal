@@ -13,11 +13,6 @@ export default function UpcomingMatches() {
   // Usar el contexto de liga
   const { leagueData, loading: contextLoading, error: contextError, fetchLeagueData, isDataLoaded, getTeamName, getPlayerName } = useLeague();
   
-  console.log('🔍 UpcomingMatches: Renderizando componente');
-  console.log('🔍 UpcomingMatches: leagueData:', !!leagueData);
-  console.log('🔍 UpcomingMatches: contextLoading:', contextLoading);
-  console.log('🔍 UpcomingMatches: contextError:', contextError);
-  console.log('🔍 UpcomingMatches: isDataLoaded:', isDataLoaded);
   
   // Estados de datos
   const [matches, setMatches] = useState<MatchDisplay[]>([]);
@@ -28,6 +23,10 @@ export default function UpcomingMatches() {
   // Estados de autenticación
   const [user, setUser] = useState<User | null>(null);
   const [userBalance, setUserBalance] = useState<number>(0);
+  
+  // Estados de apuestas optimizadas
+  const [userBets, setUserBets] = useState<any[]>([]);
+  const [betsLoading, setBetsLoading] = useState(false);
   
   // useEffect: Procesar partidos cuando el contexto esté cargado
   useEffect(() => {
@@ -107,7 +106,6 @@ export default function UpcomingMatches() {
           const { data: { user: authUser } } = await Promise.race([authPromise, timeoutPromise]) as any;
           user = authUser;
         } catch (error) {
-          console.warn('⚠️ Error o timeout en autenticación, continuando sin usuario:', error);
           user = null;
         }
         
@@ -125,18 +123,15 @@ export default function UpcomingMatches() {
             if (profile) {
               setUserBalance(profile.federal_balance);
             } else {
-              console.warn('⚠️ No se encontró perfil para el usuario');
               setUserBalance(0);
             }
           } catch (error) {
-            console.warn('⚠️ Error obteniendo balance:', error);
             setUserBalance(0);
           }
         } else {
           setUserBalance(0);
         }
       } catch (error) {
-        console.error('💥 Error en initializeAuth:', error);
       }
     }
     
@@ -161,7 +156,6 @@ export default function UpcomingMatches() {
             setUserBalance(profile.federal_balance);
           }
         } catch (error) {
-          console.warn('⚠️ Error actualizando balance:', error);
           setUserBalance(0);
         }
       } else {
@@ -172,15 +166,53 @@ export default function UpcomingMatches() {
     return () => subscription.unsubscribe();
   }, []);
 
+  // useEffect: Cargar apuestas cuando cambie el usuario o el gameweek
+  useEffect(() => {
+    if (user && nextGameweek) {
+      loadUserBets(nextGameweek);
+    } else {
+      setUserBets([]);
+    }
+  }, [user, nextGameweek]);
+
+  // Función para cargar todas las apuestas del usuario para el gameweek actual
+  async function loadUserBets(gameweek: number) {
+    if (!user) {
+      setUserBets([]);
+      return;
+    }
+
+    setBetsLoading(true);
+    try {
+      const response = await fetch(`/api/bets/user-bets?gameweek=${gameweek}`);
+      const data = await response.json();
+      
+      if (response.ok) {
+        setUserBets(data.bets || []);
+      } else {
+        console.error('Error loading user bets:', data.error);
+        setUserBets([]);
+      }
+    } catch (error) {
+      console.error('Error loading user bets:', error);
+      setUserBets([]);
+    } finally {
+      setBetsLoading(false);
+    }
+  }
+
   // Función para manejar cuando se confirma una apuesta desde MatchCard
   function handleBetConfirmed(newBalance: number) {
     setUserBalance(newBalance);
+    // Recargar apuestas después de confirmar una nueva
+    if (nextGameweek) {
+      loadUserBets(nextGameweek);
+    }
   }
 
 
   // Estado de carga
   if (loading) {
-    console.log('🔍 UpcomingMatches: Renderizando estado de carga');
     return (
       <section className="bg-[#37003c] h-full pb-4 mobile:pb-6 tablet:pb-8">
         <div className="h-full flex items-center justify-center px-3 min-[480px]:px-4 min-[768px]:px-6">
@@ -192,7 +224,6 @@ export default function UpcomingMatches() {
 
   // Estado de error
   if (error) {
-    console.log('🔍 UpcomingMatches: Renderizando estado de error:', error);
     return (
       <section className="bg-[#37003c] h-full pb-4 mobile:pb-6 tablet:pb-8">
         <div className="h-full flex items-center justify-center px-3 min-[480px]:px-4 min-[768px]:px-6">
@@ -202,7 +233,6 @@ export default function UpcomingMatches() {
     );
   }
 
-  console.log('🔍 UpcomingMatches: Renderizando partidos con datos:', matches.length, 'partidos');
   return (
     <section className="bg-[#37003c] h-full pb-4 mobile:pb-6 tablet:pb-8">
       <div className="h-full flex flex-col px-3 min-[480px]:px-4 min-[768px]:px-6">
@@ -212,16 +242,25 @@ export default function UpcomingMatches() {
 
         <div className="flex-1 overflow-y-auto">
           <div className="grid grid-cols-1 gap-4 mobile:gap-5 tablet:gap-6">
-          {matches.map((match, idx) => (
-              <MatchCard
-              key={idx}
-                match={match}
-                matchIndex={idx}
-                user={user}
-                userBalance={userBalance}
-                onBetConfirmed={handleBetConfirmed}
-              />
-            ))}
+          {matches.map((match, idx) => {
+              // Buscar la apuesta del usuario para este partido específico
+              const userBet = userBets.find(bet => 
+                bet.match_league_entry_1 === match.league_entry_1 && 
+                bet.match_league_entry_2 === match.league_entry_2
+              );
+              
+              return (
+                <MatchCard
+                  key={idx}
+                  match={match}
+                  matchIndex={idx}
+                  user={user}
+                  userBalance={userBalance}
+                  onBetConfirmed={handleBetConfirmed}
+                  userBet={userBet}
+                />
+              );
+            })}
                     </div>
         </div>
 

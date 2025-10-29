@@ -167,14 +167,14 @@ export default function ActiveBetsTable({
                     {/* Apostado */}
                     <td className="px-2 py-2 sm:px-3 sm:py-3 text-right">
                       <span className="text-xs sm:text-sm font-medium text-gray-900">
-                        ₣{bet.amount ? bet.amount.toFixed(2) : "0.00"}
+                        F${bet.amount ? bet.amount.toFixed(2) : "0.00"}
                       </span>
                     </td>
 
                     {/* Posible */}
                     <td className="px-2 py-2 sm:px-3 sm:py-3 text-right">
-                      <span className="text-xs sm:text-sm font-medium text-[#00ff87]">
-                        ₣
+                      <span className="text-xs sm:text-sm font-medium text-gray-900">
+                        F$
                         {bet.potential_win
                           ? bet.potential_win.toFixed(2)
                           : "0.00"}

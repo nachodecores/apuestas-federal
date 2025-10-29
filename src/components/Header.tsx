@@ -39,7 +39,6 @@ export default function Header() {
     try {
       // 1. Primero esperar a que el contexto tenga datos
       if (!isDataLoaded) {
-        console.log('🔍 Header: Esperando datos de liga...');
         return; // Salir si no hay datos aún
       }
       
@@ -50,7 +49,6 @@ export default function Header() {
         // Obtener nombres de equipos usando el contexto
         const participantsData: Participant[] = data.profiles.map((profile: { display_name: string; fpl_entry_id: number; team_logo: string | null }) => {
           const teamName = getTeamName(profile.fpl_entry_id);
-          console.log('🔍 Header: Mapeando participante:', profile.display_name, '->', teamName);
           
           return {
             name: profile.display_name,
@@ -62,7 +60,6 @@ export default function Header() {
         
         setParticipants(participantsData);
       } else {
-        console.warn('⚠️ No se encontraron perfiles, usando datos por defecto');
         // Usar datos por defecto si no hay perfiles
         setParticipants([
           { name: 'Chacho Bonino', teamName: 'Quebracho', fpl_entry_id: 6753, team_logo: null },
@@ -78,7 +75,6 @@ export default function Header() {
         ]);
       }
     } catch (error) {
-      console.error('💥 Error cargando participantes:', error);
       // Usar datos por defecto si falla
       setParticipants([
         { name: 'Chacho Bonino', teamName: 'Quebracho', fpl_entry_id: 6753, team_logo: null },
@@ -115,7 +111,6 @@ export default function Header() {
           const { data: { user: authUser } } = await Promise.race([authPromise, timeoutPromise]) as any;
           user = authUser;
         } catch (error) {
-          console.warn('⚠️ Error o timeout en autenticación, continuando sin usuario:', error);
           user = null;
         }
         
@@ -140,7 +135,6 @@ export default function Header() {
             // El nombre del equipo se actualizará cuando los datos de liga estén cargados
             setUserTeamName('Cargando...');
           } else {
-            console.warn('⚠️ No se encontró perfil para el usuario');
           }
         } else {
           setUserName('');
@@ -155,7 +149,6 @@ export default function Header() {
         
         setLoading(false);
       } catch (error) {
-        console.error('💥 Error en initializeComponent:', error);
         setLoading(false);
       }
     }
@@ -201,7 +194,6 @@ export default function Header() {
   // Recargar participantes cuando los datos de liga estén disponibles
   useEffect(() => {
     if (isDataLoaded) {
-      console.log('🔍 Header: Datos de liga cargados, recargando participantes...');
       loadParticipants();
     }
   }, [isDataLoaded, getTeamName]);
@@ -209,7 +201,6 @@ export default function Header() {
   // Actualizar nombre del equipo del usuario cuando los datos estén cargados
   useEffect(() => {
     if (user && isDataLoaded) {
-      console.log('🔍 Header: Actualizando nombre del equipo del usuario...');
       const updateUserTeamName = async () => {
         try {
           const { data: profile } = await supabase
@@ -220,11 +211,9 @@ export default function Header() {
           
           if (profile) {
             const teamName = getTeamName(profile.fpl_entry_id);
-            console.log('🔍 Header: Usuario', user.id, '-> Equipo:', teamName);
             setUserTeamName(teamName);
           }
         } catch (error) {
-          console.error('💥 Error actualizando nombre del equipo:', error);
         }
       };
       
@@ -360,7 +349,7 @@ export default function Header() {
                   <div className="hidden min-[768px]:flex flex-col items-end">
                     <span className="text-[0.625rem] text-white/70 uppercase tracking-wider">Disponible</span>
                     <span className="text-sm font-bold text-[#00ff87]">
-                      ₣{userBalance.toFixed(2)}
+                      F${userBalance.toFixed(2)}
                     </span>
                   </div>
                   

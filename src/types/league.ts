@@ -74,6 +74,7 @@ export interface MatchCardProps {
   user: any; // User de Supabase
   userBalance: number;
   onBetConfirmed: (newBalance: number) => void;
+  userBet?: any; // Apuesta existente del usuario para este partido (opcional)
 }
 
 export interface DashboardModalProps {
