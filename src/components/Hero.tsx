@@ -35,6 +35,13 @@ export default function Hero() {
     }
 
     fetchStats();
+
+    // Escuchar eventos de eliminación de apuestas para refrescar stats
+    function handleBetDeleted() {
+      fetchStats();
+    }
+    window.addEventListener('betDeleted', handleBetDeleted as EventListener);
+    return () => window.removeEventListener('betDeleted', handleBetDeleted as EventListener);
   }, []);
 
   return (
@@ -88,7 +95,7 @@ export default function Hero() {
             {/* Apuestas Activas */}
             <div className="text-center">
               <div className="text-[0.625rem] sm:text-xs md:text-sm text-gray-300 tracking-normal mb-2 sm:mb-3">
-                n° apuestas
+                Bets
               </div>
               <div 
                 className="text-2xl sm:text-3xl md:text-4xl font-bold mb-0"
@@ -106,7 +113,7 @@ export default function Hero() {
             {/* Monto Apostado GW */}
             <div className="text-center">
               <div className="text-[0.625rem] sm:text-xs md:text-sm text-gray-300 tracking-normal mb-2 sm:mb-3">
-                Total apostado
+                Total bet
               </div>
               <div 
                 className="text-2xl sm:text-3xl md:text-4xl font-bold mb-0"

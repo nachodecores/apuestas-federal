@@ -26,6 +26,7 @@
 import { createClient } from "@/lib/supabase/client";
 import { useEffect, useState } from "react";
 import { useLeague } from "@/contexts/LeagueContext";
+import { useUser } from "@/contexts/UserContext";
 import type { User } from "@supabase/supabase-js";
 import { DashboardModalProps } from "@/types";
 import { useDashboardData, useUserStats, useTeamMapping } from "@/hooks";
@@ -46,10 +47,9 @@ export default function DashboardModal({
   
   // Usar el contexto de liga para obtener nombres de equipos
   const { getTeamName, isDataLoaded } = useLeague();
+  // Usar contexto de usuario para el saldo
+  const { federalBalance } = useUser();
 
-  // 🔍 DEBUG: Logs para debuggear el problema del profile
-  console.log('🔍 DashboardModal - user:', user);
-  console.log('🔍 DashboardModal - isOpen:', isOpen);
   
   // HOOK 1: Cargar datos del dashboard (perfil, apuestas, admin status)
   const {
@@ -63,9 +63,7 @@ export default function DashboardModal({
     refreshData,
   } = useDashboardData(user, isOpen);
   
-  // 🔍 DEBUG: Logs después de usar el hook
-  console.log('🔍 DashboardModal - profile después del hook:', profile);
-  console.log('🔍 DashboardModal - dataLoading:', dataLoading);
+
 
   // HOOK 2: Calcular estadísticas de apuestas
   const stats = useUserStats(allBets);
@@ -182,6 +180,7 @@ export default function DashboardModal({
               <DashboardStats
                 activeBets={activeBets}
                 netProfit={stats.netProfit}
+                federalBalance={federalBalance}
               />
 
               {/* Apuestas activas */}

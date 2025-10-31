@@ -1,24 +1,7 @@
 "use client";
 
 import { createContext, useContext, useState, useEffect, ReactNode, useCallback } from 'react';
-import { LeagueEntry, Standing, ApiMatch } from '@/types';
-
-interface LeagueData {
-  league_entries: LeagueEntry[];
-  standings: Standing[];
-  matches: ApiMatch[];
-  gameweek?: number;
-}
-
-interface LeagueContextType {
-  leagueData: LeagueData | null;
-  loading: boolean;
-  error: string | null;
-  fetchLeagueData: () => Promise<void>;
-  getTeamName: (leagueEntryId: number) => string;
-  getPlayerName: (leagueEntryId: number) => string;
-  isDataLoaded: boolean;
-}
+import { LeagueContextType, LeagueData } from '@/types';
 
 const LeagueContext = createContext<LeagueContextType | undefined>(undefined);
 

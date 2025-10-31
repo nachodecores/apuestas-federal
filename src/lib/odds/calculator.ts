@@ -21,24 +21,9 @@
  * Este archivo es usado por src/lib/odds/gameweek-odds.ts que maneja la persistencia.
  */
 
-interface Standing {
-  league_entry: number;
-  rank: number;
-  points_for: number;
-  matches_won: number;
-  matches_drawn: number;
-  matches_lost: number;
-  total: number;
-}
+import type { Standing, ApiMatch } from '@/types';
 
-interface Match {
-  event: number;
-  league_entry_1: number;
-  league_entry_2: number;
-  league_entry_1_points: number;
-  league_entry_2_points: number;
-  finished: boolean;
-}
+type Match = ApiMatch;
 
 interface Odds {
   home: number;   // Cuota para victoria local
@@ -87,9 +72,18 @@ export function calculateOdds(
   // Probabilidad del equipo 2 es el complemento
   const team2Probability = 1 - team1Probability;
   
-  // 4. Calcular odds
-  // Empate tiene probabilidad baja (10-15% típicamente en Draft FPL)
-  const drawProbability = 0.12; // 12% de probabilidad de empate
+  // 4. Calcular probabilidad de empate dinámicamente
+  // Es más probable cuando los equipos están más equilibrados
+  const teamDifference = Math.abs(team1Probability - team2Probability);
+  // Si la diferencia es grande (> 0.5), empate es muy improbable (5-7%)
+  // Si están muy equilibrados (< 0.1), empate es más probable (15-18%)
+  const drawProbability = Math.max(
+    0.05,  // Mínimo 5%
+    Math.min(
+      0.18,  // Máximo 18%
+      0.15 - (teamDifference * 0.20)  // Base 15%, reduce con diferencia
+    )
+  );
   
   // Ajustar probabilidades de victoria para incluir empates
   const adjustedTeam1Prob = team1Probability * (1 - drawProbability);
@@ -100,7 +94,7 @@ export function calculateOdds(
   const margin = 1.05;
   
   const homeOdds = Math.max(1.1, (1 / adjustedTeam1Prob) * margin);
-  const drawOdds = Math.max(3.0, (1 / drawProbability) * margin); // Mínimo 3.0 para empates
+  const drawOdds = Math.max(5.0, (1 / drawProbability) * margin); // Mínimo 5.0 (empates poco probables)
   const awayOdds = Math.max(1.1, (1 / adjustedTeam2Prob) * margin);
   
   return {

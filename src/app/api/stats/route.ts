@@ -21,7 +21,7 @@
 import { createClient } from '@/lib/supabase/server';
 import { NextResponse } from 'next/server';
 
-export async function GET() {
+export async function GET(request: Request) {
   try {
     // Verificar variables de entorno
     if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.SUPABASE_SERVICE_ROLE_KEY) {
@@ -37,76 +37,86 @@ export async function GET() {
 
     const supabase = await createClient();
     
-    // 1. Obtener gameweek actual de la API de FPL
-    const baseUrl = process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : 'http://localhost:3000';
-    const apiResponse = await fetch(`${baseUrl}/api/league`);
+    // Verificar si hay usuario autenticado para devolver stats personales
+    const { data: { user } } = await supabase.auth.getUser();
+    const isPersonal = !!user;
     
-    if (!apiResponse.ok) {
-      console.error('Error fetching league data:', apiResponse.status);
-      return NextResponse.json({ 
-        currentGameweek: 8,
-        activeBets: 0,
-        gwAmount: 0,
-        federalPool: 0,
-        realPool: 10000
-      });
-    }
-    
-    const fplData = await apiResponse.json();
-    
-    // Encontrar el próximo gameweek (primer partido no terminado)
-    const upcomingMatches = fplData.matches.filter((m: { finished: boolean }) => !m.finished);
-    const currentGameweek = upcomingMatches.length > 0 ? upcomingMatches[0].event : 8;
-
-    // 2. Contar apuestas activas (status='pending') - con fallback
-    let activeBetsCount = 0;
+    // 1. Obtener gameweek activa desde gameweek_matches
+    let currentGameweek = 8;
     try {
-      const { count } = await supabase
-        .from('bets')
-        .select('*', { count: 'exact', head: true })
-        .eq('status', 'pending');
-      activeBetsCount = count || 0;
+      const { data: activeGwData } = await supabase
+        .from('gameweek_matches')
+        .select('gameweek')
+        .eq('is_active', true)
+        .limit(1)
+        .maybeSingle();
+      
+      if (activeGwData?.gameweek) {
+        currentGameweek = activeGwData.gameweek;
+      } else {
+        // Fallback: obtener desde API de FPL
+        const baseUrl = process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : 'http://localhost:3000';
+        const apiResponse = await fetch(`${baseUrl}/api/league`);
+        if (apiResponse.ok) {
+          const fplData = await apiResponse.json();
+          const upcomingMatches = fplData.matches.filter((m: { finished: boolean }) => !m.finished);
+          currentGameweek = upcomingMatches.length > 0 ? upcomingMatches[0].event : 8;
+        }
+      }
     } catch (error) {
-      console.error('Error counting active bets:', error);
+      console.error('Error getting current gameweek:', error);
     }
-    
-    // 3. Sumar montos apostados en el gameweek actual - con fallback
+
+    // 2. Contar apuestas activas según tipo (personales o globales)
+    let activeBetsCount = 0;
     let gwAmount = 0;
     try {
-      const { data: gwBets } = await supabase
+      let betsQuery = supabase
         .from('bets')
-        .select('amount')
+        .select('amount', { count: 'exact' })
         .eq('gameweek', currentGameweek)
         .eq('status', 'pending');
       
+      if (isPersonal && user) {
+        // Stats personales: solo apuestas del usuario
+        betsQuery = betsQuery.eq('user_id', user.id);
+      }
+      
+      const { data: gwBets, count } = await betsQuery;
+      
+      activeBetsCount = count || 0;
       gwAmount = gwBets?.reduce((sum, bet) => sum + bet.amount, 0) || 0;
     } catch (error) {
-      console.error('Error calculating GW amount:', error);
+      console.error('Error counting active bets:', error);
     }
 
-    // 4. Sumar todos los federal_balance (pozo federal) - con fallback
+    // 3. Calcular pools (personales o globales)
     let federalPool = 0;
-    try {
-      const { data: profiles } = await supabase
-        .from('profiles')
-        .select('federal_balance');
-      
-      federalPool = profiles?.reduce((sum, profile) => sum + (profile.federal_balance || 0), 0) || 0;
-    } catch (error) {
-      console.error('Error calculating federal pool:', error);
-    }
-
-    // 5. Sumar todos los real_balance (pozo real) - con fallback
     let realPool = 0;
+    
     try {
-      const { data: profiles } = await supabase
-        .from('profiles')
-        .select('real_balance');
-      
-      realPool = profiles?.reduce((sum, profile) => sum + (profile.real_balance || 0), 0) || 0;
+      if (isPersonal && user) {
+        // Stats personales: solo balance del usuario
+        const { data: profile } = await supabase
+          .from('profiles')
+          .select('federal_balance, real_balance')
+          .eq('id', user.id)
+          .single();
+        
+        federalPool = profile?.federal_balance || 0;
+        realPool = profile?.real_balance || 10000;
+      } else {
+        // Stats globales: suma de todos los balances
+        const { data: profiles } = await supabase
+          .from('profiles')
+          .select('federal_balance, real_balance');
+        
+        federalPool = profiles?.reduce((sum, profile) => sum + (profile.federal_balance || 0), 0) || 0;
+        realPool = profiles?.reduce((sum, profile) => sum + (profile.real_balance || 0), 0) || 10000;
+      }
     } catch (error) {
-      console.error('Error calculating real pool:', error);
-      realPool = 10000; // Fallback al valor hardcodeado anterior
+      console.error('Error calculating pools:', error);
+      realPool = 10000;
     }
 
     return NextResponse.json({

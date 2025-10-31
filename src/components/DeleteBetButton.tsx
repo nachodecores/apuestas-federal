@@ -15,6 +15,8 @@ export default function DeleteBetButton({
   const [isDeleting, setIsDeleting] = useState(false);
 
   const handleDelete = async () => {
+    const ok = window.confirm('¿Eliminar esta apuesta?');
+    if (!ok) return;
     setIsDeleting(true);
 
     try {

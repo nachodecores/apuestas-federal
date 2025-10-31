@@ -146,11 +146,11 @@ export default function MatchCard({
 
   return (
     <div
-      className="p-4 sm:p-5 md:p-6 rounded-xl sm:rounded-2xl border border-white/10"
+      className="w-full block p-4 sm:p-5 md:p-6 border border-white/10"
       style={{ backgroundColor: 'rgba(237, 237, 237, 0.85)' }}
     >
       {/* Equipos */}
-      <div className="flex items-center justify-between mb-4 sm:mb-5 md:mb-6 gap-1 sm:gap-2">
+      <div className="flex items-center justify-between gap-1 sm:gap-2">
         {/* Local - Solo datos */}
         <div className="flex flex-col min-w-0 overflow-hidden flex-1">
           <div className="text-gray-900 font-semibold text-[0.625rem] sm:text-xs md:text-sm truncate">
@@ -161,8 +161,8 @@ export default function MatchCard({
           </div>
         </div>
         
-        <div className="text-gray-800 font-black text-xs sm:text-sm md:text-base px-0.5 sm:px-1 md:px-2 flex-shrink-0">
-          VS
+        <div className="text-gray-700 font-medium text-xs sm:text-sm md:text-base px-0.5 sm:px-1 md:px-2 flex-shrink-0">
+          v
         </div>
         
         {/* Visitante - Solo datos */}

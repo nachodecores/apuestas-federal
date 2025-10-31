@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
 import MatchCard from "./MatchCard";
 import { useLeague } from "@/contexts/LeagueContext";
+import { useUser } from "@/contexts/UserContext";
 import type { User } from "@supabase/supabase-js";
 import { MatchDisplay, LeagueEntry, ApiMatch, Standing, DraftLeagueData } from "@/types";
 
@@ -13,16 +14,14 @@ export default function UpcomingMatches() {
   // Usar el contexto de liga
   const { leagueData, loading: contextLoading, error: contextError, fetchLeagueData, isDataLoaded, getTeamName, getPlayerName } = useLeague();
   
+  // Usar contexto global de usuario
+  const { user, federalBalance, refreshProfile } = useUser();
   
   // Estados de datos
   const [matches, setMatches] = useState<MatchDisplay[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [nextGameweek, setNextGameweek] = useState<number>(8);
-  
-  // Estados de autenticación
-  const [user, setUser] = useState<User | null>(null);
-  const [userBalance, setUserBalance] = useState<number>(0);
   
   // Estados de apuestas optimizadas
   const [userBets, setUserBets] = useState<any[]>([]);
@@ -37,25 +36,41 @@ export default function UpcomingMatches() {
       }
 
       try {
-        // 1. Obtener partidos activos del contexto
-        const upcomingMatches = leagueData.matches.filter(m => !m.finished);
+        // 1. Obtener gameweek activa desde gameweek_matches
+        const { data: activeGwData } = await supabase
+          .from('gameweek_matches')
+          .select('gameweek')
+          .eq('is_active', true)
+          .limit(1)
+          .maybeSingle();
+
+        const activeGameweek = activeGwData?.gameweek ?? null;
+        if (!activeGameweek) {
+          setError('No hay gameweek activa');
+          setLoading(false);
+          return;
+        }
+
+        setNextGameweek(activeGameweek);
+
+        // 2. Obtener partidos de la gameweek activa (no finalizados)
+        const upcomingMatches = leagueData.matches.filter(
+          m => !m.finished && m.event === activeGameweek
+        );
         if (!upcomingMatches.length) {
           setError('No hay partidos próximos');
           setLoading(false);
           return;
         }
         
-        const currentGW = upcomingMatches[0].event;
-        setNextGameweek(currentGW);
-
-        // 2. Obtener odds desde gameweek_matches
+        // 3. Obtener odds desde gameweek_matches
         const { data: oddsData } = await supabase
           .from('gameweek_matches')
           .select('*')
           .eq('is_active', true)
-          .eq('gameweek', currentGW);
+          .eq('gameweek', activeGameweek);
 
-        // 3. Mapear partidos con odds
+        // 4. Mapear partidos con odds
         const processedMatches = upcomingMatches.map(match => {
           const matchOdds = oddsData?.find(o => 
             o.league_entry_1 === match.league_entry_1 && 
@@ -91,80 +106,7 @@ export default function UpcomingMatches() {
     processMatches();
   }, [isDataLoaded, leagueData, getTeamName, getPlayerName, supabase]);
 
-  // useEffect: Inicializar autenticación
-  useEffect(() => {
-    async function initializeAuth() {
-      try {
-        // Crear una promesa con timeout para evitar que se cuelgue
-        const authPromise = supabase.auth.getUser();
-        const timeoutPromise = new Promise((_, reject) => 
-          setTimeout(() => reject(new Error('Auth timeout')), 5000)
-        );
-        
-        let user = null;
-        try {
-          const { data: { user: authUser } } = await Promise.race([authPromise, timeoutPromise]) as any;
-          user = authUser;
-        } catch (error) {
-          user = null;
-        }
-        
-        setUser(user);
-        
-        if (user) {
-          // Obtener balance del usuario
-          try {
-            const { data: profile } = await supabase
-              .from('profiles')
-              .select('federal_balance')
-              .eq('id', user.id)
-              .single();
-            
-            if (profile) {
-              setUserBalance(profile.federal_balance);
-            } else {
-              setUserBalance(0);
-            }
-          } catch (error) {
-            setUserBalance(0);
-          }
-        } else {
-          setUserBalance(0);
-        }
-      } catch (error) {
-      }
-    }
-    
-    initializeAuth();
-    
-    // Escuchar cambios de autenticación en TIEMPO REAL
-    const {
-      data: { subscription },
-    } = supabase.auth.onAuthStateChange(async (_event, session) => {
-      setUser(session?.user ?? null);
-      
-      if (session?.user) {
-        // Actualizar balance cuando el usuario se loguea
-        try {
-          const { data: profile } = await supabase
-            .from('profiles')
-            .select('federal_balance')
-            .eq('id', session.user.id)
-            .single();
-          
-          if (profile) {
-            setUserBalance(profile.federal_balance);
-          }
-        } catch (error) {
-          setUserBalance(0);
-        }
-      } else {
-        setUserBalance(0);
-      }
-    });
-    
-    return () => subscription.unsubscribe();
-  }, []);
+  // Ya no necesitamos manejar autenticación aquí, el contexto lo hace
 
   // useEffect: Cargar apuestas cuando cambie el usuario o el gameweek
   useEffect(() => {
@@ -174,6 +116,20 @@ export default function UpcomingMatches() {
       setUserBets([]);
     }
   }, [user, nextGameweek]);
+
+  // Escuchar eliminaciones para refrescar apuestas en esta vista
+  useEffect(() => {
+    function handleBetDeleted() {
+      (async () => {
+        await refreshProfile();
+        if (nextGameweek) {
+          loadUserBets(nextGameweek);
+        }
+      })();
+    }
+    window.addEventListener('betDeleted', handleBetDeleted as EventListener);
+    return () => window.removeEventListener('betDeleted', handleBetDeleted as EventListener);
+  }, [nextGameweek, user, refreshProfile]);
 
   // Función para cargar todas las apuestas del usuario para el gameweek actual
   async function loadUserBets(gameweek: number) {
@@ -202,8 +158,9 @@ export default function UpcomingMatches() {
   }
 
   // Función para manejar cuando se confirma una apuesta desde MatchCard
-  function handleBetConfirmed(newBalance: number) {
-    setUserBalance(newBalance);
+  async function handleBetConfirmed(newBalance: number) {
+    // Refrescar el perfil desde el contexto para sincronizar balance
+    await refreshProfile();
     // Recargar apuestas después de confirmar una nueva
     if (nextGameweek) {
       loadUserBets(nextGameweek);
@@ -240,8 +197,7 @@ export default function UpcomingMatches() {
           Próximos Partidos
         </h3>
 
-        <div className="flex-1 overflow-y-auto">
-          <div className="grid grid-cols-1 gap-4 mobile:gap-5 tablet:gap-6">
+        <div className="flex-1 overflow-y-auto w-full grid grid-cols-1 gap-0">
           {matches.map((match, idx) => {
               // Buscar la apuesta del usuario para este partido específico
               const userBet = userBets.find(bet => 
@@ -255,13 +211,12 @@ export default function UpcomingMatches() {
                   match={match}
                   matchIndex={idx}
                   user={user}
-                  userBalance={userBalance}
+                  userBalance={federalBalance}
                   onBetConfirmed={handleBetConfirmed}
                   userBet={userBet}
                 />
               );
             })}
-                    </div>
         </div>
 
       </div>

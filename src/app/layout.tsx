@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Poppins, Inter } from "next/font/google";
 import "./globals.css";
 import { LeagueProvider } from "@/contexts/LeagueContext";
+import { UserProvider } from "@/contexts/UserContext";
 
 const poppins = Poppins({
   variable: "--font-poppins",
@@ -31,9 +32,11 @@ export default function RootLayout({
       <body
         className={`${poppins.variable} ${inter.variable} antialiased`}
       >
-        <LeagueProvider>
-          {children}
-        </LeagueProvider>
+        <UserProvider>
+          <LeagueProvider>
+            {children}
+          </LeagueProvider>
+        </UserProvider>
       </body>
     </html>
   );

@@ -16,12 +16,7 @@
 
 "use client";
 
-interface DashboardFooterProps {
-  isAdmin: boolean;
-  onShowChangePassword: () => void;
-  onLogout: () => void;
-  onPopulateGameweek: () => void;
-}
+import { DashboardFooterProps } from "@/types";
 
 export default function DashboardFooter({
   isAdmin,

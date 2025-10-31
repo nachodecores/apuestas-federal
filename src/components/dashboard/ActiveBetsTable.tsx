@@ -18,37 +18,7 @@
 "use client";
 
 import DeleteBetButton from "../DeleteBetButton";
-
-interface TeamInfo {
-  name: string;
-  logo: string | null;
-}
-
-interface UserInfo {
-  name: string;
-  initials: string;
-}
-
-interface Bet {
-  id: string;
-  user_id: string;
-  match_league_entry_1: number;
-  match_league_entry_2: number;
-  prediction: string;
-  amount: number;
-  odds: number;
-  potential_win: number;
-  [key: string]: any;
-}
-
-interface ActiveBetsTableProps {
-  activeBets: Bet[];
-  isAdmin: boolean;
-  teamMap: Map<number, TeamInfo>;
-  allUsersMap: Map<string, UserInfo>;
-  onBetDeleted: () => void;
-  onClose: () => void;
-}
+import { ActiveBetsTableProps } from "@/types";
 
 export default function ActiveBetsTable({
   activeBets,

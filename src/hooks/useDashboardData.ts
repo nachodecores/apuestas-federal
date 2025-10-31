@@ -29,17 +29,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { createClient } from '@/lib/supabase/client';
 import { ROLES } from '@/constants/roles';
 import type { User } from '@supabase/supabase-js';
-
-interface DashboardData {
-  profile: any | null;
-  allBets: any[];
-  activeBets: any[];
-  isAdmin: boolean;
-  allUsersBets: any[];
-  allUsersMap: Map<string, { name: string; initials: string }>;
-  dataLoading: boolean;
-  refreshData: () => Promise<void>;
-}
+import { DashboardData } from '@/types';
 
 export function useDashboardData(user: User | null, isOpen: boolean): DashboardData {
   const supabase = createClient();
@@ -55,35 +45,41 @@ export function useDashboardData(user: User | null, isOpen: boolean): DashboardD
   const loadDashboardData = useCallback(async () => {
     if (!user || !isOpen) return;
     
-    // 🔍 DEBUG: Logs para debuggear el problema del profile
-    console.log('🔍 useDashboardData - loadDashboardData iniciado');
-    console.log('🔍 useDashboardData - user:', user);
-    console.log('🔍 useDashboardData - isOpen:', isOpen);
-    
     setDataLoading(true);
     
     try {
-      // 1. Obtener perfil del usuario
-      console.log('🔍 useDashboardData - Obteniendo perfil para user.id:', user.id);
+      // 1. Obtener gameweek activa
+      const { data: activeGwData } = await supabase
+        .from('gameweek_matches')
+        .select('gameweek')
+        .eq('is_active', true)
+        .limit(1)
+        .maybeSingle();
+
+      const activeGameweek = activeGwData?.gameweek ?? null;
+
       const { data: profileData, error: profileError } = await supabase
         .from('profiles')
         .select('*')
         .eq('id', user.id)
         .single();
       
-      console.log('🔍 useDashboardData - profileData:', profileData);
-      console.log('🔍 useDashboardData - profileError:', profileError);
       
       setProfile(profileData);
 
       // 2. Detectar si es admin
       const adminStatus = profileData?.role_id === ROLES.ADMIN;
-      console.log('🔍 useDashboardData - adminStatus:', adminStatus);
-      console.log('🔍 useDashboardData - profileData.role_id:', profileData?.role_id);
-      console.log('🔍 useDashboardData - ROLES.ADMIN:', ROLES.ADMIN);
       setIsAdmin(adminStatus);
 
-      // 3. Cargar apuestas según el rol
+      // 3. Cargar apuestas según el rol (solo si hay gameweek activa)
+      if (!activeGameweek) {
+        setAllBets([]);
+        setActiveBets([]);
+        setAllUsersBets([]);
+        setAllUsersMap(new Map());
+        return;
+      }
+
       if (adminStatus) {
         // Admin: cargar TODAS las apuestas de todos los usuarios
         const { data: allBetsData } = await supabase
@@ -95,12 +91,14 @@ export function useDashboardData(user: User | null, isOpen: boolean): DashboardD
               fpl_entry_id
             )
           `)
+          .eq('status', 'pending')
+          .eq('gameweek', activeGameweek)
           .order('created_at', { ascending: false });
         
         setAllUsersBets(allBetsData || []);
         
-        // Filtrar apuestas activas globales
-        const globalActive = allBetsData?.filter((bet) => bet.status === 'pending') || [];
+        // Filtrar apuestas activas globales (ya filtradas por gameweek)
+        const globalActive = allBetsData || [];
         setActiveBets(globalActive);
         
         // Crear mapa de usuarios
@@ -123,12 +121,14 @@ export function useDashboardData(user: User | null, isOpen: boolean): DashboardD
           .from('bets')
           .select('*')
           .eq('user_id', user.id)
+          .eq('status', 'pending')
+          .eq('gameweek', activeGameweek)
           .order('created_at', { ascending: false });
         
         setAllBets(betsData || []);
         
-        // Filtrar apuestas activas
-        const active = betsData?.filter((bet) => bet.status === 'pending') || [];
+        // Filtrar apuestas activas (ya filtradas por gameweek)
+        const active = betsData || [];
         setActiveBets(active);
       }
     } catch (error) {
@@ -136,7 +136,7 @@ export function useDashboardData(user: User | null, isOpen: boolean): DashboardD
     } finally {
       setDataLoading(false);
     }
-  }, [user, isOpen, supabase]);
+  }, [user, isOpen]);
 
   // Cargar datos cuando se abre el modal
   useEffect(() => {

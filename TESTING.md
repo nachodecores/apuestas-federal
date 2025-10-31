@@ -34,7 +34,7 @@ Este documento cubre las funcionalidades críticas:
 - Header muestra el avatar del usuario
 - Botón "Dashboard" aparece en el Header
 
-**Estado:** [ ] Pendiente | [ ] Pasó | [ ] Falló
+**Estado:** [ ] Pendiente | [x] Pasó | [ ] Falló
 
 ---
 
@@ -54,7 +54,7 @@ Este documento cubre las funcionalidades críticas:
 - Sistema muestra mensaje de error
 - Usuario no se autentica
 
-**Estado:** [ ] Pendiente | [ ] Pasó | [ ] Falló
+**Estado:** [ ] Pendiente | [x] Pasó | [ ] Falló
 
 ---
 
@@ -75,7 +75,7 @@ Este documento cubre las funcionalidades críticas:
 - DashboardModal se cierra
 - Datos del usuario se limpian de la memoria
 
-**Estado:** [ ] Pendiente | [ ] Pasó | [ ] Falló
+**Estado:** [ ] Pendiente | [x] Pasó | [ ] Falló
 
 ---
 
@@ -93,7 +93,7 @@ Este documento cubre las funcionalidades críticas:
 - Usuario sigue autenticado después de recargar
 - Header sigue mostrando avatar y botón "Dashboard"
 
-**Estado:** [ ] Pendiente | [ ] Pasó | [ ] Falló
+**Estado:** [ ] Pendiente | [x] Pasó | [ ] Falló
 
 ---
 
@@ -119,7 +119,7 @@ Este documento cubre las funcionalidades críticas:
 - Balance del usuario se reduce por el monto apostado
 - Odds y ganancia potencial se calculan correctamente
 
-**Estado:** [ ] Pendiente | [ ] Pasó | [ ] Falló
+**Estado:** [ ] Pendiente | [x] Pasó | [ ] Falló
 
 ---
 
@@ -141,7 +141,7 @@ Este documento cubre las funcionalidades críticas:
 - Cada apuesta muestra: Partido, Predicción, Apostado, Posible ganancia, Cuota
 - Estadísticas muestran: Número de apuestas activas, Total apostado, Ganancia potencial
 
-**Estado:** [ ] Pendiente | [ ] Pasó | [ ] Falló
+**Estado:** [ ] Pendiente | [x] Pasó | [ ] Falló
 
 ---
 
@@ -164,7 +164,7 @@ Este documento cubre las funcionalidades críticas:
 - Balance del usuario aumenta por el monto apostado (reembolso)
 - Estadísticas se actualizan automáticamente
 
-**Estado:** [ ] Pendiente | [ ] Pasó | [ ] Falló
+**Estado:** [ ] Pendiente | [x] Pasó | [ ] Falló
 
 ---
 
@@ -186,7 +186,7 @@ Este documento cubre las funcionalidades críticas:
 - Después de crear apuesta: balance = inicial - 100
 - Después de eliminar apuesta: balance = inicial (reembolso completo)
 
-**Estado:** [ ] Pendiente | [ ] Pasó | [ ] Falló
+**Estado:** [ ] Pendiente | [x] Pasó | [ ] Falló
 
 ---
 
@@ -208,7 +208,7 @@ Este documento cubre las funcionalidades críticas:
 - "Apostado" = suma correcta de montos de apuestas activas
 - "Ganancia Potencial" = suma correcta de potential_win de apuestas activas
 
-**Estado:** [ ] Pendiente | [ ] Pasó | [ ] Falló
+**Estado:** [ ] Pendiente | [x] Pasó | [ ] Falló
 
 ---
 
@@ -232,7 +232,7 @@ Este documento cubre las funcionalidades críticas:
 - Contraseña se actualiza exitosamente
 - Login con nueva contraseña funciona correctamente
 
-**Estado:** [ ] Pendiente | [ ] Pasó | [ ] Falló
+**Estado:** [ ] Pendiente | [x] Pasó | [ ] Falló
 
 ---
 
@@ -255,7 +255,7 @@ Este documento cubre las funcionalidades críticas:
 - "Ganancia Potencial" se reduce correspondientemente
 - No se requiere recargar la página
 
-**Estado:** [ ] Pendiente | [ ] Pasó | [ ] Falló
+**Estado:** [ ] Pendiente | [x] Pasó | [ ] Falló
 
 ---
 
@@ -277,7 +277,7 @@ Este documento cubre las funcionalidades críticas:
 - Apuestas mostradas pertenecen solo a Usuario B
 - No hay mezcla de datos entre usuarios
 
-**Estado:** [ ] Pendiente | [ ] Pasó | [ ] Falló
+**Estado:** [ ] Pendiente | [x] Pasó | [ ] Falló
 
 ---
 
@@ -302,7 +302,7 @@ Este documento cubre las funcionalidades críticas:
 - Solo la gameweek con número más alto tiene `is_active = true`
 - Gameweeks anteriores tienen `is_active = false`
 
-**Estado:** [ ] Pendiente | [ ] Pasó | [ ] Falló
+**Estado:** [ ] Pendiente | [x] Pasó | [ ] Falló
 
 ---
 
@@ -323,7 +323,7 @@ Este documento cubre las funcionalidades críticas:
 - Columna "Usuario" muestra iniciales de cada usuario
 - Se pueden ver apuestas de cualquier usuario, no solo las propias
 
-**Estado:** [ ] Pendiente | [ ] Pasó | [ ] Falló
+**Estado:** [ ] Pendiente | [x] Pasó | [ ] Falló
 
 ---
 
@@ -349,7 +349,7 @@ Este documento cubre las funcionalidades críticas:
 - NO hay error de foreign key constraint
 - NO hay error de permisos RLS
 
-**Estado:** [ ] Pendiente | [ ] Pasó | [ ] Falló
+**Estado:** [ ] Pendiente | [x] Pasó | [ ] Falló
 
 ---
 
@@ -370,7 +370,7 @@ Este documento cubre las funcionalidades críticas:
 - Columna "Usuario" NO aparece en tabla
 - Solo se ven apuestas propias, no de otros usuarios
 
-**Estado:** [ ] Pendiente | [ ] Pasó | [ ] Falló
+**Estado:** [ ] Pendiente | [x] Pasó | [ ] Falló
 
 ---
 
@@ -390,7 +390,7 @@ Este documento cubre las funcionalidades críticas:
 - API devuelve error 403 (Forbidden) o 401 (Unauthorized)
 - Operación NO se ejecuta
 
-**Estado:** [ ] Pendiente | [ ] Pasó | [ ] Falló
+**Estado:** [ ] Pendiente | [x] Pasó | [ ] Falló
 
 ---
 
@@ -411,7 +411,7 @@ Este documento cubre las funcionalidades críticas:
 - NO se ven apuestas del Usuario B
 - RLS bloquea acceso a apuestas de otros usuarios
 
-**Estado:** [ ] Pendiente | [ ] Pasó | [ ] Falló
+**Estado:** [ ] Pendiente | [x] Pasó | [ ] Falló
 
 ---
 
@@ -433,7 +433,7 @@ Este documento cubre las funcionalidades críticas:
 - Apuesta NO se elimina
 - RLS protege apuestas de otros usuarios
 
-**Estado:** [ ] Pendiente | [ ] Pasó | [ ] Falló
+**Estado:** [ ] Pendiente | [x] Pasó | [ ] Falló
 
 ---
 
@@ -457,7 +457,7 @@ Este documento cubre las funcionalidades críticas:
 - Service Role Key bypass RLS correctamente
 - Transacciones se eliminan antes de apuestas
 
-**Estado:** [ ] Pendiente | [ ] Pasó | [ ] Falló
+**Estado:** [ ] Pendiente | [x] Pasó | [ ] Falló
 
 ---
 
@@ -465,12 +465,12 @@ Este documento cubre las funcionalidades críticas:
 
 | Categoría | Total | Pasó | Falló | Pendiente |
 |-----------|-------|------|-------|-----------|
-| Autenticación | 4 | 0 | 0 | 4 |
-| Apuestas | 4 | 0 | 0 | 4 |
-| Dashboard | 4 | 0 | 0 | 4 |
-| Admin | 4 | 0 | 0 | 4 |
-| Permisos | 4 | 0 | 0 | 4 |
-| **TOTAL** | **20** | **0** | **0** | **20** |
+| Autenticación | 4 | 4 | 0 | 0 |
+| Apuestas | 4 | 4 | 0 | 0 |
+| Dashboard | 4 | 4 | 0 | 0 |
+| Admin | 4 | 4 | 0 | 0 |
+| Permisos | 4 | 4 | 0 | 0 |
+| **TOTAL** | **20** | **20** | **0** | **0** |
 
 ---
 

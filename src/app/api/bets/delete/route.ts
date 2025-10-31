@@ -141,7 +141,33 @@ export async function DELETE(request: Request) {
       return NextResponse.json({ error: 'No se pudo eliminar la apuesta' }, { status: 500 });
     }
 
-    // Devolver el monto para actualizar el balance
+    // 3. Devolver el monto al balance del dueño de la apuesta
+    // Si es admin eliminando apuesta de otro usuario, usar Service Role para bypass RLS
+    let supabaseForUpdate = supabase;
+    if (isAdmin && bet.user_id !== user.id) {
+      const { createServiceClient } = await import('@/lib/supabase/server');
+      supabaseForUpdate = createServiceClient();
+    }
+
+    const { data: ownerProfile, error: ownerErr } = await supabaseForUpdate
+      .from('profiles')
+      .select('federal_balance')
+      .eq('id', bet.user_id)
+      .single();
+
+    if (!ownerErr && ownerProfile) {
+      const newBalance = (ownerProfile.federal_balance || 0) + (bet.amount || 0);
+      const { error: updErr } = await supabaseForUpdate
+        .from('profiles')
+        .update({ federal_balance: newBalance })
+        .eq('id', bet.user_id);
+
+      if (updErr) {
+        console.error('Error actualizando balance tras eliminar apuesta:', updErr);
+      }
+    }
+
+    // Devolver el monto para actualizar el balance en UI
     return NextResponse.json({ 
       success: true, 
       refundAmount: bet.amount 

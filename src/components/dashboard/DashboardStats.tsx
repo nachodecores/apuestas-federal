@@ -14,30 +14,25 @@
 
 "use client";
 
-interface Bet {
-  amount: number;
-  [key: string]: any;
-}
-
-interface DashboardStatsProps {
-  activeBets: Bet[];
-  netProfit: number;
-}
+import { DashboardStatsProps } from "@/types";
 
 export default function DashboardStats({
   activeBets,
   netProfit,
+  federalBalance,
 }: DashboardStatsProps) {
   const totalBet = activeBets.reduce((sum, bet) => sum + (bet.amount || 0), 0);
+  const potentialSum = activeBets.reduce((sum, bet) => sum + (bet.potential_win || 0), 0);
 
   return (
     <div
       className="border border-white/10 rounded-lg sm:rounded-xl p-4 sm:p-6 md:p-8 mb-4 sm:mb-6 md:mb-8 relative overflow-hidden flex flex-row items-center justify-between"
       style={{ backgroundColor: "rgba(237, 237, 237, 0.85)" }}
     >
+      {/* Saldo (federal_balance) */}
       <div className="relative z-10 flex-1 text-center">
-        <div className="text-xs text-gray-600 mb-1">Apuestas activas</div>
-        <div className="text-lg text-gray-900">{activeBets.length}</div>
+        <div className="text-[0.68rem] mobile:text-[0.72rem] tablet:text-[0.75rem] md:text-xs text-gray-600 mb-1">Saldo</div>
+        <div className="text-[0.95rem] mobile:text-[1rem] tablet:text-[1.05rem] md:text-lg text-gray-900">F${federalBalance.toFixed(0)}</div>
       </div>
 
       <div
@@ -46,8 +41,8 @@ export default function DashboardStats({
       ></div>
 
       <div className="relative z-10 flex-1 text-center">
-        <div className="text-xs text-gray-600 mb-1">Total apostado</div>
-        <div className="text-lg text-gray-900">F${totalBet.toFixed(0)}</div>
+        <div className="text-[0.68rem] mobile:text-[0.72rem] tablet:text-[0.75rem] md:text-xs text-gray-600 mb-1">Apuestas activas</div>
+        <div className="text-[0.95rem] mobile:text-[1rem] tablet:text-[1.05rem] md:text-lg text-gray-900">{activeBets.length}</div>
       </div>
 
       <div
@@ -56,8 +51,18 @@ export default function DashboardStats({
       ></div>
 
       <div className="relative z-10 flex-1 text-center">
-        <div className="text-xs text-gray-600 mb-1">Ganancia potencial</div>
-        <div className="text-lg text-gray-900">F${netProfit.toFixed(2)}</div>
+        <div className="text-[0.68rem] mobile:text-[0.72rem] tablet:text-[0.75rem] md:text-xs text-gray-600 mb-1">Total apostado</div>
+        <div className="text-[0.95rem] mobile:text-[1rem] tablet:text-[1.05rem] md:text-lg text-gray-900">F${totalBet.toFixed(0)}</div>
+      </div>
+
+      <div
+        className="w-px h-12"
+        style={{ backgroundColor: "rgb(20, 198, 236)" }}
+      ></div>
+
+      <div className="relative z-10 flex-1 text-center">
+        <div className="text-[0.68rem] mobile:text-[0.72rem] tablet:text-[0.75rem] md:text-xs text-gray-600 mb-1">Ganancia potencial</div>
+        <div className="text-[0.95rem] mobile:text-[1rem] tablet:text-[1.05rem] md:text-lg text-gray-900">F${potentialSum.toFixed(2)}</div>
       </div>
 
       <div className="absolute inset-0 opacity-5 bg-gradient-to-br from-[#953bff] to-[#02efff]"></div>

@@ -24,25 +24,7 @@
 
 import { createClient } from '@/lib/supabase/server';
 import { calculateOdds } from './calculator';
-
-interface FplStanding {
-  league_entry: number;
-  rank: number;
-  points_for: number;
-  matches_won: number;
-  matches_drawn: number;
-  matches_lost: number;
-  total: number;
-}
-
-interface FplMatch {
-  event: number;
-  league_entry_1: number;
-  league_entry_2: number;
-  league_entry_1_points: number;
-  league_entry_2_points: number;
-  finished: boolean;
-}
+import type { FplStanding, FplMatch } from '@/types';
 
 export async function getGameweekOdds(gameweek: number) {
   const supabase = await createClient();

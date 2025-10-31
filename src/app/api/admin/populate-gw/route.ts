@@ -30,30 +30,28 @@
 
 import { NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
+import { ROLES } from '@/constants/roles';
 import { calculateOdds } from '@/lib/odds/calculator';
-
-interface FplStanding {
-  league_entry: number;
-  rank: number;
-  points_for: number;
-  matches_won: number;
-  matches_drawn: number;
-  matches_lost: number;
-  total: number;
-}
-
-interface FplMatch {
-  event: number;
-  league_entry_1: number;
-  league_entry_2: number;
-  league_entry_1_points: number;
-  league_entry_2_points: number;
-  finished: boolean;
-}
+import type { FplStanding, FplMatch } from '@/types';
 
 export async function POST(request: Request) {
   try {
     const supabase = await createClient();
+    // Auth y verificación de admin
+    const { data: { user }, error: authErr } = await supabase.auth.getUser();
+    if (authErr || !user) {
+      return NextResponse.json({ success: false, error: 'No autorizado' }, { status: 401 });
+    }
+    const { data: profile } = await supabase
+      .from('profiles')
+      .select('role_id')
+      .eq('id', user.id)
+      .single();
+    const isAdmin = profile?.role_id === ROLES.ADMIN;
+    if (!isAdmin) {
+      return NextResponse.json({ success: false, error: 'Permisos insuficientes' }, { status: 403 });
+    }
+
     const body = await request.json().catch(() => ({}));
     const requestedGw: number | undefined = body?.gameweek;
 
@@ -61,7 +59,10 @@ export async function POST(request: Request) {
     if (!res.ok) {
       throw new Error(`FPL fetch failed: ${res.status} ${res.statusText}`);
     }
-    const data = (await res.json()) as { standings: FplStanding[]; matches: FplMatch[] };
+    const data = (await res.json()) as { 
+      standings: FplStanding[]; 
+      matches: FplMatch[] 
+    };
 
     let targetGw = requestedGw;
     if (!targetGw) {
@@ -92,12 +93,18 @@ export async function POST(request: Request) {
     });
 
     // Desactivar TODAS las gameweeks existentes (mantener historial)
-    const { error: deactivateErr } = await supabase
+    // Usar Service Role para escrituras (bypass RLS)
+    const { createServiceClient } = await import('@/lib/supabase/server');
+    const serviceSupabase = createServiceClient();
+
+    // Supabase requiere cláusula WHERE en update; aplicar filtro que abarque todas las filas
+    const { error: deactivateErr } = await serviceSupabase
       .from('gameweek_matches')
-      .update({ is_active: false });
+      .update({ is_active: false })
+      .gte('gameweek', 0);
     if (deactivateErr) throw deactivateErr;
 
-    const { error: upsertErr } = await supabase
+    const { error: upsertErr } = await serviceSupabase
       .from('gameweek_matches')
       .upsert(rows, { onConflict: 'gameweek,league_entry_1,league_entry_2' });
     if (upsertErr) throw upsertErr;
@@ -109,9 +116,11 @@ export async function POST(request: Request) {
       message: `GW${targetGw} poblada con odds (${rows.length} partidos)`,
     });
   } catch (error) {
-    console.error('populate-gw error:', error);
+    const anyErr: any = error;
+    const message = anyErr?.message || anyErr?.error || anyErr?.hint || JSON.stringify(anyErr) || 'Unknown error';
+    console.error('populate-gw error:', anyErr);
     return NextResponse.json(
-      { success: false, error: error instanceof Error ? error.message : 'Unknown error' },
+      { success: false, error: message },
       { status: 500 }
     );
   }

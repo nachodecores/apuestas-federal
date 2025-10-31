@@ -2,33 +2,34 @@
 
 import Link from "next/link";
 import Image from "next/image";
-import { useEffect, useState, useRef, useCallback } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { useRouter, usePathname } from "next/navigation";
 import DashboardModal from "./DashboardModal";
 import { useLeague } from "@/contexts/LeagueContext";
 import type { User } from "@supabase/supabase-js";
 import { Participant } from "@/types";
-import { ROLES, isAdmin } from "@/constants/roles";
+import { ROLES } from "@/constants/roles";
+import { AuthButton, UserProfileButton, PasswordModal } from "./header/index";
+import { useUser } from "@/contexts/UserContext";
 
 export default function Header() {
   const router = useRouter();
   const pathname = usePathname();
-  const [user, setUser] = useState<User | null>(null);
-  const [userName, setUserName] = useState<string>('');
-  const [userTeamName, setUserTeamName] = useState<string>('');
-  const [userTeamLogo, setUserTeamLogo] = useState<string | null>(null);
-  const [userBalance, setUserBalance] = useState<number>(0);
-  const [isAdmin, setIsAdmin] = useState<boolean>(false);
+  
+  // Usar contexto global de usuario
+  const { user, profile, federalBalance, isAdmin } = useUser();
+  const userName = profile?.display_name ?? '';
+  const userFplEntryId = profile?.fpl_entry_id ?? null;
+  const userTeamLogo = profile?.team_logo ?? null;
   const [participants, setParticipants] = useState<Participant[]>([]);
   const [loading, setLoading] = useState(true);
-  const [showDropdown, setShowDropdown] = useState(false);
   const [loggingIn, setLoggingIn] = useState(false);
   const [showPasswordModal, setShowPasswordModal] = useState(false);
   const [selectedParticipant, setSelectedParticipant] = useState<Participant | null>(null);
   const [password, setPassword] = useState('');
   const [showDashboardModal, setShowDashboardModal] = useState(false);
-  const dropdownRef = useRef<HTMLDivElement>(null);
+  const [loginError, setLoginError] = useState<string | null>(null);
   const supabase = createClient();
   
   // Usar el contexto de liga
@@ -92,102 +93,11 @@ export default function Header() {
   }, [isDataLoaded, getTeamName]);
 
   useEffect(() => {
-    // Inicializar componente: primero autenticación, luego participantes
-    async function initializeComponent() {
-      
-      // Los datos de liga se cargarán automáticamente por el contexto
-      
-      try {
-        // 1. Primero verificar autenticación con timeout
-        
-        // Crear una promesa con timeout para evitar que se cuelgue
-        const authPromise = supabase.auth.getUser();
-        const timeoutPromise = new Promise((_, reject) => 
-          setTimeout(() => reject(new Error('Auth timeout')), 5000)
-        );
-        
-        let user = null;
-        try {
-          const { data: { user: authUser } } = await Promise.race([authPromise, timeoutPromise]) as any;
-          user = authUser;
-        } catch (error) {
-          user = null;
-        }
-        
-        setUser(user);
-      
-        if (user) {
-          // Obtener datos completos del perfil (incluyendo balance)
-          const { data: profile } = await supabase
-            .from('profiles')
-            .select('display_name, fpl_entry_id, team_logo, federal_balance, role_id')
-            .eq('id', user.id)
-            .single();
-          
-          if (profile) {
-            setUserName(profile.display_name);
-            setUserTeamLogo(profile.team_logo);
-            setUserBalance(profile.federal_balance || 0);
-            
-            // Verificar si es admin usando role_id
-            setIsAdmin(profile.role_id === ROLES.ADMIN);
-            
-            // El nombre del equipo se actualizará cuando los datos de liga estén cargados
-            setUserTeamName('Cargando...');
-          } else {
-          }
-        } else {
-          setUserName('');
-          setUserTeamName('');
-          setUserTeamLogo(null);
-          setUserBalance(0);
-          setIsAdmin(false);
-        }
-        
-        // 2. DESPUÉS cargar participantes (independiente de autenticación)
+    // Solo cargar participantes cuando los datos de liga estén listos
+    (async () => {
         await loadParticipants();
-        
         setLoading(false);
-      } catch (error) {
-        setLoading(false);
-      }
-    }
-    
-    initializeComponent();
-
-    // Escuchar cambios de autenticación
-    const {
-      data: { subscription },
-    } = supabase.auth.onAuthStateChange(async (_event, session) => {
-      setUser(session?.user ?? null);
-      if (!session?.user) {
-        setUserName('');
-        setUserTeamName('');
-        setUserTeamLogo(null);
-        setUserBalance(0);
-        setIsAdmin(false);
-      } else {
-        // Actualizar todos los datos del usuario cuando se loguea o cambia sesión
-        const { data: profile } = await supabase
-          .from('profiles')
-          .select('federal_balance, display_name, fpl_entry_id, team_logo, role_id')
-          .eq('id', session.user.id)
-          .single();
-        
-        if (profile) {
-          setUserBalance(profile.federal_balance || 0);
-          setUserName(profile.display_name);
-          setUserTeamLogo(profile.team_logo);
-          setIsAdmin(profile.role_id === ROLES.ADMIN);
-          
-          // Obtener nombre del equipo usando el contexto
-          const teamName = getTeamName(profile.fpl_entry_id);
-          setUserTeamName(teamName);
-        }
-      }
-    });
-
-    return () => subscription.unsubscribe();
+    })();
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -198,57 +108,20 @@ export default function Header() {
     }
   }, [isDataLoaded, getTeamName]);
 
-  // Actualizar nombre del equipo del usuario cuando los datos estén cargados
-  useEffect(() => {
-    if (user && isDataLoaded) {
-      const updateUserTeamName = async () => {
-        try {
-          const { data: profile } = await supabase
-            .from('profiles')
-            .select('fpl_entry_id')
-            .eq('id', user.id)
-            .single();
-          
-          if (profile) {
-            const teamName = getTeamName(profile.fpl_entry_id);
-            setUserTeamName(teamName);
-          }
-        } catch (error) {
-        }
-      };
-      
-      updateUserTeamName();
-    }
-  }, [user, isDataLoaded, getTeamName, supabase]);
 
-  // Cerrar dropdown al hacer click afuera
-  useEffect(() => {
-    function handleClickOutside(event: MouseEvent) {
-      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
-        setShowDropdown(false);
-      }
-    }
-
-    if (showDropdown) {
-      document.addEventListener('mousedown', handleClickOutside);
-      return () => document.removeEventListener('mousedown', handleClickOutside);
-    }
-  }, [showDropdown]);
 
   // Mostrar modal de contraseña al seleccionar usuario
   function handleSelectUser(participant: Participant) {
     setSelectedParticipant(participant);
     setShowPasswordModal(true);
-    setShowDropdown(false);
     setPassword('');
   }
 
   // Login con validación de contraseña
   async function handleLoginWithPassword() {
-    if (!selectedParticipant) return;
+    setLoginError(null);
     
-    if (password !== '123456') {
-      alert('Contraseña incorrecta. La contraseña es: 123456');
+    if (!selectedParticipant) {
       return;
     }
     
@@ -257,23 +130,39 @@ export default function Header() {
     try {
       const email = `${selectedParticipant.fpl_entry_id}@bolichefederal.com`;
       
-      const { error } = await supabase.auth.signInWithPassword({
+      // Iniciar login y manejar resultado de forma sincrónica
+      const { data, error } = await supabase.auth.signInWithPassword({
         email,
-        password: '123456',
+        password,
       });
 
-      if (error) throw error;
+      if (error) {
+        console.error('Login error:', error);
+        const msg = error.message || '';
+        if (/Invalid login credentials/i.test(msg)) {
+          setLoginError('Credenciales incorrectas. Revisá la contraseña o intentá nuevamente.');
+        } else if (/Too many requests/i.test(msg)) {
+          setLoginError('Demasiados intentos. Esperá un momento e intentá de nuevo.');
+        } else if (/Email not confirmed/i.test(msg)) {
+          setLoginError('Email no confirmado. Contactá al administrador.');
+        } else {
+          setLoginError('No pudimos iniciar sesión. Intentá de nuevo.');
+        }
+        setLoggingIn(false);
+        return;
+      }
 
-      // Cerrar el modal
+      // Éxito: cerrar el modal
       setShowPasswordModal(false);
       setSelectedParticipant(null);
       setPassword('');
+      setLoggingIn(false);
       // NO redirigimos al dashboard, el usuario se queda en la página actual
       // El Header se actualiza automáticamente mostrando el botón "Dashboard"
     } catch (error) {
+      console.error('🔍 Header - Error inesperado:', error);
       const errorMessage = error instanceof Error ? error.message : 'Error desconocido';
-      alert(`Error: ${errorMessage}\n\nEste usuario aún no está creado en el sistema.`);
-    } finally {
+      setLoginError('No pudimos iniciar sesión. Intentá de nuevo.');
       setLoggingIn(false);
     }
   }
@@ -298,6 +187,9 @@ export default function Header() {
   const headerBg = isHome 
     ? 'linear-gradient(to right, #953bff, #02efff)' 
     : 'rgba(0, 0, 0, 0.5)';
+  
+  // Derivar el nombre del equipo del usuario
+  const derivedTeamName = userFplEntryId && isDataLoaded ? getTeamName(userFplEntryId) : '';
 
   return (
     <nav className="border-b border-white/10 sticky top-0 z-50 overflow-visible" style={{ background: headerBg }}>
@@ -340,193 +232,38 @@ export default function Header() {
           {loading ? (
             <div className="w-20 h-8 bg-white/5 rounded-full animate-pulse"></div>
           ) : user ? (
-            // Usuario logueado - mostrar opciones
-            <div className="flex items-center gap-2">
-              {/* Avatar + Nombre + Balance (solo en home) */}
-              {isHome && (
-                <div className="flex items-center gap-2">
-                  {/* Balance disponible */}
-                  <div className="hidden min-[768px]:flex flex-col items-end">
-                    <span className="text-[0.625rem] text-white/70 uppercase tracking-wider">Disponible</span>
-                    <span className="text-sm font-bold text-[#00ff87]">
-                      F${userBalance.toFixed(2)}
-                    </span>
-                  </div>
-                  
-                  {/* Botón al dashboard con avatar */}
-                  <button
-                    onClick={() => setShowDashboardModal(true)}
-                    className="px-2 py-1.5 rounded-md hover:opacity-90 transition-opacity flex items-center gap-1.5"
-                    style={{ 
-                      backgroundColor: 'rgba(255, 255, 255, 1)', 
-                      color: '#37003c' 
-                    }}
-                  >
-                    {/* Texto a la izquierda, alineado a la derecha */}
-                    <div className="flex flex-col items-end text-right">
-                      <span className="font-semibold text-[0.625rem] leading-tight">{userName}</span>
-                      <span className="text-[0.625rem] text-gray-600 leading-tight font-light">{userTeamName}</span>
-                    </div>
-                    
-                    {/* Avatar a la derecha */}
-                    <div className="w-5 h-5 rounded-full overflow-hidden bg-white border border-white/20 flex-shrink-0">
-                      <Image
-                        src="/assets/Group170.svg"
-                        alt={userTeamName}
-                        width={24}
-                        height={24}
-                        className="object-cover w-full h-full"
-                      />
-                    </div>
-                  </button>
-                </div>
-              )}
-
-              {/* Botón Dashboard (en admin) */}
-              {isAdminPage && (
-                <button
-                  onClick={() => setShowDashboardModal(true)}
-                  className="px-3 py-1.5 rounded-md bg-white/5 border border-white/10 text-white hover:bg-white/10 transition-colors text-xs font-semibold"
-                >
-                  Dashboard
-                </button>
-              )}
-
-
-              {/* Botón Cerrar sesión (en admin) */}
-              {isAdminPage && (
-                <button
-                  onClick={handleLogout}
-                  className="px-3 py-1.5 rounded-md bg-white/5 border border-white/10 text-white hover:bg-white/10 transition-colors text-xs font-semibold"
-                >
-                  <span className="hidden min-[768px]:inline">Cerrar sesión</span>
-                  <span className="min-[768px]:hidden">Salir</span>
-                </button>
-              )}
-            </div>
+            <UserProfileButton
+              userName={userName}
+              userTeamName={derivedTeamName}
+              userTeamLogo={userTeamLogo}
+              userBalance={federalBalance}
+              isAdmin={isAdmin}
+              isHome={isHome}
+              isAdminPage={isAdminPage}
+              onOpenDashboard={() => setShowDashboardModal(true)}
+              onLogout={handleLogout}
+            />
           ) : (
-            // Usuario NO logueado - mostrar dropdown
-            <div className="relative z-[100]" ref={dropdownRef}>
-              <button
-                onClick={() => {
-                  setShowDropdown(!showDropdown);
-                }}
-                disabled={loggingIn}
-                className="px-3 py-1.5 text-sm rounded-md font-semibold hover:opacity-90 transition-opacity disabled:opacity-50"
-                style={{ 
-                  backgroundColor: 'rgba(255, 255, 255, 0.75)', 
-                  color: 'rgb(55, 0, 60)' 
-                }}
-              >
-                {loggingIn ? "Ingresando..." : "Iniciar sesión"}
-              </button>
-
-              {/* Dropdown */}
-              {showDropdown && (
-                <div 
-                  className="absolute right-0 mt-2 w-[calc(100vw-2rem)] max-w-sm bg-white border border-gray-200 rounded-xl shadow-2xl overflow-hidden z-[9999]"
-                  style={{ display: 'block' }}
-                  ref={(el) => {
-                    if (el) {
-                    }
-                  }}
-                >
-                  
-                  <div className="max-h-[70vh] overflow-y-auto">
-                    {participants.map((participant, index) => (
-                      <div key={participant.fpl_entry_id}>
-                        <button
-                          onClick={() => handleSelectUser(participant)}
-                          disabled={loggingIn}
-                          className="w-full px-4 py-3 text-left text-gray-900 hover:bg-gray-50 transition-colors disabled:opacity-50 flex items-center justify-between group"
-                        >
-                          <div className="flex-1 min-w-0">
-                            <div className="font-semibold text-sm truncate">{participant.teamName}</div>
-                            <div className="text-xs text-gray-500 truncate">{participant.name}</div>
-                          </div>
-                          <div className="text-[#00ff87] opacity-0 group-hover:opacity-100 transition-opacity text-lg ml-3">
-                            →
-                          </div>
-                        </button>
-                        {index < participants.length - 1 && (
-                          <div className="mx-4 border-b border-gray-100"></div>
-                        )}
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
-            </div>
+            <AuthButton
+              participants={participants}
+              loggingIn={loggingIn}
+              onSelectUser={handleSelectUser}
+            />
           )}
         </div>
       </div>
 
       {/* Modal de contraseña */}
-      {showPasswordModal && selectedParticipant && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-[9999] p-4">
-          <div className="bg-white rounded-xl p-6 w-full max-w-md">
-            <div className="flex items-center gap-3 mb-4">
-              {/* Avatar del participante */}
-              {selectedParticipant.team_logo ? (
-                <div className="w-12 h-12 rounded-full overflow-hidden bg-white border border-gray-200 flex-shrink-0">
-                  <Image
-                    src={`/assets/${selectedParticipant.team_logo}`}
-                    alt={selectedParticipant.teamName}
-                    width={48}
-                    height={48}
-                    className="object-cover w-full h-full"
-                  />
-                </div>
-              ) : (
-                <div className="w-12 h-12 rounded-full bg-gradient-to-br from-[#ff2882] to-[#37003c] flex items-center justify-center text-white font-bold text-sm flex-shrink-0">
-                  {selectedParticipant.teamName.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase()}
-                </div>
-              )}
-              <div>
-                <h3 className="text-lg font-bold text-gray-900">{selectedParticipant.teamName}</h3>
-                <p className="text-sm text-gray-600">{selectedParticipant.name}</p>
-              </div>
-            </div>
-
-            <div className="mb-6">
-              <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-2">
-                Contraseña
-              </label>
-              <input
-                type="password"
-                id="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                onKeyDown={(e) => {
-                  if (e.key === 'Enter') {
-                    handleLoginWithPassword();
-                  }
-                }}
-                placeholder="Ingresá la contraseña"
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#953bff] focus:border-transparent"
-                autoFocus
-              />
-              <p className="text-xs text-gray-500 mt-1">Contraseña por defecto: 123456</p>
-            </div>
-
-            <div className="flex gap-3">
-              <button
-                onClick={handleCancelLogin}
-                className="flex-1 px-4 py-2 text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors font-medium"
-              >
-                Cancelar
-              </button>
-              <button
-                onClick={handleLoginWithPassword}
-                disabled={loggingIn || !password.trim()}
-                className="flex-1 px-4 py-2 bg-gradient-to-r from-[#953bff] to-[#02efff] text-white rounded-lg hover:opacity-90 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed font-medium"
-              >
-                {loggingIn ? 'Ingresando...' : 'Ingresar'}
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+      <PasswordModal
+        isOpen={showPasswordModal}
+        participant={selectedParticipant}
+        password={password}
+        loggingIn={loggingIn}
+        onPasswordChange={(v) => { setPassword(v); if (loginError) setLoginError(null); }}
+        onConfirm={handleLoginWithPassword}
+        onCancel={handleCancelLogin}
+        loginError={loginError}
+      />
 
       {/* Modal del Dashboard */}
       <DashboardModal

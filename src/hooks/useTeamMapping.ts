@@ -20,11 +20,7 @@
  */
 
 import { useState, useEffect } from 'react';
-
-interface TeamInfo {
-  name: string;
-  logo: string | null;
-}
+import { TeamInfo } from '@/types';
 
 export function useTeamMapping(
   activeBets: any[],

@@ -37,16 +37,7 @@
 import { createClient } from '@/lib/supabase/server';
 import { NextResponse } from 'next/server';
 
-// Tipo de datos que recibimos del cliente
-interface BetInput {
-  gameweek: number;
-  match_league_entry_1: number;
-  match_league_entry_2: number;
-  prediction: 'home' | 'draw' | 'away';
-  amount: number;
-  odds: number;
-  potential_win: number;
-}
+import type { BetInput } from '@/types';
 
 export async function POST(request: Request) {
   try {

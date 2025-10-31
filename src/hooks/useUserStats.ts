@@ -24,14 +24,7 @@
  */
 
 import { useMemo } from 'react';
-
-export interface DashboardStats {
-  totalWon: number;
-  totalLost: number;
-  netProfit: number;
-  wonBets: any[];
-  lostBets: any[];
-}
+import { DashboardStats } from '@/types';
 
 export function useUserStats(allBets: any[]): DashboardStats {
   return useMemo(() => {

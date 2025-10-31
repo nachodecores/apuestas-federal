@@ -32,18 +32,9 @@
 
 import { createClient } from '@/lib/supabase/server';
 import { NextResponse } from 'next/server';
+import type { ResolveRequest, FplMatch } from '@/types';
 
-interface ResolveRequest {
-  gameweek: number;
-}
-
-interface Match {
-  event: number;
-  league_entry_1: number;
-  league_entry_2: number;
-  league_entry_1_points: number;
-  league_entry_2_points: number;
-  finished: boolean;
+interface Match extends FplMatch {
   started: boolean;
 }
 

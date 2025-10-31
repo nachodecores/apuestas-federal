@@ -14,11 +14,7 @@
 
 import { createClient } from "@/lib/supabase/client";
 import { useState } from "react";
-
-interface ChangePasswordModalProps {
-  isOpen: boolean;
-  onClose: () => void;
-}
+import { ChangePasswordModalProps } from "@/types";
 
 export default function ChangePasswordModal({
   isOpen,
@@ -106,7 +102,7 @@ export default function ChangePasswordModal({
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-[99999]">
+    <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-[99999]" onClick={(e) => e.stopPropagation()}>
       <div className="bg-white rounded-xl p-6 w-full max-w-md">
         <h3 className="text-xl font-bold text-gray-900 mb-4">
           Cambiar contraseña

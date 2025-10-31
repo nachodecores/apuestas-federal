@@ -112,12 +112,12 @@ export default function StandingsTable() {
       <div className="h-full flex flex-col px-2 mobile:px-3 tablet:px-4">
         <div className="flex justify-between items-center mb-3 mobile:mb-4 tablet:mb-6">
           <h3 className="text-lg mobile:text-xl tablet:text-2xl font-black text-[#37003c]">
-            Tabla de Posiciones
+            Standings
           </h3>
         </div>
 
         <div className="rounded-lg mobile:rounded-xl tablet:rounded-2xl overflow-hidden border border-gray-200 bg-white shadow-lg flex-1 mx-2 mobile:mx-3 tablet:mx-4">
-          <div className="overflow-x-auto h-full px-3 mobile:px-4 tablet:px-6">
+          <div className="overflow-x-auto px-3 mobile:px-4 tablet:px-6">
             <table className="w-full">
               <thead>
                 <tr className="border-b border-gray-200 text-left bg-gray-50">
@@ -125,13 +125,13 @@ export default function StandingsTable() {
                     {/* Columna vacía para posición sin header */}
                   </th>
                   <th className="px-1 py-1 mobile:px-2 mobile:py-2 tablet:px-3 tablet:py-2 text-[0.5rem] mobile:text-[0.625rem] tablet:text-xs font-light text-gray-600 uppercase tracking-wider">
-                    Equipo
+                    Team & Manager
                   </th>
                   <th className="hidden tablet:table-cell px-3 py-2 text-xs font-light text-gray-600 uppercase tracking-wider text-right">
-                    Récord
+                    Record
                   </th>
                   <th className="px-1 py-1 mobile:px-2 mobile:py-2 tablet:px-3 tablet:py-2 text-[0.5rem] mobile:text-[0.625rem] tablet:text-xs font-light text-gray-600 uppercase tracking-wider text-center">
-                    Racha
+                    Record
                   </th>
                   <th className="px-1 py-1 mobile:px-2 mobile:py-2 tablet:px-3 tablet:py-2 text-[0.5rem] mobile:text-[0.625rem] tablet:text-xs font-light text-gray-600 uppercase tracking-wider text-right">
                     +
