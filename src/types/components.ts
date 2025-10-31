@@ -2,6 +2,7 @@
 
 import type { Participant, Profile } from './user';
 import type { User } from '@supabase/supabase-js';
+import type { Bet } from './betting';
 
 // Header Components
 export interface PasswordModalProps {
@@ -70,17 +71,7 @@ export interface UserInfo {
 }
 
 export interface ActiveBetsTableProps {
-  activeBets: Array<{
-    id: string;
-    user_id: string;
-    match_league_entry_1: number;
-    match_league_entry_2: number;
-    prediction: string;
-    amount: number;
-    odds: number;
-    potential_win: number;
-    [key: string]: any;
-  }>;
+  activeBets: Bet[];
   isAdmin: boolean;
   teamMap: Map<number, TeamInfo>;
   allUsersMap: Map<string, UserInfo>;

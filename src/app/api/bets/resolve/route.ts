@@ -3,6 +3,7 @@
  * 
  * PROPÓSITO:
  * Resuelve todas las apuestas de una gameweek usando resultados reales de FPL.
+ * Guarda resultados en gameweek_matches para auditoría y futuro uso.
  * 
  * BODY:
  * {
@@ -13,25 +14,28 @@
  * - 200: Apuestas resueltas exitosamente con resumen de resultados
  * - 400: Gameweek inválido o no hay partidos finalizados
  * - 401: Usuario no autenticado
+ * - 403: Usuario no es admin
  * - 500: Error al resolver apuestas
  * 
  * USADO POR:
- * - Endpoint de admin (futuro) para resolver gameweeks
+ * - Endpoint de admin para resolver gameweeks manualmente
+ * - Endpoint de admin/populate-gw para resolver automáticamente
  * 
  * LÓGICA:
- * 1. Obtiene resultados reales de FPL API
- * 2. Filtra partidos finalizados del gameweek
- * 3. Busca apuestas pendientes del gameweek
- * 4. Compara predicciones con resultados
- * 5. Calcula ganadores y perdedores
- * 6. Actualiza balances de usuarios
- * 7. Marca apuestas como resueltas
- * 
- * TODO: Agregar verificación de admin
+ * 1. Verifica que el usuario sea admin
+ * 2. Obtiene resultados reales de FPL API
+ * 3. Filtra partidos finalizados del gameweek
+ * 4. Guarda resultados en gameweek_matches.result y resolved_at
+ * 5. Busca apuestas pendientes del gameweek
+ * 6. Compara predicciones con resultados
+ * 7. Calcula ganadores y perdedores
+ * 8. Actualiza balances de usuarios
+ * 9. Marca apuestas como resueltas
  */
 
 import { createClient } from '@/lib/supabase/server';
 import { NextResponse } from 'next/server';
+import { ROLES } from '@/constants/roles';
 import type { ResolveRequest, FplMatch } from '@/types';
 
 interface Match extends FplMatch {
@@ -42,11 +46,22 @@ export async function POST(request: Request) {
   try {
     const supabase = await createClient();
     
-    // Verificar autenticación (opcional: agregar verificación de admin)
+    // Verificar autenticación y admin
     const { data: { user }, error: authError } = await supabase.auth.getUser();
     
     if (authError || !user) {
       return NextResponse.json({ error: 'No autenticado' }, { status: 401 });
+    }
+
+    // Verificar que sea admin
+    const { data: profile } = await supabase
+      .from('profiles')
+      .select('role_id')
+      .eq('id', user.id)
+      .single();
+
+    if (!profile || profile.role_id !== ROLES.ADMIN) {
+      return NextResponse.json({ error: 'Solo administradores pueden resolver gameweeks' }, { status: 403 });
     }
 
     const { gameweek }: ResolveRequest = await request.json();
@@ -76,30 +91,17 @@ export async function POST(request: Request) {
       }, { status: 400 });
     }
 
-
-    // 2. Obtener todas las apuestas pendientes de ese gameweek
-    const { data: pendingBets, error: betsError } = await supabase
-      .from('bets')
-      .select('*')
-      .eq('gameweek', gameweek)
-      .eq('status', 'pending');
-
-    if (betsError) {
-      throw new Error(`Error al obtener apuestas: ${betsError.message}`);
-    }
-
-    if (!pendingBets || pendingBets.length === 0) {
-      return NextResponse.json({ 
-        message: `No hay apuestas pendientes para el Gameweek ${gameweek}`,
-        resolved: 0
-      });
-    }
-
-
-    // 3. Crear mapa de resultados reales
+    // 2. Crear mapa de resultados reales y guardar en gameweek_matches
+    // IMPORTANTE: Guardar resultados primero, incluso si no hay apuestas pendientes
     const resultsMap = new Map<string, 'home' | 'draw' | 'away'>();
+    const resolvedAt = new Date().toISOString();
     
-    finishedMatches.forEach((match) => {
+    // Usar Service Role para actualizar gameweek_matches (bypass RLS)
+    const { createServiceClient } = await import('@/lib/supabase/server');
+    const serviceSupabase = createServiceClient();
+    
+    // Calcular y guardar resultados en gameweek_matches
+    for (const match of finishedMatches) {
       const key = `${match.league_entry_1}-${match.league_entry_2}`;
       let result: 'home' | 'draw' | 'away';
       
@@ -112,7 +114,48 @@ export async function POST(request: Request) {
       }
       
       resultsMap.set(key, result);
-    });
+      
+      // Guardar resultado en gameweek_matches
+      const { error: updateMatchError } = await serviceSupabase
+        .from('gameweek_matches')
+        .update({ 
+          result,
+          resolved_at: resolvedAt
+        })
+        .eq('gameweek', gameweek)
+        .eq('league_entry_1', match.league_entry_1)
+        .eq('league_entry_2', match.league_entry_2);
+      
+      if (updateMatchError) {
+        console.error(`Error al guardar resultado para partido ${key}:`, updateMatchError);
+        // Continuar procesando otros partidos aunque uno falle
+      }
+    }
+
+    // 3. Obtener todas las apuestas pendientes de ese gameweek
+    const { data: pendingBets, error: betsError } = await supabase
+      .from('bets')
+      .select('*')
+      .eq('gameweek', gameweek)
+      .eq('status', 'pending');
+
+    if (betsError) {
+      throw new Error(`Error al obtener apuestas: ${betsError.message}`);
+    }
+
+    // Si no hay apuestas pendientes, retornar éxito pero indicar que no hubo apuestas
+    if (!pendingBets || pendingBets.length === 0) {
+      return NextResponse.json({ 
+        success: true,
+        message: `No hay apuestas pendientes para el Gameweek ${gameweek}`,
+        gameweek,
+        resolved: 0,
+        won: 0,
+        lost: 0,
+        users_updated: 0,
+        matches_updated: finishedMatches.length
+      });
+    }
 
     // 4. Procesar cada apuesta
     let wonCount = 0;

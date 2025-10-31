@@ -47,10 +47,15 @@ src/
 │   │   ├── ChangePasswordModal.tsx # Modal para cambiar contraseña
 │   │   ├── DashboardFooter.tsx   # Botones de acción (logout, admin)
 │   │   └── index.ts              # Barrel export
+│   ├── header/                   # Sub-componentes del header
+│   │   ├── AuthButton.tsx        # Botón de login y dropdown de usuarios
+│   │   ├── PasswordModal.tsx     # Modal para ingresar contraseña
+│   │   ├── UserProfileButton.tsx # Botón de perfil de usuario logueado
+│   │   └── index.ts              # Barrel export
 │   ├── DashboardModal.tsx        # Modal principal del usuario/admin (orquestador)
 │   ├── DeleteBetButton.tsx       # Botón para eliminar apuestas
 │   ├── Footer.tsx                # Footer de la app
-│   ├── Header.tsx                # Header con navegación
+│   ├── Header.tsx                # Header con navegación (orquestador)
 │   ├── Hero.tsx                  # Sección hero con pools y stats
 │   ├── MatchCard.tsx             # Card de partido con odds y apuesta
 │   ├── StandingsTable.tsx        # Tabla de posiciones
@@ -58,7 +63,8 @@ src/
 │   └── index.ts                  # Barrel export
 │
 ├── contexts/                     # React Contexts
-│   └── LeagueContext.tsx         # Context global para datos de liga
+│   ├── LeagueContext.tsx         # Context global para datos de liga
+│   └── UserContext.tsx           # Context global para datos de usuario (sesión, perfil, balance)
 │
 ├── hooks/                        # Custom React Hooks
 │   ├── useDashboardData.ts       # Hook para cargar datos del dashboard
@@ -83,8 +89,12 @@ src/
 │       └── server.ts             # Cliente para uso server-side
 │
 ├── types/                        # Definiciones de tipos TypeScript
+│   ├── api.ts                    # Tipos relacionados con APIs (requests, responses, FPL)
 │   ├── betting.ts                # Tipos relacionados con apuestas
-│   ├── index.ts                  # Tipos generales
+│   ├── components.ts             # Props de componentes React
+│   ├── contexts.ts               # Tipos de contextos (UserContext, LeagueContext)
+│   ├── hooks.ts                  # Tipos de custom hooks
+│   ├── index.ts                  # Exportaciones centrales
 │   ├── league.ts                 # Tipos de liga y equipos
 │   └── user.ts                   # Tipos de usuario
 │
@@ -98,8 +108,9 @@ src/
 
 ## Flujo de Datos
 
-### 1. Carga Inicial de Datos de Liga
+### 1. Carga Inicial de Datos
 
+#### Datos de Liga
 ```
 FPL API (draft.premierleague.com)
     ↓
@@ -111,6 +122,17 @@ Components (Hero, StandingsTable, UpcomingMatches, MatchCard)
 ```
 
 **Importante**: Los componentes NO deben hacer fetch directo a la API. Siempre usar `LeagueContext`.
+
+#### Datos de Usuario
+```
+Supabase Auth (sesión del usuario)
+    ↓
+UserContext (almacena perfil, balance, admin status)
+    ↓
+Components (Header, DashboardModal, Hero)
+```
+
+**Importante**: Los componentes NO deben hacer fetch directo a `profiles`. Siempre usar `UserContext` y su método `refreshProfile()` cuando sea necesario actualizar datos.
 
 ### 2. Flujo de Apuestas
 
@@ -203,12 +225,13 @@ Retorna gameweek poblado
 - `gameweek` (INTEGER)
 - `match_league_entry_1` (INTEGER) - Equipo local
 - `match_league_entry_2` (INTEGER) - Equipo visitante
-- `predicted_result` (TEXT) - 'home', 'draw', 'away'
+- `prediction` (TEXT) - 'home', 'draw', 'away'
 - `amount` (NUMERIC) - Monto apostado
 - `odds` (NUMERIC) - Odds al momento de apostar
 - `potential_win` (NUMERIC) - Ganancia potencial
 - `status` (TEXT) - 'pending', 'won', 'lost'
 - `created_at` (TIMESTAMP)
+- `updated_at` (TIMESTAMP)
 
 #### `transactions`
 - `id` (UUID)
@@ -249,7 +272,7 @@ Retorna gameweek poblado
   - Admins pueden leer y eliminar cualquier transacción
 
 - **gameweek_matches**:
-  - Todos pueden leer
+  - Todos pueden leer (usuarios autenticados y anónimos)
   - Solo admins pueden insertar/actualizar
 
 ---
@@ -281,20 +304,32 @@ Retorna gameweek poblado
 
 ### Algoritmo
 
-Las odds se calculan basándose en:
+Las odds se calculan basándose en 4 factores con los siguientes pesos:
 
-1. **Posición en la tabla**: Equipos más arriba tienen ventaja
-2. **Puntos totales**: Diferencia de puntos acumulados
-3. **Forma reciente**: Últimos 5 partidos (racha de victorias/derrotas)
-4. **Factor local**: Ventaja del 10% para el equipo local
+1. **Posición en la tabla** (30%): Equipos mejor posicionados tienen ventaja
+2. **Puntos totales** (25%): Diferencia de puntos acumulados
+3. **Forma reciente** (30%): Últimos 5 partidos (puntos promedio y victorias)
+4. **Récord general** (15%): Ratio de victorias/derrotas totales
+
+**Probabilidad de empate dinámica**:
+- Varía entre 5% y 18% según la diferencia entre equipos
+- Equipos equilibrados → mayor probabilidad de empate (~15-18%)
+- Equipos muy diferentes → menor probabilidad de empate (~5-7%)
 
 **Fórmula simplificada**:
 ```
-strength = (rank_factor × 0.4) + (points_factor × 0.3) + (form_factor × 0.3)
-home_strength = team1_strength × 1.1  // Factor local
-away_strength = team2_strength
+team_probability = (position_factor × 0.30) + (points_factor × 0.25) + 
+                   (form_factor × 0.30) + (record_factor × 0.15)
 
-// Normalizar y convertir a odds decimales
+draw_probability = f(difference_between_teams) // 5% - 18% dinámico
+
+// Ajustar probabilidades para incluir empate
+adjusted_team_prob = team_probability × (1 - draw_probability)
+
+// Convertir a odds con margen de casa del 5%
+odds = (1 / probability) × 1.05
+
+// Límites mínimos: home/away = 1.1, draw = 5.0
 ```
 
 **Implementación**: `src/lib/odds/calculator.ts`
@@ -330,15 +365,27 @@ Lista de participantes de la liga.
 ```
 
 #### `GET /api/stats`
-Estadísticas globales de la aplicación.
+Estadísticas de la aplicación. Devuelve stats personales si hay usuario autenticado, stats globales si no.
 
-**Response**:
+**Response** (usuario autenticado - stats personales):
 ```json
 {
-  "totalRealPool": 1000,
-  "totalFederalPool": 5000,
-  "totalBets": 42,
-  "activeBets": 12
+  "currentGameweek": 10,
+  "activeBets": 3,
+  "gwAmount": 250,
+  "federalPool": 1500,
+  "realPool": 10000
+}
+```
+
+**Response** (sin usuario - stats globales):
+```json
+{
+  "currentGameweek": 10,
+  "activeBets": 12,
+  "gwAmount": 1250,
+  "federalPool": 15000,
+  "realPool": 100000
 }
 ```
 
@@ -350,17 +397,31 @@ Crea una nueva apuesta.
 **Body**:
 ```json
 {
-  "gameweek": 10,
-  "match_league_entry_1": 123,
-  "match_league_entry_2": 456,
-  "predicted_result": "home",
-  "amount": 100,
-  "odds": 2.5
+  "bets": [
+    {
+      "gameweek": 10,
+      "match_league_entry_1": 123,
+      "match_league_entry_2": 456,
+      "prediction": "home",
+      "amount": 100,
+      "odds": 2.5,
+      "potential_win": 250
+    }
+  ]
 }
 ```
 
-#### `DELETE /api/bets/delete?betId=xxx`
-Elimina una apuesta pending.
+#### `DELETE /api/bets/delete`
+Elimina una apuesta pending (solo si status='pending').
+
+**Body**:
+```json
+{
+  "betId": "uuid-de-la-apuesta"
+}
+```
+
+**Nota**: Los admins pueden eliminar apuestas de cualquier usuario. El reembolso se aplica automáticamente al balance del dueño de la apuesta.
 
 #### `GET /api/bets/user-bet?gameweek=X&entry1=Y&entry2=Z`
 Obtiene la apuesta del usuario para un partido específico.
@@ -427,34 +488,47 @@ if (profile?.role_id !== ROLES.ADMIN) {
 
 ### 4. Uso de Context
 ```typescript
-// En componentes
+// LeagueContext - Para datos de liga
 import { useLeague } from "@/contexts/LeagueContext";
 
 function MyComponent() {
-  const { teams, matches, standings, getTeamName, isDataLoaded } = useLeague();
+  const { leagueData, getTeamName, getPlayerName, isDataLoaded } = useLeague();
   
   // NO hacer fetch directo a /api/league
   // Usar los datos del context
+}
+
+// UserContext - Para datos de usuario
+import { useUser } from "@/contexts/UserContext";
+
+function MyComponent() {
+  const { user, profile, federalBalance, isAdmin, loading, refreshProfile } = useUser();
+  
+  // NO hacer fetch directo a profiles
+  // Usar UserContext y refreshProfile() cuando necesites actualizar
 }
 ```
 
 ### 5. Custom Hooks
 Los hooks personalizados encapsulan lógica reutilizable:
-- `useDashboardData`: Carga perfil, apuestas, detecta admin
-- `useUserStats`: Calcula estadísticas de apuestas
-- `useTeamMapping`: Mapea IDs de equipos a nombres
+- `useDashboardData`: Carga perfil, apuestas (filtradas por gameweek activa), detecta admin
+- `useUserStats`: Calcula estadísticas de apuestas (total ganado, perdido, neto)
+- `useTeamMapping`: Mapea IDs de equipos a nombres usando LeagueContext
+
+**Nota**: `UserContext` ahora centraliza la gestión de sesión y perfil de usuario, por lo que los hooks se enfocan en lógica específica del dashboard.
 
 ---
 
 ## Flujo de Trabajo de Desarrollo
 
 ### 1. Agregar Nueva Feature
-1. Definir tipos en `src/types/`
+1. Definir tipos en `src/types/` (organizados por categoría: api, components, hooks, contexts)
 2. Crear API endpoint en `src/app/api/`
 3. Agregar lógica de negocio en `src/lib/`
 4. Crear/actualizar componente en `src/components/`
-5. Actualizar Context si es necesario
+5. Actualizar Context si es necesario (LeagueContext o UserContext)
 6. Probar con usuarios normales y admin
+7. Verificar filtrado por gameweek activa si aplica
 
 ### 2. Modificar Base de Datos
 1. Hacer cambios en Supabase Dashboard
@@ -495,6 +569,12 @@ Si una query falla sin error aparente, verificar:
 ## Próximos Pasos / TODOs
 
 - [x] Refactorizar `DashboardModal.tsx` en sub-componentes ✅
+- [x] Refactorizar `Header.tsx` en sub-componentes modulares ✅
+- [x] Crear `UserContext` para centralizar gestión de usuario ✅
+- [x] Reorganizar tipos en `src/types/` por categorías ✅
+- [x] Mejorar cálculo de odds (probabilidad de empate dinámica) ✅
+- [x] Actualizar RLS para permitir lectura anónima de `gameweek_matches` ✅
+- [x] Filtrar apuestas y partidos por gameweek activa ✅
 - [ ] Agregar tests unitarios para sub-componentes del dashboard
 - [ ] Agregar tests unitarios para cálculo de odds
 - [ ] Implementar página de historial de apuestas en landing

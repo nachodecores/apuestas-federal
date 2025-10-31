@@ -6,10 +6,14 @@ export interface Bet {
   match_league_entry_1: number;
   match_league_entry_2: number;
   amount: number;
-  selected_team: number;
+  prediction: 'home' | 'draw' | 'away';
+  odds: number;
+  potential_win: number;
   status: 'pending' | 'won' | 'lost';
   created_at: string;
   updated_at: string;
+  // selected_team se mantiene por compatibilidad pero puede estar deprecado
+  selected_team?: number;
 }
 
 export interface UserBet {

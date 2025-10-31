@@ -62,10 +62,64 @@ export async function POST(request: Request) {
       );
     }
 
-    // 3. Calcular total a apostar
+    // 3. Validar que haya gameweek activa y que el deadline no haya pasado
+    const { data: activeGwData, error: gwError } = await supabase
+      .from('gameweek_matches')
+      .select('gameweek')
+      .eq('is_active', true)
+      .limit(1)
+      .maybeSingle();
+    
+    if (gwError) {
+      console.error('Error al obtener gameweek activa:', gwError);
+      return NextResponse.json(
+        { error: 'Error al verificar gameweek activa' },
+        { status: 500 }
+      );
+    }
+    
+    if (!activeGwData?.gameweek) {
+      return NextResponse.json(
+        { error: 'No hay gameweek activa. Las apuestas están cerradas.' },
+        { status: 400 }
+      );
+    }
+
+    // Verificar deadline desde FPL API
+    try {
+      const baseUrl = process.env.VERCEL_URL 
+        ? `https://${process.env.VERCEL_URL}` 
+        : process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000';
+      
+      const deadlineResponse = await fetch(`${baseUrl}/api/fpl/deadline`);
+      
+      if (deadlineResponse.ok) {
+        const deadlineData = await deadlineResponse.json();
+        
+        if (deadlineData.success && deadlineData.deadline) {
+          const deadlineTime = new Date(deadlineData.deadline);
+          const now = new Date();
+          
+          if (now > deadlineTime) {
+            return NextResponse.json(
+              { error: `Las apuestas para esta gameweek están cerradas. El deadline era el ${deadlineTime.toLocaleString('es-AR')}.` },
+              { status: 400 }
+            );
+          }
+        }
+      } else {
+        // Si no se puede obtener deadline, loguear pero no bloquear (fallback)
+        console.warn('No se pudo obtener deadline, continuando sin validación');
+      }
+    } catch (deadlineError) {
+      // Si hay error al obtener deadline, loguear pero no bloquear (fallback)
+      console.warn('Error al validar deadline:', deadlineError);
+    }
+
+    // 4. Calcular total a apostar
     const totalAmount = bets.reduce((sum, bet) => sum + bet.amount, 0);
 
-    // 4. Obtener el perfil del usuario para verificar balance
+    // 5. Obtener el perfil del usuario para verificar balance
     const { data: profile, error: profileError } = await supabase
       .from('profiles')
       .select('federal_balance')
@@ -79,7 +133,7 @@ export async function POST(request: Request) {
       );
     }
 
-    // 5. Verificar que tenga suficiente saldo
+    // 6. Verificar que tenga suficiente saldo
     if (profile.federal_balance < totalAmount) {
       return NextResponse.json(
         { error: `Saldo insuficiente. Disponible: F$${profile.federal_balance}, Necesario: F$${totalAmount}` },
@@ -87,7 +141,7 @@ export async function POST(request: Request) {
       );
     }
 
-    // 6. Crear las apuestas en la base de datos
+    // 7. Crear las apuestas en la base de datos
     const betsToInsert = bets.map(bet => ({
       user_id: user.id,
       gameweek: bet.gameweek,
@@ -113,7 +167,7 @@ export async function POST(request: Request) {
       );
     }
 
-    // 7. Actualizar el balance del usuario (restar el total apostado)
+    // 8. Actualizar el balance del usuario (restar el total apostado)
     const newBalance = profile.federal_balance - totalAmount;
     
     const { error: updateError } = await supabase
@@ -129,7 +183,7 @@ export async function POST(request: Request) {
       );
     }
 
-    // 8. Crear transacciones para cada apuesta
+    // 9. Crear transacciones para cada apuesta
     const transactionsToInsert = createdBets.map((bet, idx) => ({
       user_id: user.id,
       amount: -bet.amount, // Negativo porque es un gasto
@@ -147,7 +201,7 @@ export async function POST(request: Request) {
       // No retornamos error aquí, las apuestas ya se crearon
     }
 
-    // 9. Retornar éxito
+    // 10. Retornar éxito
     return NextResponse.json({
       success: true,
       message: `${bets.length} apuesta(s) creada(s) exitosamente`,

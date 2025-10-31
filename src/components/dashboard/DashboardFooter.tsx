@@ -45,7 +45,7 @@ export default function DashboardFooter({
           onClick={onPopulateGameweek}
           className="px-4 py-2 rounded-lg text-white font-medium bg-gradient-to-r from-[#02efff] to-[#00ff87] hover:opacity-90 transition-opacity text-sm"
         >
-          Poblar próxima GW con odds
+          Resolver Gameweek
         </button>
       )}
     </div>

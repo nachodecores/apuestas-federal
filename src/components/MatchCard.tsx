@@ -229,7 +229,7 @@ export default function MatchCard({
                     <div className={`font-semibold text-xs sm:text-sm ${
                       bet.prediction === 'home' ? 'text-[#37003c]' : 'text-gray-700'
                     }`}>
-                      Local
+                      Home
                     </div>
                     <div className={`text-[0.625rem] sm:text-xs mt-0.5 sm:mt-1 ${
                       bet.prediction === 'home' ? 'text-[#37003c]' : 'text-gray-800'
@@ -255,7 +255,7 @@ export default function MatchCard({
                     <div className={`font-semibold text-xs sm:text-sm ${
                       bet.prediction === 'draw' ? 'text-[#37003c]' : 'text-gray-700'
                     }`}>
-                      Empate
+                      Draw
                     </div>
                     <div className={`text-[0.625rem] sm:text-xs mt-0.5 sm:mt-1 ${
                       bet.prediction === 'draw' ? 'text-[#37003c]' : 'text-gray-800'
@@ -281,7 +281,7 @@ export default function MatchCard({
                     <div className={`font-semibold text-xs sm:text-sm ${
                       bet.prediction === 'away' ? 'text-[#37003c]' : 'text-gray-700'
                     }`}>
-                      Visitante
+                      Away
                     </div>
                     <div className={`text-[0.625rem] sm:text-xs mt-0.5 sm:mt-1 ${
                       bet.prediction === 'away' ? 'text-[#37003c]' : 'text-gray-800'
@@ -357,7 +357,7 @@ export default function MatchCard({
                     : { backgroundColor: '#963cff', color: 'white' }
                   }
                 >
-                  Confirmar Apuesta
+                  Confirm Bet
                 </button>
               </div>
             </>

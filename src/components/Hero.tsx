@@ -10,6 +10,8 @@ export default function Hero() {
   const [federalPool, setFederalPool] = useState<number>(0);
   const [realPool, setRealPool] = useState<number>(10000);
   const [loading, setLoading] = useState(true);
+  const [deadline, setDeadline] = useState<string | null>(null);
+  const [deadlineLoading, setDeadlineLoading] = useState(true);
 
   useEffect(() => {
     async function fetchStats() {
@@ -42,6 +44,29 @@ export default function Hero() {
     }
     window.addEventListener('betDeleted', handleBetDeleted as EventListener);
     return () => window.removeEventListener('betDeleted', handleBetDeleted as EventListener);
+  }, []);
+
+  // Fetch deadline
+  useEffect(() => {
+    async function fetchDeadline() {
+      try {
+        const response = await fetch('/api/fpl/deadline');
+        const data = await response.json();
+        
+        if (data.success && data.deadline) {
+          setDeadline(data.deadline);
+        } else {
+          setDeadline(null);
+        }
+        setDeadlineLoading(false);
+      } catch (error) {
+        console.error('Error fetching deadline:', error);
+        setDeadline(null);
+        setDeadlineLoading(false);
+      }
+    }
+
+    fetchDeadline();
   }, []);
 
   return (
@@ -189,6 +214,70 @@ export default function Hero() {
                 {loading ? '...' : (federalPool / realPool).toFixed(2)}
               </div>
             </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Deadline Section - Al final con mismo estilo violeta */}
+      <div className="relative w-full overflow-hidden mt-8 sm:mt-12 md:mt-16" style={{ backgroundColor: '#37003c' }}>
+        {/* Pattern overlay - alineado a la izquierda */}
+        <div 
+          className="absolute left-0 bottom-0 h-1/2 w-1/3 overflow-hidden"
+          style={{
+            backgroundImage: 'url(/assets/pattern-1.png)',
+            backgroundPosition: 'left bottom',
+            backgroundRepeat: 'no-repeat',
+            backgroundSize: 'cover',
+            backgroundAttachment: 'local',
+            marginLeft: '-30px'
+          }}
+        >
+          <div 
+            className="w-full h-[200%]"
+            style={{
+              backgroundImage: 'url(/assets/pattern-1.png)',
+              backgroundPosition: 'left bottom',
+              backgroundRepeat: 'no-repeat',
+              backgroundSize: 'cover',
+              marginLeft: '-30px'
+            }}
+          />
+        </div>
+        <div className="relative flex justify-center">
+          {/* Upcoming Deadline - Título con gradiente en la parte superior */}
+          <div 
+            className="w-[80%] px-4 sm:px-6 md:px-8 py-2 sm:py-3 md:py-4 rounded-b-xl sm:rounded-b-2xl md:rounded-b-3xl text-center"
+            style={{ background: 'linear-gradient(to right, #00ff87, #02efff)' }}
+          >
+            <h2 className="text-base sm:text-lg md:text-xl lg:text-2xl font-normal mb-0" style={{ color: '#37003c' }}>
+              Upcoming Deadline
+            </h2>
+          </div>
+        </div>
+
+        {/* Contenido con deadline */}
+        <div className="px-3 sm:px-4 md:px-6 lg:px-8 py-8 sm:py-10 md:py-12 lg:py-16">
+          <div className="text-center">
+            {deadlineLoading ? (
+              <div className="text-lg sm:text-xl md:text-2xl text-white font-normal mb-0">
+                <span className="animate-pulse">Cargando...</span>
+              </div>
+            ) : deadline ? (
+              <div className="text-lg sm:text-xl md:text-2xl text-white font-normal mb-0">
+                {new Date(deadline).toLocaleString('en-US', {
+                  year: 'numeric',
+                  month: 'long',
+                  day: 'numeric',
+                  hour: '2-digit',
+                  minute: '2-digit',
+                  timeZone: 'America/Argentina/Buenos_Aires'
+                })}
+              </div>
+            ) : (
+              <div className="text-lg sm:text-xl md:text-2xl text-gray-300 font-normal">
+                No hay deadline disponible
+              </div>
+            )}
           </div>
         </div>
       </div>
