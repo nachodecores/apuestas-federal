@@ -79,3 +79,7 @@ export interface ActiveBetsTableProps {
   onClose: () => void;
 }
 
+export interface BettingClosedToastProps {
+  isVisible: boolean;
+}
+

@@ -103,6 +103,11 @@ export default function DashboardModal({
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Error al poblar GW");
+      
+      // Disparar evento para que Hero.tsx actualice el deadline inmediatamente
+      const gameweekPopulatedEvent = new CustomEvent('gameweekPopulated');
+      window.dispatchEvent(gameweekPopulatedEvent);
+      
       // Opcional: mostrar mensaje de éxito
     } catch (e) {
       console.error(e);

@@ -31,6 +31,7 @@
  * 7. Calcula ganadores y perdedores
  * 8. Actualiza balances de usuarios
  * 9. Marca apuestas como resueltas
+ * 10. Guarda snapshot de pools en pool_snapshots
  */
 
 import { createClient } from '@/lib/supabase/server';
@@ -143,8 +144,37 @@ export async function POST(request: Request) {
       throw new Error(`Error al obtener apuestas: ${betsError.message}`);
     }
 
-    // Si no hay apuestas pendientes, retornar éxito pero indicar que no hubo apuestas
+    // Si no hay apuestas pendientes, guardar snapshot y retornar
     if (!pendingBets || pendingBets.length === 0) {
+      // Guardar snapshot incluso si no hay apuestas
+      try {
+        const { data: allProfiles } = await serviceSupabase
+          .from('profiles')
+          .select('federal_balance, real_balance');
+        
+        const federalAmount = allProfiles?.reduce((sum, profile) => 
+          sum + (parseFloat(profile.federal_balance?.toString() || '0')), 0) || 0;
+        
+        const { data: lastSnapshot } = await serviceSupabase
+          .from('pool_snapshots')
+          .select('real_amount')
+          .order('created_at', { ascending: false })
+          .limit(1)
+          .maybeSingle();
+        
+        const realAmount = lastSnapshot?.real_amount || 10000;
+        
+        await serviceSupabase
+          .from('pool_snapshots')
+          .insert({
+            gameweek,
+            federal_amount: federalAmount,
+            real_amount: realAmount
+          });
+      } catch (snapshotErr) {
+        console.error('Error al guardar snapshot (sin apuestas):', snapshotErr);
+      }
+
       return NextResponse.json({ 
         success: true,
         message: `No hay apuestas pendientes para el Gameweek ${gameweek}`,
@@ -229,6 +259,46 @@ export async function POST(request: Request) {
       }
     }
 
+    // 6. Guardar snapshot de pools después de resolver gameweek
+    try {
+      // Calcular pools actuales
+      const { data: allProfiles } = await serviceSupabase
+        .from('profiles')
+        .select('federal_balance, real_balance');
+      
+      const federalAmount = allProfiles?.reduce((sum, profile) => 
+        sum + (parseFloat(profile.federal_balance?.toString() || '0')), 0) || 0;
+      
+      // Obtener el real_amount más reciente (o usar el último si alguien actualizó manualmente)
+      const { data: lastSnapshot } = await serviceSupabase
+        .from('pool_snapshots')
+        .select('real_amount')
+        .order('created_at', { ascending: false })
+        .limit(1)
+        .maybeSingle();
+      
+      // Usar el último real_amount guardado, o 10000 como fallback
+      const realAmount = lastSnapshot?.real_amount || 10000;
+      
+      // Guardar snapshot
+      const { error: snapshotError } = await serviceSupabase
+        .from('pool_snapshots')
+        .insert({
+          gameweek,
+          federal_amount: federalAmount,
+          real_amount: realAmount  // Este valor se mantiene hasta que se actualice manualmente
+        });
+      
+      if (snapshotError) {
+        console.error('Error al guardar snapshot de pools:', snapshotError);
+        // No fallar el proceso si el snapshot falla, solo loguear
+      } else {
+        console.log(`Snapshot de pools guardado para GW${gameweek}: Federal=${federalAmount}, Real=${realAmount}`);
+      }
+    } catch (snapshotErr) {
+      console.error('Error inesperado al guardar snapshot:', snapshotErr);
+      // No fallar el proceso completo si hay error en snapshot
+    }
 
     return NextResponse.json({
       success: true,

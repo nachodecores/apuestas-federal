@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
 import MatchCard from "./MatchCard";
+import BettingClosedToast from "./BettingClosedToast";
 import { useLeague } from "@/contexts/LeagueContext";
 import { useUser } from "@/contexts/UserContext";
 import type { User } from "@supabase/supabase-js";
@@ -26,6 +27,9 @@ export default function UpcomingMatches() {
   // Estados de apuestas optimizadas
   const [userBets, setUserBets] = useState<any[]>([]);
   const [betsLoading, setBetsLoading] = useState(false);
+  
+  // Estado para deadline
+  const [deadlinePassed, setDeadlinePassed] = useState(false);
   
   // useEffect: Procesar partidos cuando el contexto esté cargado
   useEffect(() => {
@@ -131,6 +135,37 @@ export default function UpcomingMatches() {
     return () => window.removeEventListener('betDeleted', handleBetDeleted as EventListener);
   }, [nextGameweek, user, refreshProfile]);
 
+  // Verificar deadline cuando hay usuario logueado
+  useEffect(() => {
+    async function checkDeadline() {
+      if (!user || !nextGameweek) {
+        setDeadlinePassed(false);
+        return;
+      }
+
+      try {
+        const response = await fetch('/api/fpl/deadline');
+        const data = await response.json();
+        
+        if (data.success && data.deadline) {
+          const deadlineTime = new Date(data.deadline);
+          const now = new Date();
+          setDeadlinePassed(now > deadlineTime);
+        } else {
+          setDeadlinePassed(false);
+        }
+      } catch (error) {
+        console.error('Error checking deadline:', error);
+        setDeadlinePassed(false);
+      }
+    }
+
+    checkDeadline();
+    // Verificar cada minuto para actualizar el estado
+    const interval = setInterval(checkDeadline, 60000);
+    return () => clearInterval(interval);
+  }, [user, nextGameweek]);
+
   // Función para cargar todas las apuestas del usuario para el gameweek actual
   async function loadUserBets(gameweek: number) {
     if (!user) {
@@ -214,11 +249,14 @@ export default function UpcomingMatches() {
                   userBalance={federalBalance}
                   onBetConfirmed={handleBetConfirmed}
                   userBet={userBet}
+                  deadlinePassed={deadlinePassed}
                 />
               );
             })}
         </div>
 
+        {/* Toast flotante - solo si usuario está logueado */}
+        {user && <BettingClosedToast isVisible={deadlinePassed} />}
       </div>
     </section>
   );

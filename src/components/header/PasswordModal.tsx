@@ -60,7 +60,7 @@ export default function PasswordModal({
 
         <div className="mb-6">
           <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-2">
-            Contraseña
+            Password
           </label>
           <input
             type="password"
@@ -72,7 +72,7 @@ export default function PasswordModal({
                 onConfirm();
               }
             }}
-            placeholder="Ingresá la contraseña"
+            placeholder="Enter password"
             aria-invalid={!!loginError}
             className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 ${
               loginError
@@ -81,7 +81,7 @@ export default function PasswordModal({
             }`}
             autoFocus
           />
-          <p className="text-xs text-gray-500 mt-1">Contraseña por defecto: 123456</p>
+        
         </div>
 
         {loginError && (
@@ -95,14 +95,14 @@ export default function PasswordModal({
             onClick={onCancel}
             className="flex-1 px-4 py-2 text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors font-medium"
           >
-            Cancelar
+            Cancel
           </button>
           <button
             onClick={onConfirm}
             disabled={loggingIn || !password.trim()}
             className="flex-1 px-4 py-2 bg-gradient-to-r from-[#953bff] to-[#02efff] text-white rounded-lg hover:opacity-90 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed font-medium"
           >
-            {loggingIn ? 'Ingresando...' : 'Ingresar'}
+            {loggingIn ? 'Signing in...' : 'Sign in'}
           </button>
         </div>
       </div>

@@ -78,6 +78,7 @@ export interface MatchCardProps {
   userBalance: number;
   onBetConfirmed: (newBalance: number) => void;
   userBet?: any; // Apuesta existente del usuario para este partido (opcional)
+  deadlinePassed?: boolean; // Si el deadline ya pasó, deshabilitar apuestas
 }
 
 export interface DashboardModalProps {

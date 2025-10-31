@@ -11,7 +11,8 @@ export default function MatchCard({
   user, 
   userBalance, 
   onBetConfirmed,
-  userBet: propUserBet
+  userBet: propUserBet,
+  deadlinePassed = false
 }: MatchCardProps) {
   // Estado para la apuesta de este partido específico
   const [bet, setBet] = useState<BetSelection>({
@@ -196,9 +197,9 @@ export default function MatchCard({
             <div className="mt-3 sm:mt-4 mb-3 sm:mb-4 p-3 rounded-lg relative" style={{ background: 'linear-gradient(to right, #02efff, #00ff87)' }}>
               <div className="text-center">
                 <div className="text-[0.625rem] tablet:text-xs font-medium text-[#37003c]">
-                  {userBet.prediction === 'home' && `Apostaste F$${userBet.amount} a que gana ${match.team1Name}`}
-                  {userBet.prediction === 'away' && `Apostaste F$${userBet.amount} a que gana ${match.team2Name}`}
-                  {userBet.prediction === 'draw' && `Apostaste F$${userBet.amount} a un empate`}
+                  {userBet.prediction === 'home' && `You bet F$${userBet.amount} on ${match.team1Name} to win`}
+                  {userBet.prediction === 'away' && `You bet F$${userBet.amount} on ${match.team2Name} to win`}
+                  {userBet.prediction === 'draw' && `You bet F$${userBet.amount} on a draw`}
                 </div>
               </div>
               
@@ -228,10 +229,13 @@ export default function MatchCard({
                   <button
                     type="button"
                     onClick={() => handlePredictionChange('home')}
+                    disabled={deadlinePassed}
                     className={`py-2 sm:py-2.5 md:py-3 px-2 sm:px-3 rounded-md sm:rounded-lg transition-all ${
-                      bet.prediction === 'home'
-                        ? ''
-                        : 'hover:opacity-80'
+                      deadlinePassed 
+                        ? 'opacity-50 cursor-not-allowed' 
+                        : bet.prediction === 'home'
+                          ? ''
+                          : 'hover:opacity-80'
                     }`}
                     style={bet.prediction === 'home' 
                       ? { background: 'linear-gradient(to right, #02efff, #00ff87)' }
@@ -254,10 +258,13 @@ export default function MatchCard({
                   <button
                     type="button"
                     onClick={() => handlePredictionChange('draw')}
+                    disabled={deadlinePassed}
                     className={`py-2 sm:py-2.5 md:py-3 px-2 sm:px-3 rounded-md sm:rounded-lg transition-all ${
-                      bet.prediction === 'draw'
-                        ? ''
-                        : 'hover:opacity-80'
+                      deadlinePassed 
+                        ? 'opacity-50 cursor-not-allowed' 
+                        : bet.prediction === 'draw'
+                          ? ''
+                          : 'hover:opacity-80'
                     }`}
                     style={bet.prediction === 'draw' 
                       ? { background: 'linear-gradient(to right, #02efff, #00ff87)' }
@@ -280,10 +287,13 @@ export default function MatchCard({
                   <button
                     type="button"
                     onClick={() => handlePredictionChange('away')}
+                    disabled={deadlinePassed}
                     className={`py-2 sm:py-2.5 md:py-3 px-2 sm:px-3 rounded-md sm:rounded-lg transition-all ${
-                      bet.prediction === 'away'
-                        ? ''
-                        : 'hover:opacity-80'
+                      deadlinePassed 
+                        ? 'opacity-50 cursor-not-allowed' 
+                        : bet.prediction === 'away'
+                          ? ''
+                          : 'hover:opacity-80'
                     }`}
                     style={bet.prediction === 'away' 
                       ? { background: 'linear-gradient(to right, #02efff, #00ff87)' }
@@ -311,7 +321,12 @@ export default function MatchCard({
                   <button
                     type="button"
                     onClick={handleDecrementAmount}
-                    className="w-[30%] py-2 sm:py-2.5 md:py-3 rounded-md sm:rounded-lg text-gray-700 font-bold text-xl sm:text-2xl md:text-3xl hover:opacity-80 transition-opacity flex items-center justify-center"
+                    disabled={deadlinePassed}
+                    className={`w-[30%] py-2 sm:py-2.5 md:py-3 rounded-md sm:rounded-lg text-gray-700 font-bold text-xl sm:text-2xl md:text-3xl transition-opacity flex items-center justify-center ${
+                      deadlinePassed 
+                        ? 'opacity-50 cursor-not-allowed' 
+                        : 'hover:opacity-80'
+                    }`}
                     style={{ backgroundColor: '#efefef' }}
                     onMouseDown={(e) => e.currentTarget.style.background = 'linear-gradient(to right, #02efff, #00ff87)'}
                     onMouseUp={(e) => e.currentTarget.style.background = '#efefef'}
@@ -343,7 +358,12 @@ export default function MatchCard({
                   <button
                     type="button"
                     onClick={handleIncrementAmount}
-                    className="w-[30%] py-2 sm:py-2.5 md:py-3 rounded-md sm:rounded-lg text-gray-700 font-bold text-xl sm:text-2xl md:text-3xl hover:opacity-80 transition-opacity flex items-center justify-center"
+                    disabled={deadlinePassed}
+                    className={`w-[30%] py-2 sm:py-2.5 md:py-3 rounded-md sm:rounded-lg text-gray-700 font-bold text-xl sm:text-2xl md:text-3xl transition-opacity flex items-center justify-center ${
+                      deadlinePassed 
+                        ? 'opacity-50 cursor-not-allowed' 
+                        : 'hover:opacity-80'
+                    }`}
                     style={{ backgroundColor: '#efefef' }}
                     onMouseDown={(e) => e.currentTarget.style.background = 'linear-gradient(to right, #02efff, #00ff87)'}
                     onMouseUp={(e) => e.currentTarget.style.background = '#efefef'}
@@ -358,13 +378,13 @@ export default function MatchCard({
                 {/* Botón confirmar apuesta individual */}
                 <button
                   onClick={handleConfirmBet}
-                  disabled={!bet.prediction || !bet.amount || parseFloat(bet.amount) <= 0}
+                  disabled={deadlinePassed || !bet.prediction || !bet.amount || parseFloat(bet.amount) <= 0}
                   className={`w-full mt-3 sm:mt-4 py-2 sm:py-2.5 md:py-3 rounded-lg sm:rounded-xl font-bold text-sm sm:text-base transition-all shadow-lg ${
-                    !bet.prediction || !bet.amount || parseFloat(bet.amount) <= 0
+                    deadlinePassed || !bet.prediction || !bet.amount || parseFloat(bet.amount) <= 0
                       ? 'opacity-50 cursor-not-allowed bg-gray-300 text-gray-500'
                       : 'hover:opacity-90 shadow-[#963cff]/20'
                   }`}
-                  style={!bet.prediction || !bet.amount || parseFloat(bet.amount) <= 0 
+                  style={deadlinePassed || !bet.prediction || !bet.amount || parseFloat(bet.amount) <= 0 
                     ? {} 
                     : { backgroundColor: '#963cff', color: 'white' }
                   }

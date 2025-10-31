@@ -12,6 +12,7 @@ export default function Hero() {
   const [loading, setLoading] = useState(true);
   const [deadline, setDeadline] = useState<string | null>(null);
   const [deadlineLoading, setDeadlineLoading] = useState(true);
+  const [deadlinePassed, setDeadlinePassed] = useState(false);
 
   useEffect(() => {
     async function fetchStats() {
@@ -64,6 +65,9 @@ export default function Hero() {
         const data = await response.json();
         
         if (data.success && data.deadline) {
+          const deadlineTime = new Date(data.deadline);
+          const now = new Date();
+          setDeadlinePassed(now > deadlineTime);
           setDeadline(data.deadline);
         } else {
           setDeadline(null);
@@ -77,6 +81,20 @@ export default function Hero() {
     }
 
     fetchDeadline();
+    // Verificar cada minuto para actualizar el estado
+    const interval = setInterval(fetchDeadline, 60000);
+    
+    // Escuchar evento cuando se pobla una nueva gameweek para actualizar deadline inmediatamente
+    function handleGameweekPopulated() {
+      fetchDeadline(); // Actualizar deadline inmediatamente
+    }
+    
+    window.addEventListener('gameweekPopulated', handleGameweekPopulated as EventListener);
+    
+    return () => {
+      clearInterval(interval);
+      window.removeEventListener('gameweekPopulated', handleGameweekPopulated as EventListener);
+    };
   }, []);
 
   return (
@@ -133,7 +151,7 @@ export default function Hero() {
                 Bets
               </div>
               <div 
-                className="text-2xl sm:text-3xl md:text-4xl font-bold mb-0"
+                className="text-xl sm:text-2xl md:text-3xl font-bold mb-0"
                 style={{ 
                   background: 'linear-gradient(to right, #00ff87, #02efff)',
                   WebkitBackgroundClip: 'text',
@@ -151,7 +169,7 @@ export default function Hero() {
                 Total bet
               </div>
               <div 
-                className="text-2xl sm:text-3xl md:text-4xl font-bold mb-0"
+                className="text-xl sm:text-2xl md:text-3xl font-bold mb-0"
                 style={{ 
                   background: 'linear-gradient(to right, #00ff87, #02efff)',
                   WebkitBackgroundClip: 'text',
@@ -177,7 +195,7 @@ export default function Hero() {
                 Cash Pool
               </div>
               <div 
-                className="text-2xl sm:text-3xl md:text-4xl font-bold mb-0"
+                className="text-xl sm:text-2xl md:text-3xl font-bold mb-0"
                 style={{ 
                   background: 'linear-gradient(to right, #ff2882, rgb(55, 0, 60))',
                   WebkitBackgroundClip: 'text',
@@ -195,7 +213,7 @@ export default function Hero() {
                 Federal Pool 
               </div>
               <div 
-                className="text-2xl sm:text-3xl md:text-4xl font-bold mb-0"
+                className="text-xl sm:text-2xl md:text-3xl font-bold mb-0"
                 style={{ 
                   background: 'linear-gradient(to left, #ff2882, rgb(55, 0, 60))',
                   WebkitBackgroundClip: 'text',
@@ -213,7 +231,7 @@ export default function Hero() {
                 Rate
               </div>
               <div 
-                className="text-2xl sm:text-3xl md:text-4xl font-bold mb-0"
+                className="text-xl sm:text-2xl md:text-3xl font-bold mb-0"
                 style={{ 
                   background: 'linear-gradient(to right, #ff2882, rgb(55, 0, 60))',
                   WebkitBackgroundClip: 'text',
@@ -271,6 +289,10 @@ export default function Hero() {
             {deadlineLoading ? (
               <div className="text-lg sm:text-xl md:text-2xl text-white font-normal mb-0">
                 <span className="animate-pulse">Cargando...</span>
+              </div>
+            ) : deadlinePassed ? (
+              <div className="text-lg sm:text-xl md:text-2xl text-white font-normal mb-0">
+                Gameweek in course
               </div>
             ) : deadline ? (
               <div className="text-lg sm:text-xl md:text-2xl text-white font-normal mb-0">
