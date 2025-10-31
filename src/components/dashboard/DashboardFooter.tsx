@@ -30,14 +30,14 @@ export default function DashboardFooter({
         onClick={onShowChangePassword}
         className="text-gray-500 hover:text-[#ff2882] transition-colors text-sm font-medium"
       >
-        Cambiar contraseña
+        Change password
       </button>
 
       <button
         onClick={onLogout}
         className="text-gray-500 hover:text-red-500 transition-colors text-sm font-medium"
       >
-        Cerrar sesión
+        Log out
       </button>
 
       {isAdmin && (

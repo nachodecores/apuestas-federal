@@ -28,7 +28,17 @@ export default function DeleteBetButton({
         body: JSON.stringify({ betId }),
       });
 
-      const result = await response.json();
+      // Verificar si la respuesta es JSON antes de parsearla
+      const contentType = response.headers.get('content-type');
+      let result;
+      
+      if (contentType && contentType.includes('application/json')) {
+        result = await response.json();
+      } else {
+        // Si no es JSON, obtener el texto de la respuesta
+        const text = await response.text();
+        throw new Error(text || `Error del servidor: ${response.status} ${response.statusText}`);
+      }
 
       if (!response.ok) {
         throw new Error(result.error || 'Error al eliminar la apuesta');

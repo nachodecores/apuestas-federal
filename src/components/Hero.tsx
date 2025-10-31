@@ -38,12 +38,22 @@ export default function Hero() {
 
     fetchStats();
 
-    // Escuchar eventos de eliminación de apuestas para refrescar stats
+    // Escuchar eventos de eliminación y creación de apuestas para refrescar stats
     function handleBetDeleted() {
       fetchStats();
     }
+    
+    function handleBetCreated() {
+      fetchStats();
+    }
+    
     window.addEventListener('betDeleted', handleBetDeleted as EventListener);
-    return () => window.removeEventListener('betDeleted', handleBetDeleted as EventListener);
+    window.addEventListener('betCreated', handleBetCreated as EventListener);
+    
+    return () => {
+      window.removeEventListener('betDeleted', handleBetDeleted as EventListener);
+      window.removeEventListener('betCreated', handleBetCreated as EventListener);
+    };
   }, []);
 
   // Fetch deadline
@@ -164,7 +174,7 @@ export default function Hero() {
             {/* Pozo Real */}
             <div className="text-center">
               <div className="text-[0.625rem] sm:text-xs md:text-sm text-gray-600 tracking-normal mb-2 sm:mb-3">
-                Pozo Real
+                Cash Pool
               </div>
               <div 
                 className="text-2xl sm:text-3xl md:text-4xl font-bold mb-0"
@@ -182,7 +192,7 @@ export default function Hero() {
             {/* Pozo Federal */}
             <div className="text-center">
               <div className="text-[0.625rem] sm:text-xs md:text-sm text-gray-600 tracking-normal mb-2 sm:mb-3">
-                Pozo Federal
+                Federal Pool 
               </div>
               <div 
                 className="text-2xl sm:text-3xl md:text-4xl font-bold mb-0"
@@ -197,10 +207,10 @@ export default function Hero() {
               </div>
             </div>
 
-            {/* TC (Tipo de Cambio) */}
+            {/* Rate (Tipo de Cambio) */}
             <div className="text-center">
               <div className="text-[0.625rem] sm:text-xs md:text-sm text-gray-600 tracking-normal mb-2 sm:mb-3">
-                TC
+                Rate
               </div>
               <div 
                 className="text-2xl sm:text-3xl md:text-4xl font-bold mb-0"

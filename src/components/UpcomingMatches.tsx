@@ -171,9 +171,9 @@ export default function UpcomingMatches() {
   // Estado de carga
   if (loading) {
     return (
-      <section className="bg-[#37003c] h-full pb-4 mobile:pb-6 tablet:pb-8">
-        <div className="h-full flex items-center justify-center px-3 min-[480px]:px-4 min-[768px]:px-6">
-          <div className="text-white text-base min-[480px]:text-lg min-[768px]:text-xl">Cargando próximos partidos...</div>
+      <section className="bg-[#37003c] h-full pt-4 mobile:pt-6 tablet:pt-8 pb-4 mobile:pb-6 tablet:pb-8">
+        <div className="h-full flex items-center justify-center px-2 mobile:px-3 tablet:px-4">
+          <div className="text-white text-sm mobile:text-base tablet:text-lg">Cargando próximos partidos...</div>
         </div>
       </section>
     );
@@ -182,19 +182,19 @@ export default function UpcomingMatches() {
   // Estado de error
   if (error) {
     return (
-      <section className="bg-[#37003c] h-full pb-4 mobile:pb-6 tablet:pb-8">
-        <div className="h-full flex items-center justify-center px-3 min-[480px]:px-4 min-[768px]:px-6">
-          <div className="text-red-500 text-base min-[480px]:text-lg min-[768px]:text-xl">Error: {error}</div>
+      <section className="bg-[#37003c] h-full pt-4 mobile:pt-6 tablet:pt-8 pb-4 mobile:pb-6 tablet:pb-8">
+        <div className="h-full flex items-center justify-center px-2 mobile:px-3 tablet:px-4">
+          <div className="text-red-500 text-sm mobile:text-base tablet:text-lg">Error: {error}</div>
         </div>
       </section>
     );
   }
 
   return (
-    <section className="bg-[#37003c] h-full pb-4 mobile:pb-6 tablet:pb-8">
+    <section id="upcoming-matches" className="bg-[#37003c] h-full pt-4 mobile:pt-6 tablet:pt-8 pb-4 mobile:pb-6 tablet:pb-8">
       <div className="h-full flex flex-col px-3 min-[480px]:px-4 min-[768px]:px-6">
-        <h3 className="text-lg mobile:text-xl tablet:text-2xl font-black text-white mb-6">
-          Próximos Partidos
+        <h3 className="text-lg mobile:text-xl tablet:text-2xl font-bold text-white mb-6 ml-2 mobile:ml-3 tablet:ml-4">
+          Upcoming Matches
         </h3>
 
         <div className="flex-1 overflow-y-auto w-full grid grid-cols-1 gap-0">

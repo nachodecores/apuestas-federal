@@ -45,16 +45,26 @@ export async function DELETE(request: Request) {
     const { data: { user }, error: authError } = await supabase.auth.getUser();
     
     if (authError || !user) {
+      console.error('DELETE /api/bets/delete - Auth error:', authError);
       return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
     }
 
     // Obtener el betId del body
-    const { betId } = await request.json();
-    
+    let betId;
+    try {
+      const body = await request.json();
+      betId = body.betId;
+    } catch (parseError) {
+      console.error('DELETE /api/bets/delete - Error parsing request body:', parseError);
+      return NextResponse.json({ error: 'Formato de solicitud inválido' }, { status: 400 });
+    }
     
     if (!betId) {
+      console.error('DELETE /api/bets/delete - betId missing');
       return NextResponse.json({ error: 'betId es requerido' }, { status: 400 });
     }
+
+    console.log('DELETE /api/bets/delete - Attempting to delete bet:', betId, 'User:', user.id);
 
     // Verificar si el usuario es admin
     const { data: profile } = await supabase
@@ -79,6 +89,7 @@ export async function DELETE(request: Request) {
     const { data: bet, error: betError } = await query.single();
 
     if (betError || !bet) {
+      console.error('DELETE /api/bets/delete - Bet not found:', betError);
       return NextResponse.json({ error: 'Apuesta no encontrada' }, { status: 404 });
     }
 
@@ -112,11 +123,13 @@ export async function DELETE(request: Request) {
     const { data: deletedTransactions, error: transDeleteError } = await transDeleteQuery;
 
     if (transDeleteError) {
-      return NextResponse.json({ error: 'Error al eliminar transacciones' }, { status: 500 });
+      console.error('DELETE /api/bets/delete - Error deleting transactions:', transDeleteError);
+      return NextResponse.json({ error: 'Error al eliminar transacciones', details: transDeleteError.message }, { status: 500 });
     }
     
-    // Verificar si realmente se eliminó algo
-    if (deletedTransactions.length === 0) {
+    // Verificar si realmente se eliminó algo (puede que no haya transacciones, eso es OK)
+    if (deletedTransactions && deletedTransactions.length > 0) {
+      console.log('DELETE /api/bets/delete - Deleted', deletedTransactions.length, 'transactions');
     }
 
     // 2. Eliminar la apuesta
@@ -133,13 +146,17 @@ export async function DELETE(request: Request) {
     const { data: deletedData, error: deleteError } = await deleteQuery.select();
 
     if (deleteError) {
-      return NextResponse.json({ error: 'Error al eliminar la apuesta' }, { status: 500 });
+      console.error('DELETE /api/bets/delete - Error deleting bet:', deleteError);
+      return NextResponse.json({ error: 'Error al eliminar la apuesta', details: deleteError.message }, { status: 500 });
     }
     
     // Verificar si realmente se eliminó algo
-    if (deletedData.length === 0) {
+    if (!deletedData || deletedData.length === 0) {
+      console.error('DELETE /api/bets/delete - Bet deletion returned no data');
       return NextResponse.json({ error: 'No se pudo eliminar la apuesta' }, { status: 500 });
     }
+
+    console.log('DELETE /api/bets/delete - Bet deleted successfully:', betId);
 
     // 3. Devolver el monto al balance del dueño de la apuesta
     // Si es admin eliminando apuesta de otro usuario, usar Service Role para bypass RLS
@@ -163,8 +180,14 @@ export async function DELETE(request: Request) {
         .eq('id', bet.user_id);
 
       if (updErr) {
-        console.error('Error actualizando balance tras eliminar apuesta:', updErr);
+        console.error('DELETE /api/bets/delete - Error updating balance:', updErr);
+        // No fallar aquí, la apuesta ya se eliminó, solo loguear el error
+      } else {
+        console.log('DELETE /api/bets/delete - Balance updated for user:', bet.user_id);
       }
+    } else {
+      console.error('DELETE /api/bets/delete - Error fetching owner profile:', ownerErr);
+      // No fallar aquí, la apuesta ya se eliminó, solo loguear el error
     }
 
     // Devolver el monto para actualizar el balance en UI
@@ -174,6 +197,7 @@ export async function DELETE(request: Request) {
     });
 
   } catch (error) {
+    console.error('DELETE /api/bets/delete - Unexpected error:', error);
     return NextResponse.json({
       error: 'Error interno del servidor',
       details: error instanceof Error ? error.message : 'Unknown error'

@@ -36,22 +36,28 @@ export default function ActiveBetsTable({
       >
         <div className="relative z-10">
           <h3 className="text-lg sm:text-xl font-bold text-gray-900 mb-1 sm:mb-2">
-            No tenés apuestas activas
+            No active bets yet
           </h3>
 
-          <p className="text-sm sm:text-base text-gray-600 mb-3 sm:mb-4">
-            Andá a la página principal para hacer apuestas en los próximos
-            partidos
-          </p>
+        
 
           <button
-            onClick={onClose}
+            onClick={() => {
+              onClose();
+              // Hacer scroll a la sección de upcoming matches después de cerrar el modal
+              setTimeout(() => {
+                const upcomingSection = document.getElementById('upcoming-matches');
+                if (upcomingSection) {
+                  upcomingSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                }
+              }, 100);
+            }}
             className="inline-block px-4 sm:px-5 md:px-6 py-2 sm:py-2.5 md:py-3 rounded-lg sm:rounded-xl font-bold text-sm sm:text-base hover:opacity-90 transition-opacity text-white"
             style={{
               background: "linear-gradient(to right, #953bff, #02efff)",
             }}
           >
-            Ver próximos partidos
+            View upcoming matches
           </button>
         </div>
 
@@ -63,7 +69,7 @@ export default function ActiveBetsTable({
   return (
     <div className="mb-4 sm:mb-6 md:mb-8">
       <h3 className="text-lg sm:text-xl font-black text-[#37003c] mb-3 sm:mb-4">
-        {isAdmin ? "Todas las Apuestas Activas" : "Apuestas Activas"}
+        {isAdmin ? "All active bets" : "Active bets"}
       </h3>
 
       <div className="border border-gray-200 rounded-lg sm:rounded-xl overflow-hidden bg-white shadow-lg">
@@ -73,23 +79,23 @@ export default function ActiveBetsTable({
               <tr className="border-b border-gray-200 text-left bg-gray-50">
                 {isAdmin && (
                   <th className="px-2 py-2 sm:px-3 sm:py-3 text-[0.625rem] sm:text-xs font-medium text-gray-600 uppercase tracking-wider">
-                    Usuario
+                    User
                   </th>
                 )}
                 <th className="px-2 py-2 sm:px-3 sm:py-3 text-[0.625rem] sm:text-xs font-medium text-gray-600 uppercase tracking-wider">
-                  Partido
+                  Match
                 </th>
                 <th className="px-2 py-2 sm:px-3 sm:py-3 text-[0.625rem] sm:text-xs font-medium text-gray-600 uppercase tracking-wider">
-                  Predicción
+                  Prediction
                 </th>
                 <th className="px-2 py-2 sm:px-3 sm:py-3 text-[0.625rem] sm:text-xs font-medium text-gray-600 uppercase tracking-wider text-right">
-                  Apostado
+                  Bet
                 </th>
                 <th className="px-2 py-2 sm:px-3 sm:py-3 text-[0.625rem] sm:text-xs font-medium text-gray-600 uppercase tracking-wider text-right">
-                  Posible
+                  Prize
                 </th>
                 <th className="px-2 py-2 sm:px-3 sm:py-3 text-[0.625rem] sm:text-xs font-medium text-gray-600 uppercase tracking-wider text-right">
-                  Cuota
+                  Odds
                 </th>
                 <th className="px-2 py-2 sm:px-3 sm:py-3 text-[0.625rem] sm:text-xs font-medium text-gray-600 uppercase tracking-wider text-center"></th>
               </tr>
@@ -102,16 +108,16 @@ export default function ActiveBetsTable({
                 const userInfo = allUsersMap.get(bet.user_id);
 
                 let predictionText = "";
-                if (bet.prediction === "home") predictionText = "Local";
-                else if (bet.prediction === "away") predictionText = "Visitante";
-                else predictionText = "Empate";
+                if (bet.prediction === "home") predictionText = "Home";
+                else if (bet.prediction === "away") predictionText = "Away";
+                else predictionText = "Draw";
 
                 return (
                   <tr
                     key={bet.id}
                     className="border-b border-gray-100 hover:bg-gray-50 transition-colors"
                   >
-                    {/* Usuario - Solo para admin */}
+                    {/* User - Only for admin */}
                     {isAdmin && (
                       <td className="px-2 py-2 sm:px-3 sm:py-3">
                         <div className="text-xs sm:text-sm font-medium text-gray-900">
@@ -120,45 +126,45 @@ export default function ActiveBetsTable({
                       </td>
                     )}
 
-                    {/* Partido */}
+                    {/* Match */}
                     <td className="px-2 py-2 sm:px-3 sm:py-3">
                       <div className="text-xs sm:text-sm font-medium text-gray-900 whitespace-nowrap">
-                        {team1?.name || "Local"} vs {team2?.name || "Visitante"}
+                          {team1?.name || "Home"} vs {team2?.name || "Away"}
                       </div>
                     </td>
 
-                    {/* Predicción */}
+                    {/* Prediction */}
                     <td className="px-2 py-2 sm:px-3 sm:py-3">
                       <span className="text-xs sm:text-sm font-medium text-gray-900">
                         {predictionText}
                       </span>
                     </td>
 
-                    {/* Apostado */}
+                    {/* Bet */}
                     <td className="px-2 py-2 sm:px-3 sm:py-3 text-right">
                       <span className="text-xs sm:text-sm font-medium text-gray-900">
-                        F${bet.amount ? bet.amount.toFixed(2) : "0.00"}
+                        F${bet.amount ? bet.amount.toFixed(0) : "0"}
                       </span>
                     </td>
 
-                    {/* Posible */}
+                    {/* Prize */}
                     <td className="px-2 py-2 sm:px-3 sm:py-3 text-right">
                       <span className="text-xs sm:text-sm font-medium text-gray-900">
                         F$
                         {bet.potential_win
-                          ? bet.potential_win.toFixed(2)
-                          : "0.00"}
+                          ? bet.potential_win.toFixed(0)
+                          : "0"}
                       </span>
                     </td>
 
-                    {/* Cuota */}
+                    {/* Odds */}
                     <td className="px-2 py-2 sm:px-3 sm:py-3 text-right">
                       <span className="text-xs sm:text-sm font-medium text-gray-600">
                         {bet.odds ? bet.odds.toFixed(2) : "N/A"}
                       </span>
                     </td>
 
-                    {/* Botón eliminar */}
+                      {/* Delete button */}
                     <td className="px-2 py-2 sm:px-3 sm:py-3 text-center">
                       <DeleteBetButton
                         betId={bet.id}
@@ -166,7 +172,7 @@ export default function ActiveBetsTable({
                         variant="icon"
                         size="sm"
                         onDeleteSuccess={(betId, refundAmount) => {
-                          // Refresh data from parent
+                          // Refresh data from parent component
                           onBetDeleted();
                         }}
                         onDeleteError={(error) => {

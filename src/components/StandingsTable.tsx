@@ -63,6 +63,9 @@ export default function StandingsTable() {
             h2hPoints: standing.total, // Puntos de la tabla H2H
             fplPoints: standing.points_for, // Puntos totales FPL
             record: `${standing.matches_won}-${standing.matches_drawn}-${standing.matches_lost}`,
+            matches_won: standing.matches_won,
+            matches_drawn: standing.matches_drawn,
+            matches_lost: standing.matches_lost,
             federal_balance: 10000, // Por ahora mock, después lo calcularemos según apuestas
             recentForm
           };
@@ -87,7 +90,7 @@ export default function StandingsTable() {
   // Mientras está cargando, mostramos un spinner
   if (loading) {
     return (
-      <section className="bg-[#ebe5eb] h-full pb-4 mobile:pb-6 tablet:pb-8">
+      <section className="bg-[#ebe5eb] h-full pt-4 mobile:pt-6 tablet:pt-8 pb-4 mobile:pb-6 tablet:pb-8">
         <div className="h-full flex items-center justify-center px-2 mobile:px-3 tablet:px-4">
           <div className="text-[#37003c] text-sm mobile:text-base tablet:text-lg">Cargando tabla de posiciones...</div>
         </div>
@@ -95,30 +98,24 @@ export default function StandingsTable() {
     );
   }
   
-  // Si hay error, lo mostramos
+  // Si hay error, no mostrar nada (ocultar el mensaje de error)
   if (error) {
-    return (
-      <section className="bg-[#ebe5eb] h-full pb-4 mobile:pb-6 tablet:pb-8">
-        <div className="h-full flex items-center justify-center px-2 mobile:px-3 tablet:px-4">
-          <div className="text-red-500 text-sm mobile:text-base tablet:text-lg">Error: {error}</div>
-        </div>
-      </section>
-    );
+    return null;
   }
   
   // Renderizamos la tabla con los datos reales
   return (
-    <section className="bg-[#ebe5eb] h-full pb-4 mobile:pb-6 tablet:pb-8">
+    <section className="bg-[#ebe5eb] h-full pt-4 mobile:pt-6 tablet:pt-8 pb-4 mobile:pb-6 tablet:pb-8">
       <div className="h-full flex flex-col px-2 mobile:px-3 tablet:px-4">
         <div className="flex justify-between items-center mb-3 mobile:mb-4 tablet:mb-6">
-          <h3 className="text-lg mobile:text-xl tablet:text-2xl font-black text-[#37003c]">
+          <h3 className="text-lg mobile:text-xl tablet:text-2xl font-bold text-[#37003c] ml-2 mobile:ml-3 tablet:ml-4">
             Standings
           </h3>
         </div>
 
         <div className="rounded-lg mobile:rounded-xl tablet:rounded-2xl overflow-hidden border border-gray-200 bg-white shadow-lg flex-1 mx-2 mobile:mx-3 tablet:mx-4">
           <div className="overflow-x-auto px-3 mobile:px-4 tablet:px-6">
-            <table className="w-full">
+            <table className="min-w-full">
               <thead>
                 <tr className="border-b border-gray-200 text-left bg-gray-50">
                   <th className="px-1 py-1 mobile:px-2 mobile:py-2 tablet:px-3 tablet:py-2">
@@ -129,6 +126,15 @@ export default function StandingsTable() {
                   </th>
                   <th className="hidden tablet:table-cell px-3 py-2 text-xs font-light text-gray-600 uppercase tracking-wider text-right">
                     Record
+                  </th>
+                  <th className="px-1 py-1 mobile:px-2 mobile:py-2 tablet:px-3 tablet:py-2 text-[0.5rem] mobile:text-[0.625rem] tablet:text-xs font-light text-gray-600 uppercase tracking-wider text-center whitespace-nowrap">
+                    W
+                  </th>
+                  <th className="px-1 py-1 mobile:px-2 mobile:py-2 tablet:px-3 tablet:py-2 text-[0.5rem] mobile:text-[0.625rem] tablet:text-xs font-light text-gray-600 uppercase tracking-wider text-center whitespace-nowrap">
+                    D
+                  </th>
+                  <th className="px-1 py-1 mobile:px-2 mobile:py-2 tablet:px-3 tablet:py-2 text-[0.5rem] mobile:text-[0.625rem] tablet:text-xs font-light text-gray-600 uppercase tracking-wider text-center whitespace-nowrap">
+                    L
                   </th>
                   <th className="px-1 py-1 mobile:px-2 mobile:py-2 tablet:px-3 tablet:py-2 text-[0.5rem] mobile:text-[0.625rem] tablet:text-xs font-light text-gray-600 uppercase tracking-wider text-center">
                     Record
@@ -173,17 +179,32 @@ export default function StandingsTable() {
                       <span className="text-gray-700 font-light font-mono text-xs">{player.record}</span>
                     </td>
                     
+                    {/* W (Wins) - visible en todos los tamaños */}
+                    <td className="px-1 py-1 mobile:px-2 mobile:py-2 tablet:px-3 tablet:py-2 text-center whitespace-nowrap">
+                      <span className="text-gray-700 font-light text-[0.625rem] mobile:text-xs tablet:text-sm">{player.matches_won}</span>
+                    </td>
+                    
+                    {/* D (Draws) - visible en todos los tamaños */}
+                    <td className="px-1 py-1 mobile:px-2 mobile:py-2 tablet:px-3 tablet:py-2 text-center whitespace-nowrap">
+                      <span className="text-gray-700 font-light text-[0.625rem] mobile:text-xs tablet:text-sm">{player.matches_drawn}</span>
+                    </td>
+                    
+                    {/* L (Losses) - visible en todos los tamaños */}
+                    <td className="px-1 py-1 mobile:px-2 mobile:py-2 tablet:px-3 tablet:py-2 text-center whitespace-nowrap">
+                      <span className="text-gray-700 font-light text-[0.625rem] mobile:text-xs tablet:text-sm">{player.matches_lost}</span>
+                    </td>
+                    
                     {/* Racha (Últimos 5) - VISIBLE en mobile */}
                     <td className="px-1 py-1 mobile:px-2 mobile:py-2 tablet:px-3 tablet:py-2">
                       <div className="flex gap-0.5 mobile:gap-1 justify-center">
-                        {[...player.recentForm].reverse().map((result, formIdx) => (
+                        {[...player.recentForm].reverse().map((result, formIdx, reversedArray) => (
                           <div
                             key={formIdx}
                             className={`w-2 h-2 mobile:w-3 mobile:h-3 tablet:w-4 tablet:h-4 rounded-full ${
                               result === 'win' ? 'bg-green-500' :
                               result === 'draw' ? 'bg-gray-400' :
                               'bg-red-500'
-                            }`}
+                            } ${formIdx === reversedArray.length - 1 ? 'border border-gray-600 border-opacity-40' : ''}`}
                             title={result === 'win' ? 'Victoria' : result === 'draw' ? 'Empate' : 'Derrota'}
                           />
                         ))}

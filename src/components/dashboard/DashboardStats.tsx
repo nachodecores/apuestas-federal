@@ -31,7 +31,7 @@ export default function DashboardStats({
     >
       {/* Saldo (federal_balance) */}
       <div className="relative z-10 flex-1 text-center">
-        <div className="text-[0.68rem] mobile:text-[0.72rem] tablet:text-[0.75rem] md:text-xs text-gray-600 mb-1">Saldo</div>
+        <div className="text-[0.68rem] mobile:text-[0.72rem] tablet:text-[0.75rem] md:text-xs text-gray-600 mb-1">Balance</div>
         <div className="text-[0.95rem] mobile:text-[1rem] tablet:text-[1.05rem] md:text-lg text-gray-900">F${federalBalance.toFixed(0)}</div>
       </div>
 
@@ -41,7 +41,7 @@ export default function DashboardStats({
       ></div>
 
       <div className="relative z-10 flex-1 text-center">
-        <div className="text-[0.68rem] mobile:text-[0.72rem] tablet:text-[0.75rem] md:text-xs text-gray-600 mb-1">Apuestas activas</div>
+        <div className="text-[0.68rem] mobile:text-[0.72rem] tablet:text-[0.75rem] md:text-xs text-gray-600 mb-1">Active bets</div>
         <div className="text-[0.95rem] mobile:text-[1rem] tablet:text-[1.05rem] md:text-lg text-gray-900">{activeBets.length}</div>
       </div>
 
@@ -51,7 +51,7 @@ export default function DashboardStats({
       ></div>
 
       <div className="relative z-10 flex-1 text-center">
-        <div className="text-[0.68rem] mobile:text-[0.72rem] tablet:text-[0.75rem] md:text-xs text-gray-600 mb-1">Total apostado</div>
+        <div className="text-[0.68rem] mobile:text-[0.72rem] tablet:text-[0.75rem] md:text-xs text-gray-600 mb-1">Total bet</div>
         <div className="text-[0.95rem] mobile:text-[1rem] tablet:text-[1.05rem] md:text-lg text-gray-900">F${totalBet.toFixed(0)}</div>
       </div>
 
@@ -61,8 +61,8 @@ export default function DashboardStats({
       ></div>
 
       <div className="relative z-10 flex-1 text-center">
-        <div className="text-[0.68rem] mobile:text-[0.72rem] tablet:text-[0.75rem] md:text-xs text-gray-600 mb-1">Ganancia potencial</div>
-        <div className="text-[0.95rem] mobile:text-[1rem] tablet:text-[1.05rem] md:text-lg text-gray-900">F${potentialSum.toFixed(2)}</div>
+        <div className="text-[0.68rem] mobile:text-[0.72rem] tablet:text-[0.75rem] md:text-xs text-gray-600 mb-1">Prize</div>
+        <div className="text-[0.95rem] mobile:text-[1rem] tablet:text-[1.05rem] md:text-lg text-gray-900">F${potentialSum.toFixed(0)}</div>
       </div>
 
       <div className="absolute inset-0 opacity-5 bg-gradient-to-br from-[#953bff] to-[#02efff]"></div>

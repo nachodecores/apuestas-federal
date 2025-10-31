@@ -100,6 +100,7 @@ export default function MatchCard({
     const betAmount = parseFloat(bet.amount);
     
     if (betAmount > userBalance) {
+      alert('Insufficient balance');
       return;
     }
     
@@ -132,6 +133,17 @@ export default function MatchCard({
       
       // Éxito! Actualizar el balance local
       onBetConfirmed(result.new_balance);
+      
+      // Disparar evento global para que Hero.tsx actualice stats
+      const betCreatedEvent = new CustomEvent('betCreated', {
+        detail: {
+          gameweek: betData.gameweek,
+          match_league_entry_1: betData.match_league_entry_1,
+          match_league_entry_2: betData.match_league_entry_2,
+          amount: betAmount
+        }
+      });
+      window.dispatchEvent(betCreatedEvent);
       
       // Limpiar la apuesta
       setBet({
@@ -181,7 +193,7 @@ export default function MatchCard({
         <>
           {userBet ? (
             // Mostrar apuesta existente
-            <div className="mb-3 sm:mb-4 p-3 rounded-lg relative" style={{ background: 'linear-gradient(to right, #02efff, #00ff87)' }}>
+            <div className="mt-3 sm:mt-4 mb-3 sm:mb-4 p-3 rounded-lg relative" style={{ background: 'linear-gradient(to right, #02efff, #00ff87)' }}>
               <div className="text-center">
                 <div className="text-[0.625rem] tablet:text-xs font-medium text-[#37003c]">
                   {userBet.prediction === 'home' && `Apostaste F$${userBet.amount} a que gana ${match.team1Name}`}
@@ -210,7 +222,7 @@ export default function MatchCard({
             // Mostrar botones de apuesta
             <>
               {/* Radio buttons para predicción */}
-              <div className="mb-3 sm:mb-4">
+              <div className="mt-3 sm:mt-4 mb-3 sm:mb-4">
                 <div className="grid grid-cols-3 gap-1.5 sm:gap-2">
                   {/* Local */}
                   <button

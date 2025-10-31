@@ -42,7 +42,7 @@ export default function UserProfileButton({
           <div className="hidden min-[768px]:flex flex-col items-end">
             <span className="text-[0.625rem] text-white/70 uppercase tracking-wider">Disponible</span>
             <span className="text-sm font-bold text-[#00ff87]">
-              F${userBalance.toFixed(2)}
+              F${userBalance.toFixed(0)}
             </span>
           </div>
           

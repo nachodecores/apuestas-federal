@@ -2,20 +2,21 @@
  * ENDPOINT: GET /api/stats
  * 
  * PROPÓSITO:
- * Obtiene estadísticas generales para mostrar en el componente Hero.
+ * Obtiene estadísticas globales (todas las apuestas de todos los participantes) para mostrar en el componente Hero.
  * 
  * RESPUESTAS:
- * - 200: Objeto con estadísticas:
+ * - 200: Objeto con estadísticas globales:
  *   - currentGameweek: Número de gameweek actual
- *   - activeBets: Cantidad de apuestas pendientes
- *   - gwAmount: Monto total apostado en la gameweek actual
+ *   - activeBets: Cantidad total de apuestas pendientes de todos los participantes
+ *   - gwAmount: Monto total apostado en la gameweek actual por todos los participantes
  *   - federalPool: Suma de todos los federal_balance
  *   - realPool: Suma de todos los real_balance
  * 
  * USADO POR:
  * - Hero.tsx
  * 
- * NOTA: Incluye fallbacks para todos los valores en caso de error.
+ * NOTA: Siempre devuelve stats globales, independientemente de si el usuario está autenticado o no.
+ * Incluye fallbacks para todos los valores en caso de error.
  */
 
 import { createClient } from '@/lib/supabase/server';
@@ -37,11 +38,8 @@ export async function GET(request: Request) {
 
     const supabase = await createClient();
     
-    // Verificar si hay usuario autenticado para devolver stats personales
-    const { data: { user } } = await supabase.auth.getUser();
-    const isPersonal = !!user;
-    
     // 1. Obtener gameweek activa desde gameweek_matches
+    // NOTA: Siempre devolvemos stats globales (todas las apuestas de todos los participantes)
     let currentGameweek = 8;
     try {
       const { data: activeGwData } = await supabase
@@ -67,22 +65,15 @@ export async function GET(request: Request) {
       console.error('Error getting current gameweek:', error);
     }
 
-    // 2. Contar apuestas activas según tipo (personales o globales)
+    // 2. Contar apuestas activas globales (todas las apuestas de todos los participantes)
     let activeBetsCount = 0;
     let gwAmount = 0;
     try {
-      let betsQuery = supabase
+      const { data: gwBets, count } = await supabase
         .from('bets')
         .select('amount', { count: 'exact' })
         .eq('gameweek', currentGameweek)
         .eq('status', 'pending');
-      
-      if (isPersonal && user) {
-        // Stats personales: solo apuestas del usuario
-        betsQuery = betsQuery.eq('user_id', user.id);
-      }
-      
-      const { data: gwBets, count } = await betsQuery;
       
       activeBetsCount = count || 0;
       gwAmount = gwBets?.reduce((sum, bet) => sum + bet.amount, 0) || 0;
@@ -90,30 +81,17 @@ export async function GET(request: Request) {
       console.error('Error counting active bets:', error);
     }
 
-    // 3. Calcular pools (personales o globales)
+    // 3. Calcular pools globales (suma de todos los balances)
     let federalPool = 0;
     let realPool = 0;
     
     try {
-      if (isPersonal && user) {
-        // Stats personales: solo balance del usuario
-        const { data: profile } = await supabase
-          .from('profiles')
-          .select('federal_balance, real_balance')
-          .eq('id', user.id)
-          .single();
-        
-        federalPool = profile?.federal_balance || 0;
-        realPool = profile?.real_balance || 10000;
-      } else {
-        // Stats globales: suma de todos los balances
-        const { data: profiles } = await supabase
-          .from('profiles')
-          .select('federal_balance, real_balance');
-        
-        federalPool = profiles?.reduce((sum, profile) => sum + (profile.federal_balance || 0), 0) || 0;
-        realPool = profiles?.reduce((sum, profile) => sum + (profile.real_balance || 0), 0) || 10000;
-      }
+      const { data: profiles } = await supabase
+        .from('profiles')
+        .select('federal_balance, real_balance');
+      
+      federalPool = profiles?.reduce((sum, profile) => sum + (profile.federal_balance || 0), 0) || 0;
+      realPool = profiles?.reduce((sum, profile) => sum + (profile.real_balance || 0), 0) || 10000;
     } catch (error) {
       console.error('Error calculating pools:', error);
       realPool = 10000;

@@ -24,8 +24,32 @@ export default function DashboardHeader({
 }: DashboardHeaderProps) {
   
   return (
-    <div className="flex items-center p-4 sm:p-6 border-b border-gray-200">
-      <div className="flex items-center gap-4">
+    <div className="relative overflow-hidden flex items-center p-4 sm:p-6 border-b border-gray-200">
+      {/* Pattern overlay - pattern-2.png alineado a la derecha */}
+      <div 
+        className="absolute right-0 top-0 h-full w-1/4 sm:w-1/3 md:w-2/5 overflow-hidden"
+        style={{
+          backgroundImage: 'url(/assets/pattern-2.png)',
+          backgroundPosition: 'right top',
+          backgroundRepeat: 'no-repeat',
+          backgroundSize: 'cover',
+          backgroundAttachment: 'local',
+          marginRight: '-20px',
+          marginTop: '-5%'
+        }}
+      >
+        <div 
+          className="w-full h-full"
+          style={{
+            backgroundImage: 'url(/assets/pattern-2.png)',
+            backgroundPosition: 'right top',
+            backgroundRepeat: 'no-repeat',
+            backgroundSize: 'cover',
+            marginRight: '-20px'
+          }}
+        />
+      </div>
+      <div className="relative flex items-center gap-4 z-10">
         {/* Avatar del equipo */}
         <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-full overflow-hidden bg-white flex-shrink-0">
           {profile?.team_logo ? (

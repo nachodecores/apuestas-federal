@@ -36,14 +36,14 @@ export default function ChangePasswordModal({
     try {
       // Validaciones
       if (newPassword !== confirmNewPassword) {
-        setPasswordError("Las contraseñas no coinciden");
+        setPasswordError("The passwords do not match");
         setChangingPassword(false);
         return;
       }
 
       if (newPassword.length < 6) {
         setPasswordError(
-          "La nueva contraseña debe tener al menos 6 caracteres",
+          "The new password must be at least 6 characters",
         );
         setChangingPassword(false);
         return;
@@ -55,23 +55,23 @@ export default function ChangePasswordModal({
       });
 
       if (error) {
-        console.error("Error al cambiar contraseña:", error);
+        console.error("Error changing password:", error);
         throw error;
       }
 
       if (!data.user) {
-        console.error("No se recibió usuario actualizado");
+        console.error("No user was updated");
         throw new Error("Error: No se pudo actualizar el usuario");
       }
 
       // Éxito
-      alert("¡Contraseña cambiada exitosamente!");
+      alert("Password changed successfully!");
       onClose();
       setCurrentPassword("");
       setNewPassword("");
       setConfirmNewPassword("");
     } catch (error) {
-      console.error("Error completo en cambio de contraseña:", error);
+      console.error("Error changing password:", error);
 
       let errorMessage = "Error al cambiar contraseña";
 
@@ -105,13 +105,13 @@ export default function ChangePasswordModal({
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-[99999]" onClick={(e) => e.stopPropagation()}>
       <div className="bg-white rounded-xl p-6 w-full max-w-md">
         <h3 className="text-xl font-bold text-gray-900 mb-4">
-          Cambiar contraseña
+          Change password
         </h3>
 
         <form onSubmit={handleChangePassword} className="space-y-4">
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
-              Contraseña actual
+              Current password
             </label>
             <input
               type="password"
@@ -119,13 +119,13 @@ export default function ChangePasswordModal({
               onChange={(e) => setCurrentPassword(e.target.value)}
               required
               className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-[#ff2882]"
-              placeholder="Tu contraseña actual"
+              placeholder="Your current password"
             />
           </div>
 
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
-              Nueva contraseña
+              New password
             </label>
             <input
               type="password"
@@ -134,13 +134,13 @@ export default function ChangePasswordModal({
               required
               minLength={6}
               className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-[#ff2882]"
-              placeholder="Mínimo 6 caracteres (requerido por Supabase)"
+              placeholder="Minimum 6 characters"
             />
           </div>
 
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
-              Confirmar nueva contraseña
+              Confirm new password
             </label>
             <input
               type="password"
@@ -149,7 +149,7 @@ export default function ChangePasswordModal({
               required
               minLength={6}
               className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-[#ff2882]"
-              placeholder="Repetí la nueva contraseña (mínimo 6 caracteres)"
+              placeholder="Repeat the new password (minimum 6 characters)"
             />
           </div>
 
@@ -163,7 +163,7 @@ export default function ChangePasswordModal({
               onClick={onClose}
               className="flex-1 px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors"
             >
-              Cancelar
+              Cancel
             </button>
             <button
               type="submit"
@@ -171,7 +171,7 @@ export default function ChangePasswordModal({
               className="flex-1 px-4 py-2 rounded-lg text-white font-medium transition-colors disabled:opacity-50"
               style={{ backgroundColor: "rgb(150, 60, 255)" }}
             >
-              {changingPassword ? "Cambiando..." : "Cambiar"}
+              {changingPassword ? "Changing..." : "Change"}
             </button>
           </div>
         </form>
