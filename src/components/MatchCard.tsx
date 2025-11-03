@@ -19,6 +19,9 @@ export default function MatchCard({
     prediction: null,
     amount: ''
   });
+  
+  // Estado para prevenir múltiples clics mientras se procesa la apuesta
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   // Usar la prop userBet directamente (optimización)
   const userBet = propUserBet;
@@ -89,6 +92,9 @@ export default function MatchCard({
 
   // Función para confirmar la apuesta
   async function handleConfirmBet() {
+    // Prevenir múltiples clics
+    if (isSubmitting) return;
+    
     // Validaciones
     if (!user) {
       return;
@@ -104,6 +110,9 @@ export default function MatchCard({
       alert('Insufficient balance');
       return;
     }
+    
+    // Establecer estado de envío para deshabilitar el botón inmediatamente
+    setIsSubmitting(true);
     
     // Preparar datos para enviar al backend
     const betData = {
@@ -154,6 +163,9 @@ export default function MatchCard({
       
     } catch (error) {
       console.error('Error al confirmar apuesta:', error);
+    } finally {
+      // Siempre restablecer el estado de envío, incluso si hay error
+      setIsSubmitting(false);
     }
   }
 
@@ -211,6 +223,7 @@ export default function MatchCard({
                     userId={user?.id}
                     variant="icon"
                     size="sm"
+                    deadlinePassed={deadlinePassed}
                     className="!bg-transparent !text-white !border-0 !shadow-none hover:!opacity-80 !transition-opacity"
                     onDeleteSuccess={(betId, refundAmount) => {
                       onBetConfirmed(userBalance + refundAmount); // Update balance
@@ -378,18 +391,18 @@ export default function MatchCard({
                 {/* Botón confirmar apuesta individual */}
                 <button
                   onClick={handleConfirmBet}
-                  disabled={deadlinePassed || !bet.prediction || !bet.amount || parseFloat(bet.amount) <= 0}
+                  disabled={isSubmitting || deadlinePassed || !bet.prediction || !bet.amount || parseFloat(bet.amount) <= 0}
                   className={`w-full mt-3 sm:mt-4 py-2 sm:py-2.5 md:py-3 rounded-lg sm:rounded-xl font-bold text-sm sm:text-base transition-all shadow-lg ${
-                    deadlinePassed || !bet.prediction || !bet.amount || parseFloat(bet.amount) <= 0
+                    isSubmitting || deadlinePassed || !bet.prediction || !bet.amount || parseFloat(bet.amount) <= 0
                       ? 'opacity-50 cursor-not-allowed bg-gray-300 text-gray-500'
                       : 'hover:opacity-90 shadow-[#963cff]/20'
                   }`}
-                  style={deadlinePassed || !bet.prediction || !bet.amount || parseFloat(bet.amount) <= 0 
+                  style={isSubmitting || deadlinePassed || !bet.prediction || !bet.amount || parseFloat(bet.amount) <= 0 
                     ? {} 
                     : { backgroundColor: '#963cff', color: 'white' }
                   }
                 >
-                  Confirm Bet
+                  {isSubmitting ? 'Placing bet...' : 'Confirm Bet'}
                 </button>
               </div>
             </>

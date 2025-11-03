@@ -10,9 +10,15 @@ export default function DeleteBetButton({
   onDeleteError,
   size = 'md',
   variant = 'icon',
-  className = ''
+  className = '',
+  deadlinePassed = false
 }: DeleteBetButtonProps) {
   const [isDeleting, setIsDeleting] = useState(false);
+  
+  // Si el deadline pasó, no mostrar el botón
+  if (deadlinePassed) {
+    return null;
+  }
 
   const handleDelete = async () => {
     const ok = window.confirm('¿Eliminar esta apuesta?');

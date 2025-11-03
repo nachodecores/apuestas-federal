@@ -56,4 +56,5 @@ export interface DeleteBetButtonProps {
   size?: 'sm' | 'md' | 'lg';
   variant?: 'icon' | 'button';
   className?: string;
+  deadlinePassed?: boolean; // Si el deadline pasó, ocultar el botón
 }
