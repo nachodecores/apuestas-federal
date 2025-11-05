@@ -5,12 +5,14 @@
  * Footer del dashboard con botones de acción:
  * - Cambiar contraseña
  * - Cerrar sesión
- * - Poblar próxima GW con odds (solo admin)
+ * - Resolver Gameweek (solo admin)
+ * - Poblar Gameweek (solo admin)
  *
  * PROPS:
  * - isAdmin: Si el usuario es admin
  * - onShowChangePassword: Función para mostrar modal de cambio de contraseña
  * - onLogout: Función para cerrar sesión
+ * - onResolveGameweek: Función para resolver gameweek actual (admin)
  * - onPopulateGameweek: Función para poblar próximo gameweek (admin)
  */
 
@@ -22,6 +24,7 @@ export default function DashboardFooter({
   isAdmin,
   onShowChangePassword,
   onLogout,
+  onResolveGameweek,
   onPopulateGameweek,
 }: DashboardFooterProps) {
   return (
@@ -41,12 +44,20 @@ export default function DashboardFooter({
       </button>
 
       {isAdmin && (
-        <button
-          onClick={onPopulateGameweek}
-          className="px-4 py-2 rounded-lg text-white font-medium bg-gradient-to-r from-[#02efff] to-[#00ff87] hover:opacity-90 transition-opacity text-sm"
-        >
-          Resolver Gameweek
-        </button>
+        <>
+          <button
+            onClick={onResolveGameweek}
+            className="px-4 py-2 rounded-lg text-white font-medium bg-gradient-to-r from-[#ff2882] to-[#963cff] hover:opacity-90 transition-opacity text-sm"
+          >
+            Resolve Gameweek
+          </button>
+          <button
+            onClick={onPopulateGameweek}
+            className="px-4 py-2 rounded-lg text-white font-medium bg-gradient-to-r from-[#02efff] to-[#00ff87] hover:opacity-90 transition-opacity text-sm"
+          >
+            Populate Gameweek
+          </button>
+        </>
       )}
     </div>
   );

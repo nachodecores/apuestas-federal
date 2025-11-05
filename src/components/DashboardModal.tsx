@@ -95,6 +95,44 @@ export default function DashboardModal({
     }
   }
 
+  // Función para resolver gameweek (admin)
+  async function handleResolveGameweek() {
+    try {
+      // Obtener gameweek activa
+      const supabase = createClient();
+      const { data: activeGwData, error: gwError } = await supabase
+        .from('gameweek_matches')
+        .select('gameweek')
+        .eq('is_active', true)
+        .limit(1)
+        .maybeSingle();
+
+      if (gwError || !activeGwData?.gameweek) {
+        throw new Error('No se pudo obtener la gameweek activa');
+      }
+
+      const activeGameweek = activeGwData.gameweek;
+
+      const res = await fetch("/api/bets/resolve", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ gameweek: activeGameweek }),
+      });
+      
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "Error al resolver gameweek");
+      
+      // Refrescar datos del dashboard
+      await refreshData();
+      
+      // Mostrar mensaje de éxito
+      alert(`Success! Gameweek ${activeGameweek} resolved. Won: ${data.won || 0}, Lost: ${data.lost || 0}`);
+    } catch (e: any) {
+      console.error(e);
+      alert(`Error: ${e.message || "Failed to resolve gameweek. Please try again."}`);
+    }
+  }
+
   // Función para poblar gameweek (admin)
   async function handlePopulateGameweek() {
     try {
@@ -208,6 +246,7 @@ export default function DashboardModal({
                 isAdmin={isAdmin}
                 onShowChangePassword={() => setShowChangePasswordModal(true)}
                 onLogout={handleLogout}
+                onResolveGameweek={handleResolveGameweek}
                 onPopulateGameweek={handlePopulateGameweek}
               />
             </>

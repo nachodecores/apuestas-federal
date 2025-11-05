@@ -46,6 +46,7 @@ export interface DashboardFooterProps {
   isAdmin: boolean;
   onShowChangePassword: () => void;
   onLogout: () => void;
+  onResolveGameweek: () => void;
   onPopulateGameweek: () => void;
 }
 
