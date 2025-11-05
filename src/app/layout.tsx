@@ -20,6 +20,14 @@ const inter = Inter({
 export const metadata: Metadata = {
   title: "Bet Federal",
   description: "Sistema de apuestas para tu liga privada de Draft Fantasy Premier League",
+  icons: {
+    icon: [
+      { url: '/favicon.ico', sizes: 'any' },
+    ],
+    apple: [
+      { url: '/favicon.ico', sizes: '180x180' },
+    ],
+  },
 };
 
 export default function RootLayout({
