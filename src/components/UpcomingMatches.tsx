@@ -58,21 +58,53 @@ export default function UpcomingMatches() {
         setNextGameweek(activeGameweek);
 
         // 2. Obtener partidos de la gameweek activa (no finalizados)
-        const upcomingMatches = leagueData.matches.filter(
+        let upcomingMatches = leagueData.matches.filter(
           m => !m.finished && m.event === activeGameweek
         );
+
+        // Si no hay partidos próximos en la gameweek activa, buscar la siguiente gameweek
+        let targetGameweek = activeGameweek;
         if (!upcomingMatches.length) {
-          setError('No hay partidos próximos');
+          // Buscar la siguiente gameweek con partidos no finalizados
+          const allUpcomingMatches = leagueData.matches
+            .filter(m => !m.finished)
+            .sort((a, b) => a.event - b.event);
+          
+          if (allUpcomingMatches.length > 0) {
+            const nextGw = allUpcomingMatches[0].event;
+            upcomingMatches = allUpcomingMatches.filter(m => m.event === nextGw);
+            
+            // Actualizar la gameweek que estamos mostrando
+            if (upcomingMatches.length > 0) {
+              targetGameweek = nextGw;
+              setNextGameweek(nextGw);
+            }
+          }
+        }
+
+        if (!upcomingMatches.length) {
+          setError('No hay partidos próximos. La gameweek actual ha terminado. Por favor, resuelve la gameweek actual y pobla la siguiente.');
           setLoading(false);
           return;
         }
         
         // 3. Obtener odds desde gameweek_matches
-        const { data: oddsData } = await supabase
+        // Intentar primero con la gameweek objetivo, luego con la activa como fallback
+        let { data: oddsData } = await supabase
           .from('gameweek_matches')
           .select('*')
           .eq('is_active', true)
-          .eq('gameweek', activeGameweek);
+          .eq('gameweek', targetGameweek);
+
+        // Si no hay odds para la gameweek objetivo, intentar con la activa
+        if ((!oddsData || oddsData.length === 0) && targetGameweek !== activeGameweek) {
+          const { data: activeOddsData } = await supabase
+            .from('gameweek_matches')
+            .select('*')
+            .eq('is_active', true)
+            .eq('gameweek', activeGameweek);
+          oddsData = activeOddsData;
+        }
 
         // 4. Mapear partidos con odds
         const processedMatches = upcomingMatches.map(match => {

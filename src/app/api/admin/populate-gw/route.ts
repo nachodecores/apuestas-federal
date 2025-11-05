@@ -22,8 +22,9 @@
  * 1. Obtiene datos de FPL API (standings, matches)
  * 2. Determina gameweek objetivo (provisto o próximo)
  * 3. Calcula odds para cada partido usando standings y rachas
- * 4. Desactiva TODAS las gameweeks anteriores (is_active = false)
- * 5. Inserta/actualiza nueva gameweek con is_active = true
+ * 4. Desactiva solo gameweeks activas que ya tienen resultado (respetando constraint)
+ * 5. Verifica que no queden gameweeks activas sin resultado
+ * 6. Inserta/actualiza nueva gameweek con is_active = true
  * 
  * NOTA: Mantiene historial de todas las gameweeks en la DB
  */
@@ -92,17 +93,42 @@ export async function POST(request: Request) {
       };
     });
 
-    // Desactivar TODAS las gameweeks existentes (mantener historial)
+    // Desactivar solo las gameweeks que están activas Y tienen resultado
+    // Esto respeta el constraint check_inactive_must_have_result
     // Usar Service Role para escrituras (bypass RLS)
     const { createServiceClient } = await import('@/lib/supabase/server');
     const serviceSupabase = createServiceClient();
 
-    // Supabase requiere cláusula WHERE en update; aplicar filtro que abarque todas las filas
     const { error: deactivateErr } = await serviceSupabase
       .from('gameweek_matches')
       .update({ is_active: false })
-      .gte('gameweek', 0);
-    if (deactivateErr) throw deactivateErr;
+      .eq('is_active', true)
+      .not('result', 'is', null);
+      
+    if (deactivateErr) {
+      console.error('Error al desactivar gameweeks anteriores:', deactivateErr);
+      throw deactivateErr;
+    }
+
+    // Verificar si quedan gameweeks activas sin resultado (no debería pasar si el flujo es correcto)
+    const { data: activeWithoutResult, error: checkErr } = await serviceSupabase
+      .from('gameweek_matches')
+      .select('gameweek')
+      .eq('is_active', true)
+      .is('result', null)
+      .limit(1)
+      .maybeSingle();
+
+    if (checkErr) {
+      console.warn('Error al verificar gameweeks activas sin resultado:', checkErr);
+    }
+
+    if (activeWithoutResult) {
+      return NextResponse.json({ 
+        success: false, 
+        error: `Hay una gameweek activa (GW${activeWithoutResult.gameweek}) sin resolver. Por favor, resuelve la gameweek primero antes de poblar la siguiente.` 
+      }, { status: 400 });
+    }
 
     const { error: upsertErr } = await serviceSupabase
       .from('gameweek_matches')
