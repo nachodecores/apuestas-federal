@@ -87,11 +87,11 @@ export default function DashboardModal({
   async function handleLogout() {
     try {
       await supabase.auth.signOut();
-      onClose(); // Cerrar el modal
       // El Header se encargará de redirigir o actualizar la UI
+      onClose(); // Cerrar el modal después de cerrar sesión
     } catch (error) {
       console.error("Error al cerrar sesión:", error);
-      alert("Error al cerrar sesión. Intentalo de nuevo.");
+      alert("Error: Failed to log out. Please try again.");
     }
   }
 
@@ -108,10 +108,15 @@ export default function DashboardModal({
       const gameweekPopulatedEvent = new CustomEvent('gameweekPopulated');
       window.dispatchEvent(gameweekPopulatedEvent);
       
-      // Opcional: mostrar mensaje de éxito
-    } catch (e) {
+      // Refrescar datos del dashboard
+      await refreshData();
+      
+      // Mostrar mensaje de éxito
+      alert(`Success! Gameweek ${data.gameweek} populated with ${data.matches} matches.`);
+    } catch (e: any) {
       console.error(e);
-      // Opcional: mostrar mensaje de error
+      // Mostrar mensaje de error
+      alert(`Error: ${e.message || "Failed to populate gameweek. Please try again."}`);
     }
   }
 
